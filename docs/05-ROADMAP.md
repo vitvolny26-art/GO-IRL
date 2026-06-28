@@ -29,7 +29,7 @@ Minimum Lovable Product.
 
 **Goal:** One vertical (Sport) becomes best-in-class.
 
-## Future
+## Beyond MLP
 
 - Additional verticals (Nature, Learning, Creative)
 - Marketplace features

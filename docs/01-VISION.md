@@ -4,6 +4,14 @@
 
 **Help people spend less time online and more time together.**
 
+## North Star Metric
+
+**Weekly Confirmed Real-Life Meetings**
+
+Not DAU. Not session time. Only meetings that actually happened.
+
+Measurable: "This week, GO IRL organized 487 confirmed meetings."
+
 ## Problem
 
 The screen is stealing our lives. We spend hours scrolling through apps looking for things to do, people to meet, places to go. But we rarely actually *do* anything.
@@ -24,6 +32,8 @@ GO IRL is a social coordination platform that helps people:
 
 ## Core Principle
 
+**Technology is the bridge. Real life is the destination.**
+
 Real-life experiences are the most valuable thing.
 
 Technology should minimize friction between intention and action.
@@ -38,7 +48,7 @@ GO IRL is **focused**: help people organize real-life activities, nothing else.
 
 ## Success Metric
 
-**Confirmed Real-Life Meetings**
+**Weekly Confirmed Real-Life Meetings**
 
 Not DAU. Not session time. Not screen time.
 

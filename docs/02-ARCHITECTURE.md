@@ -52,6 +52,8 @@ Vertical business contexts:
 - **Creative** — Creative activities
 - *(Future)* — Additional verticals
 
+**During Sprint 1–3:** All modules may temporarily share UI components until validated by users.
+
 ## Communication Pattern
 
 ```

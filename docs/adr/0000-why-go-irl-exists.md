@@ -18,9 +18,9 @@ GO IRL reverses this:
 
 ## Core Belief
 
-Real-life experiences are the most valuable thing.
+**Technology is the bridge. Real life is the destination.**
 
-Technology should minimize friction between intention and action.
+Technology should connect people online only long enough to bring them together offline.
 
 ## What GO IRL Does
 

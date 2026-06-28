@@ -2,9 +2,9 @@
 
 ## North Star
 
-**Confirmed Real-Life Meetings**
+**Weekly Confirmed Real-Life Meetings**
 
-Not DAU. Not session time. Only meetings that actually happened.
+Not DAU. Not session time. Only meetings that actually happened, measured weekly.
 
 ## Mission
 
@@ -55,7 +55,7 @@ Phase 3: Europe
 - **ORM:** Prisma
 - **Frontend:** React (web), Telegram Mini App
 - **Realtime:** WebSocket
-- **Auth:** Telegram OAuth2
+- **Auth:** Telegram Authentication
 
 ## First Activities (Pre-Launch)
 
@@ -72,7 +72,7 @@ Organizer: You (vitvolny26-art)
 
 ## Key Metrics
 
-✅ Confirmed meetings (primary)
+✅ Weekly confirmed meetings (primary)
 ✅ User retention (secondary)
 ✅ Activity creation rate (secondary)
 ❌ Session duration (wrong signal)
@@ -87,7 +87,7 @@ Organizer: You (vitvolny26-art)
 4. Every sprint = visible value
 5. Measure reality, don't assume
 6. Documentation > code comments
-7. Architecture frozen until MVP
+7. Architecture frozen until MLP
 8. Technical debt must be visible
 9. Every release helps someone meet
 10. Friendships = success

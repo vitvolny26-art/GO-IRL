@@ -43,7 +43,7 @@ All responses follow standard structure:
 
 ## Authentication
 
-Telegram OAuth2 token-based.
+Telegram Authentication (initData validation).
 
 ## See Also
 

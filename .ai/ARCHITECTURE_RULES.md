@@ -2,7 +2,7 @@
 
 ## Frozen Decisions
 
-These DO NOT change until MVP is released:
+These DO NOT change until MLP is released:
 
 ✅ Monorepo + pnpm
 ✅ Platform First
@@ -12,7 +12,7 @@ These DO NOT change until MVP is released:
 ✅ REST + WebSocket
 ✅ Prisma + PostgreSQL
 ✅ ADR + RFC process
-✅ Telegram OAuth
+✅ Telegram Authentication
 
 ## Architecture Budget
 
@@ -93,6 +93,8 @@ Never reverse.
 
 Rule: Product depends on Platform. Platform never depends on Product.
 
+**During Sprint 1–3:** All modules may temporarily share UI components until validated by users.
+
 ## Testing Strategy
 
 Tests are part of feature definition, not an afterthought.
@@ -121,11 +123,13 @@ Every folder has README answering:
 ## Metrics
 
 Measure:
-✅ Confirmed meetings
+
+✅ Weekly confirmed meetings
 ✅ User retention
 ✅ Activity creation rate
 
 Don't measure:
+
 ❌ Session duration
 ❌ DAU (not relevant for coordinate-offline app)
 ❌ Screen time (counter to mission)
