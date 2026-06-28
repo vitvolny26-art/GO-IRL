@@ -1,0 +1,27 @@
+{
+  "name": "@go-irl/backend",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/main.ts",
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/src/main.js",
+    "test": "echo \"No tests yet\"",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "fastify": "^4.25.1",
+    "@fastify/cors": "^8.5.0",
+    "@fastify/websocket": "^10.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "ts-node": "^10.9.2"
+  }
+}
