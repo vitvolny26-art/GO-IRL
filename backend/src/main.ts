@@ -10,24 +10,19 @@ const app = Fastify({
   logger: true,
 });
 
-// Initialize database
 const prisma = new PrismaClient();
 
-// Get Telegram bot token from environment
 const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
 if (!telegramBotToken) {
   console.error('TELEGRAM_BOT_TOKEN environment variable is not set');
   process.exit(1);
 }
 
-// Initialize services
 const identityService = new IdentityService(prisma, telegramBotToken);
 const activityService = new ActivityService(prisma);
 
-// Register plugins
 await app.register(cors);
 
-// Register routes
 app.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
@@ -40,13 +35,10 @@ app.get('/', async () => {
   };
 });
 
-// Authentication routes
 await registerAuthRoutes(app, identityService);
 
-// Activity routes
 await registerActivityRoutes(app, activityService);
 
-// Graceful shutdown
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
   await app.close();
