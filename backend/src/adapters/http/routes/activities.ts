@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { ActivityService } from '../../platform/activity/activity.service.js';
+import { ActivityService } from '../../../platform/activity/activity.service.js';
 
 export async function registerActivityRoutes(
   _app: FastifyInstance,
