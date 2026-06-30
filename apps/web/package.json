@@ -1,0 +1,9 @@
+{
+  "name": "@go-irl/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Web app - Coming in Sprint 1\"",
+    "build": "echo \"Web app - Coming in Sprint 1\""
+  }
+}

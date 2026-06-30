@@ -1,0 +1,9 @@
+{
+  "name": "@go-irl/telegram-miniapp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Telegram Mini App - Coming in Sprint 1\"",
+    "build": "echo \"Telegram Mini App - Coming in Sprint 1\""
+  }
+}
