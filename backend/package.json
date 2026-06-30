@@ -9,7 +9,9 @@
     "start": "node dist/src/main.js",
     "test": "echo \"No tests yet\"",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "db:generate": "prisma generate",
+    "db:seed": "node --loader ts-node/esm prisma/seed.ts"
   },
   "dependencies": {
     "fastify": "^4.25.1",
