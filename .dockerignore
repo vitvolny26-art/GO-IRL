@@ -45,10 +45,3 @@ lerna-debug.log*
 .turbo
 .eslintcache
 .prettierignore
-README.md
-CONTRIBUTING.md
-
-# Docker
-Dockerfile
-docker-compose*.yml
-.dockerignore
