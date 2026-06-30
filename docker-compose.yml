@@ -54,62 +54,6 @@ services:
       retries: 3
     restart: unless-stopped
 
-  # GO IRL Backend
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: go-irl-backend
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: "postgresql://go_irl_user:go_irl_password@postgres:5432/go_irl_db"
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      N8N_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-}
-    ports:
-      - "3000:3000"
-    networks:
-      - go-irl-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      n8n:
-        condition: service_healthy
-    volumes:
-      - ./backend/src:/app/backend/src:ro
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: unless-stopped
-
-  # Telegram Mini App Frontend
-  telegram-miniapp:
-    build:
-      context: .
-      dockerfile: apps/telegram-miniapp/Dockerfile
-    container_name: go-irl-telegram-miniapp
-    environment:
-      NODE_ENV: production
-      VITE_API_BASE_URL: "http://backend:3000"
-    ports:
-      - "5173:5173"
-    networks:
-      - go-irl-network
-    depends_on:
-      - backend
-    volumes:
-      - ./apps/telegram-miniapp/src:/app/apps/telegram-miniapp/src:ro
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5173/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: unless-stopped
-
 volumes:
   postgres_data:
     driver: local
