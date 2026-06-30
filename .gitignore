@@ -37,7 +37,6 @@ lerna-debug.log*
 *~
 
 # pnpm
-pnpm-lock.yaml
 
 # Database
 prisma/.env

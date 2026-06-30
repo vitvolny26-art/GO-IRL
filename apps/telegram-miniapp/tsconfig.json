@@ -1,12 +1,11 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
+    "jsx": "react-jsx",
     "outDir": "./dist",
     "rootDir": "./src"
   },
