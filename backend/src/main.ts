@@ -56,5 +56,5 @@ app.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
     app.log.error(err);
     process.exit(1);
   }
-  console.log(`Server running at ${address}`);
+  app.log.info(`Server running at ${address}`);
 });
