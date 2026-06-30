@@ -14,8 +14,8 @@
   "dependencies": {
     "fastify": "^4.25.1",
     "@fastify/cors": "^8.5.0",
-    "@fastify/websocket": "^10.1.1",
-    "@prisma/client": "*"
+    "@fastify/websocket": "^11.2.0",
+    "@prisma/client": "^5.22.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
@@ -23,6 +23,7 @@
     "@typescript-eslint/parser": "^6.13.2",
     "eslint": "^8.55.0",
     "prettier": "^3.1.0",
+    "prisma": "^5.22.0",
     "ts-node": "^10.9.2"
   }
 }
