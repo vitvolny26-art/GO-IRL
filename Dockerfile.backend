@@ -1,0 +1,44 @@
+# Backend Dockerfile
+# Multi-stage build for production-ready image
+
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies
+COPY pnpm-workspace.yaml .
+COPY package.json .
+COPY backend/package.json backend/
+
+RUN npm install -g pnpm@8.10.0 && \
+    pnpm install --frozen-lockfile
+
+# Build TypeScript
+COPY tsconfig.json .
+COPY tsconfig.build.json .
+COPY backend/ backend/
+
+RUN cd backend && pnpm run build
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install only production dependencies
+COPY pnpm-workspace.yaml .
+COPY package.json .
+COPY backend/package.json backend/
+
+RUN npm install -g pnpm@8.10.0 && \
+    pnpm install --prod --frozen-lockfile
+
+# Copy built backend
+COPY --from=builder /app/backend/dist ./dist
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+CMD ["node", "dist/src/main.js"]
