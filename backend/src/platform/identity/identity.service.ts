@@ -1,5 +1,80 @@
+import { createHmac } from 'crypto';
 import { PrismaClient } from '@prisma/client';
 
+export interface TelegramUser {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+}
+
 export class IdentityService {
-  constructor(_prisma: PrismaClient, _telegramBotToken: string) {}
+  private readonly prisma: PrismaClient;
+  private readonly telegramBotToken: string;
+
+  constructor(prisma: PrismaClient, telegramBotToken: string) {
+    this.prisma = prisma;
+    this.telegramBotToken = telegramBotToken;
+  }
+
+  verifyInitData(initData: string): TelegramUser {
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    if (!hash) {
+      throw new Error('Missing hash in initData');
+    }
+
+    params.delete('hash');
+    const entries = Array.from(params.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join('\n');
+
+    const secretKey = createHmac('sha256', 'WebAppData')
+      .update(this.telegramBotToken)
+      .digest();
+
+    const expectedHash = createHmac('sha256', secretKey)
+      .update(entries)
+      .digest('hex');
+
+    if (expectedHash !== hash) {
+      throw new Error('Invalid initData signature');
+    }
+
+    const userParam = params.get('user');
+    if (!userParam) {
+      throw new Error('Missing user in initData');
+    }
+
+    return JSON.parse(userParam) as TelegramUser;
+  }
+
+  async findOrCreateUser(telegramUser: TelegramUser): Promise<{
+    id: string;
+    telegramId: bigint;
+    firstName: string | null;
+    lastName: string | null;
+    username: string | null;
+    profileImage: string | null;
+    createdAt: Date;
+  }> {
+    return this.prisma.user.upsert({
+      where: { telegramId: BigInt(telegramUser.id) },
+      update: {
+        firstName: telegramUser.first_name ?? null,
+        lastName: telegramUser.last_name ?? null,
+        username: telegramUser.username ?? null,
+        profileImage: telegramUser.photo_url ?? null,
+      },
+      create: {
+        telegramId: BigInt(telegramUser.id),
+        firstName: telegramUser.first_name ?? null,
+        lastName: telegramUser.last_name ?? null,
+        username: telegramUser.username ?? null,
+        profileImage: telegramUser.photo_url ?? null,
+      },
+    });
+  }
 }

@@ -37,7 +37,7 @@ app.get('/', async () => {
 
 await registerAuthRoutes(app, identityService);
 
-await registerActivityRoutes(app, activityService);
+await registerActivityRoutes(app, activityService, identityService);
 
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
