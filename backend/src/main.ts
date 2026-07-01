@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import { PrismaClient } from '@prisma/client';
 import { IdentityService } from './platform/identity/identity.service.js';
 import { ActivityService } from './platform/activity/activity.service.js';
@@ -22,6 +23,11 @@ const identityService = new IdentityService(prisma, telegramBotToken);
 const activityService = new ActivityService(prisma);
 
 await app.register(cors);
+await app.register(rateLimit, {
+  global: true,
+  max: 100,
+  timeWindow: '1 minute',
+});
 
 app.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };

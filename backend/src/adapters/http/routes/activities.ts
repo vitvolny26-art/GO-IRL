@@ -5,7 +5,7 @@ import { IdentityService } from '../../../platform/identity/identity.service.js'
 export async function registerActivityRoutes(
   app: FastifyInstance,
   activityService: ActivityService,
-  identityService?: IdentityService
+  identityService: IdentityService
 ): Promise<void> {
   app.get('/api/activities', async (_request, reply) => {
     try {
@@ -35,7 +35,7 @@ export async function registerActivityRoutes(
     async (request, reply) => {
       const { initData, ...input } = request.body;
 
-      if (!initData || !identityService) {
+      if (!initData) {
         return reply.status(400).send({ success: false, error: 'initData is required' });
       }
 
@@ -57,7 +57,7 @@ export async function registerActivityRoutes(
     async (request, reply) => {
       const { initData } = request.body;
 
-      if (!initData || !identityService) {
+      if (!initData) {
         return reply.status(400).send({ success: false, error: 'initData is required' });
       }
 
