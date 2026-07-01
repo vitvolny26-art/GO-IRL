@@ -5,7 +5,7 @@ interface AuthResponse {
   data?: {
     user: {
       id: string;
-      telegramId: bigint;
+      telegramId: string;
       firstName?: string;
       lastName?: string;
       username?: string;

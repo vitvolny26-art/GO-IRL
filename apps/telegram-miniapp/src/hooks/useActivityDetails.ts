@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getActivityById } from '../services/api';
 import type { Activity } from '../types/index';
 
 export function useActivityDetails(activityId: string) {
   const [activity, setActivity] = useState<Activity | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchActivity = async () => {
@@ -21,6 +21,11 @@ export function useActivityDetails(activityId: string) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchActivity();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activityId]);
 
   return { activity, loading, error, refetch: fetchActivity };
 }

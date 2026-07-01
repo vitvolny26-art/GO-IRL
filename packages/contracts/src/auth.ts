@@ -7,5 +7,4 @@ export interface TelegramAuthRequest {
 
 export interface TelegramAuthResponse {
   user: User
-  token: string // JWT for subsequent requests
 }

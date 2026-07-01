@@ -31,7 +31,7 @@ export interface Activity {
 
 export interface User {
   id: string;
-  telegramId: bigint;
+  telegramId: string;
   firstName?: string;
   lastName?: string;
   username?: string;
