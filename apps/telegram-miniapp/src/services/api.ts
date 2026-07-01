@@ -78,6 +78,8 @@ interface ActivitiesResponse {
       endTime?: string;
       maxParticipants: number;
       participantCount: number;
+      status: string;
+      createdAt: string;
     }>;
   };
   error?: string;

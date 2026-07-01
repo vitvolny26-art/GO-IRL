@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useTelegramAuth } from './hooks/useTelegramAuth';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
-import type { User } from './types/user';
 import './App.css';
 
 export function App() {
