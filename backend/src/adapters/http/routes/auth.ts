@@ -44,41 +44,53 @@ export async function registerAuthRoutes(
   app: FastifyInstance,
   identityService: IdentityService
 ): Promise<void> {
-  app.post<{ Body: AuthBody }>('/api/auth/telegram', async (request, reply) => {
-    const { initData } = request.body;
+  app.post<{ Body: AuthBody }>(
+    '/api/auth/telegram',
+    {
+      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
+    },
+    async (request, reply) => {
+      const { initData } = request.body;
 
-    if (!initData) {
-      return reply.status(400).send(errorResponse('initData is required', 'MISSING_INIT_DATA'));
-    }
+      if (!initData) {
+        return reply.status(400).send(errorResponse('initData is required', 'MISSING_INIT_DATA'));
+      }
 
-    try {
-      const telegramUser = identityService.verifyInitData(initData);
-      const user = await identityService.findOrCreateUser(telegramUser);
-      const token = identityService.issueToken(user.id, user.telegramId.toString());
-      return reply.send({ success: true, data: { user: serializeUser(user), token } });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Authentication failed';
-      return reply.status(401).send(errorResponse(message, 'UNAUTHORIZED'));
-    }
-  });
+      try {
+        const telegramUser = identityService.verifyInitData(initData);
+        const user = await identityService.findOrCreateUser(telegramUser);
+        const token = identityService.issueToken(user.id, user.telegramId.toString());
+        return reply.send({ success: true, data: { user: serializeUser(user), token } });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Authentication failed';
+        return reply.status(401).send(errorResponse(message, 'UNAUTHORIZED'));
+      }
+    },
+  );
 
-  app.get<{ Querystring: { initData?: string } }>('/api/me', async (request, reply) => {
-    const { initData } = request.query;
+  app.get<{ Querystring: { initData?: string } }>(
+    '/api/me',
+    {
+      config: { rateLimit: { max: 20, timeWindow: '1 minute' } },
+    },
+    async (request, reply) => {
+      const { initData } = request.query;
 
-    if (!initData) {
-      return reply
-        .status(400)
-        .send(errorResponse('initData query param is required', 'MISSING_INIT_DATA'));
-    }
+      if (!initData) {
+        return reply
+          .status(400)
+          .send(errorResponse('initData query param is required', 'MISSING_INIT_DATA'));
+      }
 
-    try {
-      const telegramUser = identityService.verifyInitData(initData);
-      const user = await identityService.findOrCreateUser(telegramUser);
-      const token = identityService.issueToken(user.id, user.telegramId.toString());
-      return reply.send({ success: true, data: { user: serializeUser(user), token } });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Authentication failed';
-      return reply.status(401).send(errorResponse(message, 'UNAUTHORIZED'));
-    }
-  });
+      try {
+        const telegramUser = identityService.verifyInitData(initData);
+        const user = await identityService.findOrCreateUser(telegramUser);
+        const token = identityService.issueToken(user.id, user.telegramId.toString());
+        return reply.send({ success: true, data: { user: serializeUser(user), token } });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Authentication failed';
+        return reply.status(401).send(errorResponse(message, 'UNAUTHORIZED'));
+      }
+    },
+  );
 }

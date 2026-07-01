@@ -42,6 +42,7 @@ export async function registerActivityRoutes(
 
   app.post<{ Body: CreateActivityInput & { initData: string } }>(
     '/api/activities',
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
     async (request, reply) => {
       const { initData, ...input } = request.body;
 
@@ -85,6 +86,7 @@ export async function registerActivityRoutes(
 
   app.post<{ Params: { id: string }; Body: { initData: string } }>(
     '/api/activities/:id/join',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
     async (request, reply) => {
       const { initData } = request.body;
 
