@@ -195,3 +195,42 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.details-back-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 16px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.leave-button {
+  width: 100%;
+  padding: 14px 20px;
+  background: #f5f5f5;
+  color: #d32f2f;
+  font-size: 16px;
+  font-weight: 700;
+  border: 2px solid #d32f2f;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.leave-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-error {
+  background: rgba(211, 47, 47, 0.1);
+  border: 1px solid rgba(211, 47, 47, 0.3);
+  color: #d32f2f;
+  padding: 10px 16px;
+  margin: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}

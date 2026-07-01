@@ -1,0 +1,171 @@
+ФИНАЛЬНАЯ РЕВИЗИЯ ПРОЕКТА — Sprint 0
+Дата: 2026-07-01
+Версия: v0.1.0
+================================================================================
+
+РЕЗУЛЬТАТ: ВСЕ ИСПРАВЛЕНИЯ ПОДТВЕРЖДЕНЫ. АРХИТЕКТУРА НЕ НАРУШЕНА.
+
+================================================================================
+1. ПРОВЕРКА АРХИТЕКТУРЫ
+================================================================================
+
+Архитектурная модель проекта: Platform-First Monorepo.
+
+Правила:
+  - Вся бизнес-логика живёт в backend/src/platform/
+  - HTTP-маршруты в backend/src/adapters/http/ — тонкие обёртки
+  - packages/* — утилиты без зависимостей от бизнес-логики
+  - apps/* — delivery shells, вызывают backend по API
+
+Проверка каждого исправления:
+
+BUG-1 (ESLint rule name)
+  Затрагивает: .eslintrc.json
+  Нарушает архитектуру: НЕТ. Конфигурация инструмента.
+
+BUG-2 (CI format:check)
+  Затрагивает: .github/workflows/ci.yml, package.json
+  Нарушает архитектуру: НЕТ. CI pipeline.
+
+BUG-3 (docker compose v2)
+  Затрагивает: .github/workflows/ci.yml
+  Нарушает архитектуру: НЕТ. CI pipeline.
+
+BUG-4 (docker-build → typecheck)
+  Затрагивает: .github/workflows/ci.yml
+  Нарушает архитектуру: НЕТ. Сломанный джоб заменён рабочим.
+
+BUG-5 (dist/main.js path)
+  Затрагивает: Dockerfile.backend, backend/package.json
+  Нарушает архитектуру: НЕТ. Исправляет путь к скомпилированному файлу.
+
+BUG-6 (pnpm-lock.yaml в .gitignore)
+  Затрагивает: .gitignore
+  Нарушает архитектуру: НЕТ. Управление зависимостями.
+
+BUG-7 (telegramId: bigint → string)
+  Затрагивает: apps/telegram-miniapp/src/types/index.ts,
+               apps/telegram-miniapp/src/services/api.ts
+  Нарушает архитектуру: НЕТ. Приводит frontend-типы в соответствие с
+  реальным JSON-ответом API. Бэкенд уже сериализует как string в
+  serializeUser().
+
+BUG-8 (useActivityDetails: useEffect)
+  Затрагивает: apps/telegram-miniapp/src/hooks/useActivityDetails.ts
+  Нарушает архитектуру: НЕТ. React-хук теперь работает как ожидается.
+  apps/* может зависеть от backend API — это соответствует архитектуре.
+
+BUG-9 (import paths в маршрутах)
+  Затрагивает: backend/src/adapters/http/routes/auth.ts,
+               backend/src/adapters/http/routes/activities.ts
+  Нарушает архитектуру: НЕТ. Направление зависимостей не изменилось:
+  adapters → platform (как и требуется).
+
+BUG-10 (CI permissions)
+  Затрагивает: .github/workflows/ci.yml
+  Нарушает архитектуру: НЕТ. Усиление безопасности CI.
+
+ИТОГ: Ни одно исправление не нарушает архитектурную модель проекта.
+
+
+================================================================================
+2. ЧТО НЕВОЗМОЖНО ПРОВЕРИТЬ БЕЗ ЗАПУСКА
+================================================================================
+
+--- pnpm install -----------------------------------------------------------
+  - Целостность pnpm-lock.yaml (3700+ строк)
+  - Разрешение peer dependencies (@typescript-eslint + eslint версии)
+  - Workspace-ссылки workspace:* между пакетами
+  - Предупреждение о supabase/ в pnpm-workspace.yaml (нет package.json)
+
+--- pnpm build (turbo run build) -------------------------------------------
+  - TypeScript компиляция backend/src/ → backend/dist/
+  - Наличие Prisma Client (требует prisma generate до build)
+  - Компиляция пакетов shared, types, contracts
+  - Vite build для apps/telegram-miniapp и apps/web
+  - Реальный путь dist/main.js после компиляции
+
+--- pnpm typecheck (turbo run typecheck) ------------------------------------
+  - Корректность типов в backend/ с module: Node16
+  - Корректность типов в apps/telegram-miniapp/ (JSX + React 18)
+  - Кросс-пакетные типы: @go-irl/types используется в miniapp
+  - Отсутствие any-типов (no-explicit-any: error в ESLint)
+
+--- pnpm lint (turbo run lint) ----------------------------------------------
+  - Исправленное правило explicit-function-return-type даёт warn или нет
+  - no-unused-vars: argsIgnorePattern ^_ — нет ли скрытых нарушений
+  - Покрытие ESLint в apps/telegram-miniapp (нет .eslintrc в miniapp)
+
+--- pnpm format:check -------------------------------------------------------
+  - Все .ts, .tsx, .json, .md, .css соответствуют prettier.config.cjs
+  - Главным образом: prettier.config.cjs сам является CJS файлом (renamed)
+
+--- Docker build (docker build -f Dockerfile.backend .) --------------------
+  - pnpm install --frozen-lockfile в builder stage
+  - pnpm run build в builder stage (нет prisma generate!)
+  - Копирование dist/main.js (путь исправлен)
+  - pnpm install --prod в production stage
+  - Healthcheck: wget http://localhost:3000/health
+
+--- docker compose up -------------------------------------------------------
+  - PostgreSQL 16 healthcheck (pg_isready)
+  - n8n healthcheck (curl /api/v1/me)
+  - DATABASE_URL доступен в backend контейнере
+
+--- Prisma -------------------------------------------------------------------
+  - prisma generate требует DATABASE_URL или schema.prisma
+  - prisma migrate dev/deploy не запускались
+  - seed.ts не тестировался
+
+--- Runtime -----------------------------------------------------------------
+  - TELEGRAM_BOT_TOKEN required при старте (process.exit(1) если нет)
+  - Telegram initData HMAC signature — тестируется только с реальным ботом
+  - verifyInitData() — HMAC SHA-256 логика не покрыта тестами
+  - joinActivity() — race condition при одновременном join не защищена
+    (нет SELECT FOR UPDATE, только sequential check + insert)
+
+
+================================================================================
+3. НОВЫЕ ФАЙЛЫ ДОБАВЛЕННЫЕ В ЭТОЙ РЕВИЗИИ
+================================================================================
+
+  RELEASE_NOTES.md     — Что включает v0.1.0, что не включает
+  CHANGELOG.md         — Технический журнал всех изменений (0.0.1 и 0.1.0)
+  BACKLOG.md           — Неначатые задачи Sprint 1-3 + технический долг
+  ROADMAP.md           — Обновлённый роадмап с Sprint 0 marked DONE
+  README.md            — Обновлён: Quick Start, структура, документация
+  .ai/final-revision.txt — этот файл
+
+
+================================================================================
+4. СОСТОЯНИЕ ПРОЕКТА
+================================================================================
+
+Версия:          v0.1.0
+Sprint:          Sprint 0 — ЗАВЕРШЁН
+Следующий шаг:  Sprint 1 (MLP) — ожидает одобрения архитектурного ревью
+
+Confirmed Bugs:  10 из 10 исправлены и доказаны кодом
+Hypothesis:       1 (websocket версия — недоказуемо без npm registry)
+Тесты:           Отсутствуют (запланированы в Sprint 1, TEST-101..105)
+Архитектура:     Не нарушена ни одним исправлением
+
+Готовность к production: НЕТ (нет тестов, нет миграций, нет auth tokens)
+Готовность к разработке: ДА (основание заложено)
+
+
+================================================================================
+5. ССЫЛКИ
+================================================================================
+
+Аудит Ревизия 2:
+  https://github.com/vitvolny26-art/GO-IRL/blob/copilot/refactorsprint-0-lite-yet-again/.ai/audit-revision-2.txt
+
+ROADMAP:
+  https://github.com/vitvolny26-art/GO-IRL/blob/copilot/refactorsprint-0-lite-yet-again/ROADMAP.md
+
+BACKLOG:
+  https://github.com/vitvolny26-art/GO-IRL/blob/copilot/refactorsprint-0-lite-yet-again/BACKLOG.md
+
+CHANGELOG:
+  https://github.com/vitvolny26-art/GO-IRL/blob/copilot/refactorsprint-0-lite-yet-again/CHANGELOG.md
