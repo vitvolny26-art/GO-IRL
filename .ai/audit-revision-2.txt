@@ -1,0 +1,371 @@
+ВТОРАЯ РЕВИЗИЯ ИСПРАВЛЕНИЙ — PR #3
+Дата: 2026-07-01
+================================================================================
+
+CONFIRMED BUGS
+================================================================================
+
+BUG-1: Неверное имя правила ESLint (explicit-function-return-types)
+------------------------------------------------------------------------
+ДО (.eslintrc.json):
+  "@typescript-eslint/explicit-function-return-types": "warn"
+
+ПОСЛЕ:
+  "@typescript-eslint/explicit-function-return-type": "warn"
+
+Почему старый код неправильный:
+  Правила "explicit-function-return-types" (с "s") не существует в
+  @typescript-eslint/eslint-plugin. ESLint тихо игнорировал неизвестное
+  правило — функции без явного возвращаемого типа не проверялись.
+
+Почему новый код правильный:
+  "explicit-function-return-type" — реальное правило пакета. Теперь
+  правило активно.
+
+Может ли сломать:
+  Нет. Только усиливает lint-проверку. Могут появиться новые предупреждения
+  на уже написанном коде — это ожидаемо.
+
+Тесты:
+  pnpm run lint в /backend на функции без явного типа возврата должна
+  выдавать warn.
+
+
+BUG-2: CI — неверная команда проверки форматирования
+------------------------------------------------------------------------
+ДО (.github/workflows/ci.yml):
+  - name: Check formatting
+    run: pnpm run format --check
+
+ПОСЛЕ:
+  - name: Check formatting
+    run: pnpm run format:check
+
+  (добавлен скрипт в package.json:)
+  "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\" --ignore-path .gitignore"
+
+Почему старый код неправильный:
+  Скрипт "format" запускает "turbo run format", который в каждом пакете
+  вызывает "prettier --write". Флаг --check передавался в turbo, а не в
+  prettier. Turbo его игнорировал — шаг проходил всегда, даже с неправильно
+  отформатированным кодом.
+
+Почему новый код правильный:
+  Скрипт format:check вызывает prettier --check напрямую и завершается с
+  ненулевым exit code при нарушениях форматирования.
+
+Может ли сломать:
+  Нет. CI-only.
+
+Тесты:
+  Закоммитить файл с неправильным отступом → CI шаг "Check formatting"
+  должен упасть с exit code 1.
+
+
+BUG-3: CI — docker-compose v1 CLI в docker-compose-validate
+------------------------------------------------------------------------
+ДО (.github/workflows/ci.yml):
+  run: docker-compose -f docker-compose.yml config > /dev/null
+
+ПОСЛЕ:
+  run: docker compose -f docker-compose.yml config > /dev/null
+
+Почему старый код неправильный:
+  Бинарный файл docker-compose (v1) убран из GitHub Actions ubuntu-latest
+  раннеров. Команда завершается с "command not found".
+
+Почему новый код правильный:
+  docker compose (v2, плагин Docker CLI) предустановлен на ubuntu-latest.
+
+Может ли сломать:
+  Нет.
+
+Тесты:
+  Запустить CI — джоб "Docker Compose Validation" должен проходить.
+
+
+BUG-4: CI — docker-build джоб использовал docker-compose.yml как Dockerfile
+------------------------------------------------------------------------
+ДО (.github/workflows/ci.yml):
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build postgres image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: go-irl:postgres-test
+          file: docker-compose.yml    # ← передаётся как --file в docker buildx build
+
+ПОСЛЕ:
+  Джоб удалён; вместо него добавлен рабочий typecheck джоб.
+
+Почему старый код неправильный:
+  docker/build-push-action использует параметр "file" как путь к Dockerfile
+  (docker buildx build --file <path>). Передавать docker-compose.yml
+  бессмысленно — это не Dockerfile. Шаг завершался бы с ошибкой парсинга.
+
+Почему новый код правильный:
+  Джоб заменён на реально работающую проверку pnpm run typecheck.
+
+Может ли сломать:
+  Нет. Старый джоб был безвозвратно сломан.
+
+Тесты:
+  CI проходит без docker-build джоба. Новый typecheck джоб компилирует TS
+  без эмита.
+
+
+BUG-5: Неверный путь к скомпилированному файлу dist/src/main.js
+------------------------------------------------------------------------
+ДО (Dockerfile.backend):
+  CMD ["node", "dist/src/main.js"]
+
+ДО (backend/package.json):
+  "start": "node dist/src/main.js"
+
+ПОСЛЕ:
+  CMD ["node", "dist/main.js"]
+  "start": "node dist/main.js"
+
+Почему старый код неправильный:
+  В backend/tsconfig.json задано:
+    "rootDir": "./src"
+    "outDir": "./dist"
+  TypeScript компилирует src/main.ts → dist/main.js.
+  Путь dist/src/main.js никогда не создаётся. Контейнер падал бы с
+  "Error: Cannot find module".
+
+Почему новый код правильный:
+  dist/main.js — реальный путь к скомпилированному файлу.
+
+Может ли сломать:
+  Нет. Старый путь был гарантированно нерабочим.
+
+Тесты:
+  cd backend && pnpm run build && node dist/main.js — должен запустить сервер.
+
+
+BUG-6: pnpm-lock.yaml в .gitignore
+------------------------------------------------------------------------
+ДО (.gitignore, строки 39-40):
+  # pnpm
+  pnpm-lock.yaml
+
+ПОСЛЕ:
+  Строки удалены; pnpm-lock.yaml закоммичен.
+
+Почему старый код неправильный:
+  CI использует pnpm install --frozen-lockfile. Этот флаг требует наличия
+  pnpm-lock.yaml в репозитории. Если файл исключён из git, CI падал бы с:
+    ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because
+    pnpm-lock.yaml is absent
+
+Почему новый код правильный:
+  Lockfile в git обеспечивает воспроизводимые сборки.
+
+Может ли сломать:
+  Нет. Это стандартная практика.
+
+Тесты:
+  CI шаг pnpm install --frozen-lockfile проходит без ошибок.
+
+
+BUG-7: telegramId: bigint во фронтенд-типах
+------------------------------------------------------------------------
+ДО (apps/telegram-miniapp/src/types/index.ts):
+  export interface User {
+    id: string;
+    telegramId: bigint;
+    ...
+  }
+
+ДО (apps/telegram-miniapp/src/services/api.ts):
+  interface AuthResponse {
+    data?: {
+      user: {
+        telegramId: bigint;
+        ...
+      };
+    };
+  }
+
+ПОСЛЕ:
+  telegramId: string;
+
+Почему старый код неправильный:
+  JSON не поддерживает BigInt. JSON.parse() не возвращает bigint — он
+  возвращает number. Для больших Telegram ID (> 2^53) это вызывает потерю
+  точности. Бэкенд явно сериализует telegramId как строку через
+  user.telegramId.toString() в serializeUser()
+  (backend/src/adapters/http/routes/auth.ts). Тип bigint во фронтенде
+  был принципиально несовместим с реальным ответом API.
+
+Почему новый код правильный:
+  string точно соответствует тому, что возвращает API.
+
+Может ли сломать:
+  Нет. Тип стал точнее.
+
+Тесты:
+  authenticateWithTelegram() → user.telegramId должна быть строка.
+
+
+BUG-8: useActivityDetails — отсутствующий useEffect
+------------------------------------------------------------------------
+ДО (apps/telegram-miniapp/src/hooks/useActivityDetails.ts):
+  import { useState } from 'react';
+
+  export function useActivityDetails(activityId: string) {
+    const [activity, setActivity] = useState<Activity | null>(null);
+    const [loading, setLoading] = useState(true);  // true, но фетч никогда не стартует
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchActivity = async () => { ... };
+
+    return { activity, loading, error, refetch: fetchActivity };
+    // useEffect отсутствует — fetchActivity никогда не вызывается автоматически
+  }
+
+ПОСЛЕ:
+  import { useState, useEffect } from 'react';
+
+  export function useActivityDetails(activityId: string) {
+    const [loading, setLoading] = useState(false);  // false, пока фетч не начнётся
+
+    useEffect(() => {
+      fetchActivity();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activityId]);
+
+    return { activity, loading, error, refetch: fetchActivity };
+  }
+
+Почему старый код неправильный:
+  Хук возвращал loading: true и activity: null навсегда. ActivityDetailsPage
+  показывал бы бесконечный лоадер — данные никогда не загружались.
+
+Почему новый код правильный:
+  useEffect автоматически вызывает fetchActivity() при монтировании и при
+  изменении activityId.
+
+Может ли сломать:
+  Нет. Исправляет сломанное поведение.
+
+Тесты:
+  Render ActivityDetailsPage с activityId → должен отрисовать данные
+  активности (не застрять на загрузке).
+
+
+BUG-9: Неверные relative imports в маршрутах бэкенда
+------------------------------------------------------------------------
+ДО (backend/src/adapters/http/routes/auth.ts):
+  import { IdentityService } from '../../platform/identity/identity.service.js';
+
+ДО (backend/src/adapters/http/routes/activities.ts):
+  import { ActivityService } from '../../platform/activity/activity.service.js';
+
+ПОСЛЕ:
+  import { IdentityService } from '../../../platform/identity/identity.service.js';
+  import { ActivityService } from '../../../platform/activity/activity.service.js';
+
+Почему старый код неправильный:
+  Файлы маршрутов находятся по пути backend/src/adapters/http/routes/.
+  Путь ../../platform резолвится в backend/src/adapters/platform/ —
+  директория не существует. Node.js выбрасывал бы "Cannot find module".
+
+Почему новый код правильный:
+  ../../../platform = backend/src/platform/ — корректное расположение сервисов.
+
+Может ли сломать:
+  Нет.
+
+Тесты:
+  cd backend && pnpm run build — компилируется без ошибок TS.
+  node dist/main.js — старт без "Cannot find module".
+
+
+BUG-10: CI — отсутствие явного permissions блока
+------------------------------------------------------------------------
+ДО (.github/workflows/ci.yml):
+  (нет блока permissions)
+
+ПОСЛЕ:
+  permissions:
+    contents: read   # глобально
+
+  jobs:
+    lint:
+      permissions:
+        contents: read
+    typecheck:
+      permissions:
+        contents: read
+    build:
+      permissions:
+        contents: read
+    docker-compose-validate:
+      permissions:
+        contents: read
+
+Почему старый код неправильный:
+  Без явного блока permissions GitHub Actions наследует дефолтные настройки
+  репозитория. При настройке read-write по умолчанию скомпрометированная
+  зависимость (supply chain attack) могла бы записывать в репозиторий.
+
+Почему новый код правильный:
+  Принцип наименьших привилегий. CI требует только contents: read.
+
+Может ли сломать:
+  Нет. Джобы только читают код и строят его.
+
+Тесты:
+  CI проходит успешно.
+
+
+================================================================================
+HYPOTHESIS (не доказуемо из кода проекта)
+================================================================================
+
+HYP-1: @fastify/websocket ^10.1.1 — несуществующая версия
+------------------------------------------------------------------------
+Что было сделано:
+  Версия изменена с ^10.1.1 на ^8.3.1 в backend/package.json.
+
+Почему не удаётся доказать кодом проекта:
+  Утверждение о том, что версия 10.1.1 не существует, требует проверки
+  реестра npm. Старый pnpm-lock.yaml отсутствует (был в .gitignore),
+  поэтому нельзя проверить, падал ли pnpm install с ^10.1.1.
+
+Что CAN быть доказано:
+  @fastify/websocket нигде не импортируется в backend/src/:
+    grep -rn "websocket" backend/src/  →  (пусто)
+  Зависимость не используется — независимо от версии.
+
+Вердикт:
+  Перенесено в Hypothesis. Как "неиспользуемая зависимость" — подтверждено,
+  как "несуществующая версия" — не доказано кодом.
+
+
+================================================================================
+ИТОГОВАЯ ТАБЛИЦА
+================================================================================
+
+#   Исправление                                       Статус       Файл-доказательство
+--- ------------------------------------------------- ------------ ----------------------------------------
+1   ESLint: explicit-function-return-types → type     Confirmed    .eslintrc.json
+2   CI: format --check → format:check                 Confirmed    .github/workflows/ci.yml, package.json
+3   CI: docker-compose → docker compose               Confirmed    .github/workflows/ci.yml
+4   CI: сломанный docker-build джоб удалён            Confirmed    .github/workflows/ci.yml
+5   Dockerfile: dist/src/main.js → dist/main.js       Confirmed    Dockerfile.backend, backend/tsconfig.json
+6   .gitignore исключал pnpm-lock.yaml                Confirmed    .gitignore, CI --frozen-lockfile
+7   telegramId: bigint → string во фронтенде          Confirmed    types/index.ts, routes/auth.ts
+8   useActivityDetails: отсутствие useEffect          Confirmed    useActivityDetails.ts
+9   Неверные import paths в маршрутах                 Confirmed    routes/auth.ts, routes/activities.ts
+10  CI: отсутствие явных permissions                  Confirmed    .github/workflows/ci.yml
+H1  @fastify/websocket ^10.1.1 несуществующая версия  Hypothesis   Не доказуемо из кода проекта
