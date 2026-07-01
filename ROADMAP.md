@@ -24,25 +24,31 @@ Not DAU. Not session time. Not feature count.
 
 ---
 
-## 🟡 Sprint 1 — MLP (Next)
+## 🟢 Sprint 1 — MLP (In Progress)
 
 > Goal: First real users can discover, create, and join activities.
 
-**Blocked on:** architecture review approval.
+| Feature | Description | Status |
+|---|---|---|
+| 🔐 Authentication | JWT tokens, session management | ✅ Done |
+| 👤 User Profile | Name, photo, member since, stats | ✅ Done |
+| 📋 Activity List | Card list with type/spots display | ✅ Done |
+| ➕ Create Activity | Form with geo-picker, type, time, cap | ✅ Done |
+| ✅ Join Activity | One-tap join with optimistic UI | ✅ Done |
+| 🚪 Leave Activity | Leave button, `DELETE /leave` route | ✅ Done |
+| 🛡️ Error Boundary | Global React error boundary | ✅ Done |
+| 🔔 Toast Notifications | Success/error feedback | ✅ Done |
+| 🧪 Tests | Unit tests: IdentityService + ActivityService | ✅ Done |
+| 🔄 CI Tests | Test job in ci.yml | ✅ Done |
+| 📍 Map View | Activities on interactive map | ⬜ Remaining |
+| 🔍 Activity Filters | Filter by type, date, distance | ⬜ Remaining |
+| 🧪 Frontend Tests | Component tests for hooks | ⬜ Remaining |
+| 🐳 Docker CI | Backend Docker build in CI | ⬜ Remaining |
 
-| Feature | Description |
-|---|---|
-| 🔐 Authentication | JWT tokens, session management |
-| 👤 User Profile | Name, photo, activity history |
-| 📍 Browse Activities | Map view + list with filters |
-| ➕ Create Activity | Form with geo-picker, type, time, cap |
-| ✅ Join Activity | One-tap join with optimistic UI |
-| 🧪 Tests | Unit tests for backend services and frontend hooks |
-| 🐳 Docker CI | Backend Docker build in CI pipeline |
-
-**Success criteria:**
-- Real Telegram user can open MiniApp, see activities, join one.
-- All tests pass in CI.
+**Remaining for Sprint 1 completion:**
+- `FRONT-102` Map view (needs Leaflet/Mapbox — requires local setup)
+- `TEST-103/104` Frontend hook tests (needs vitest setup in miniapp)
+- `INFRA-101/102` Lock file + Docker CI checks
 
 ---
 

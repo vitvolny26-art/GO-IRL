@@ -19,7 +19,13 @@ if (!telegramBotToken) {
   process.exit(1);
 }
 
-const identityService = new IdentityService(prisma, telegramBotToken);
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+  console.error('JWT_SECRET environment variable is not set');
+  process.exit(1);
+}
+
+const identityService = new IdentityService(prisma, telegramBotToken, jwtSecret);
 const activityService = new ActivityService(prisma);
 
 await app.register(cors);

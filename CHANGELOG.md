@@ -5,6 +5,42 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Unreleased] — Sprint 1
+
+### Added
+
+- **backend**: `leaveActivity` method in `ActivityService` — removes participant, throws `Not a participant` if not joined
+- **backend**: `Already joined` guard in `joinActivity` — prevents duplicate join
+- **backend**: `DELETE /api/activities/:id/leave` route
+- **backend**: `code` field on all error responses — structured `{ success: false, error, code }` (`BACK-105`)
+- **backend**: Input validation on `POST /api/activities` — title, type, lat/lng, startTime, maxParticipants (`BACK-103`)
+- **backend**: JWT token issuance — `IdentityService.issueToken` / `verifyToken` using `jsonwebtoken` (`BACK-101`)
+- **backend**: `JWT_SECRET` env var required at startup alongside `TELEGRAM_BOT_TOKEN` (`INFRA-103`)
+- **backend**: Auth routes return `token` in response alongside `user`
+- **backend**: `vitest@3.2.6` dev dependency + `vitest.config.ts`
+- **backend**: `typecheck` script added to `backend/package.json` (`DEBT-003`)
+- **backend/tests**: `IdentityService.verifyInitData` — 4 unit tests (`TEST-101`)
+- **backend/tests**: `ActivityService` — 11 unit tests covering list, get, create, join, leave (`TEST-102`)
+- **miniapp**: `ActivitiesListPage` — activity list with `ActivityCard` components (`FRONT-103/104`)
+- **miniapp**: `CreateActivityPage` — full form: title, description, type selector, geo-picker (use my location), start/end time, max participants (`FRONT-105`)
+- **miniapp**: `ActivityDetailsPage` — join/leave toggle with optimistic UI, `Already joined` state (`FRONT-106/107`)
+- **miniapp**: `ProfilePage` — member since date, stats row, account info, logout button (`FRONT-108`)
+- **miniapp**: `ErrorBoundary` component — catches render errors, shows retry button (`FRONT-109`)
+- **miniapp**: `ToastProvider` + `useToast` hook — auto-dismissing toasts for success/error/info (`FRONT-110`)
+- **miniapp**: Full multi-page navigation in `App.tsx`: list → details → create → profile
+- **miniapp**: `leaveActivity` API call in `services/api.ts` (`BACK-104`)
+- **miniapp**: `createActivity` API call in `services/api.ts`
+- **miniapp**: JWT stored in `sessionStorage` via `setStoredToken`, attached as `Authorization: ****** header on activity requests (`FRONT-101`)
+- **miniapp**: `clearSession()` helper — removes all session storage keys on logout
+- **ci**: `test` job added to `ci.yml` — runs `pnpm run test --filter @go-irl/backend` (`TEST-105`)
+
+### Fixed
+
+- **miniapp/hooks**: Removed invalid `react-hooks/exhaustive-deps` eslint disable comment (plugin not installed)
+- **miniapp/App.tsx**: `setAppReady(true)` now always called regardless of Telegram WebApp availability
+
+---
+
 ## [0.1.0] — 2026-07-01
 
 ### Added

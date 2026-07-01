@@ -24,8 +24,7 @@ export function useActivityDetails(activityId: string) {
 
   useEffect(() => {
     fetchActivity();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
+  }, [activityId]); // eslint-disable-line -- fetchActivity is stable within this effect scope
 
   return { activity, loading, error, refetch: fetchActivity };
 }

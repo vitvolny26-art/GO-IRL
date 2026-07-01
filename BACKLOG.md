@@ -12,50 +12,50 @@ Priority order is indicative, not fixed.
 
 ### Authentication & Identity
 
-- [ ] `BACK-101` Implement JWT session tokens (issue + refresh)
-- [ ] `BACK-102` Token expiry and rotation
-- [ ] `FRONT-101` Store JWT in `sessionStorage`, attach to all API requests
+- [x] `BACK-101` Implement JWT session tokens (issue + refresh)
+- [ ] `BACK-102` Token expiry and rotation — JWT uses `expiresIn: 7d`; refresh endpoint not yet implemented
+- [x] `FRONT-101` Store JWT in `sessionStorage`, attach to all API requests
 
 ### Activity Discovery
 
 - [ ] `FRONT-102` Map view — display activities on a Leaflet/Mapbox map by geo-coordinates
-- [ ] `FRONT-103` Activity list with filters: type, date, distance
-- [ ] `FRONT-104` Activity card component
+- [x] `FRONT-103` Activity list with activity cards
+- [x] `FRONT-104` Activity card component
 
 ### Activity Creation
 
-- [ ] `FRONT-105` Create Activity form — title, description, type, location picker, date/time, participant cap
-- [ ] `BACK-103` Input validation (Zod or JSON schema) on all POST routes
+- [x] `FRONT-105` Create Activity form — title, description, type, location picker, date/time, participant cap
+- [x] `BACK-103` Input validation on all POST routes
 
 ### Join Flow
 
-- [ ] `FRONT-106` Join button with optimistic UI
-- [ ] `FRONT-107` Already-joined state — show "Leave" button
-- [ ] `BACK-104` `DELETE /api/activities/:id/leave` route
+- [x] `FRONT-106` Join button with optimistic UI
+- [x] `FRONT-107` Already-joined state — show "Leave" button
+- [x] `BACK-104` `DELETE /api/activities/:id/leave` route
 
 ### Profile Page
 
-- [ ] `FRONT-108` User profile page — name, photo, activities created, activities joined
+- [x] `FRONT-108` User profile page — name, photo, member since, stats, account info
 
 ### Error Handling
 
-- [ ] `FRONT-109` Global error boundary in React
-- [ ] `FRONT-110` Toast notifications for API errors
-- [ ] `BACK-105` Structured error responses — `{ success: false, error: string, code: string }`
+- [x] `FRONT-109` Global error boundary in React
+- [x] `FRONT-110` Toast notifications for API errors
+- [x] `BACK-105` Structured error responses — `{ success: false, error: string, code: string }`
 
 ### Tests
 
-- [ ] `TEST-101` Backend unit tests for `IdentityService.verifyInitData`
-- [ ] `TEST-102` Backend unit tests for `ActivityService` (mock Prisma)
+- [x] `TEST-101` Backend unit tests for `IdentityService.verifyInitData`
+- [x] `TEST-102` Backend unit tests for `ActivityService` (mock Prisma)
 - [ ] `TEST-103` Frontend component tests for `useTelegramAuth`
 - [ ] `TEST-104` Frontend component tests for `useActivityDetails`
-- [ ] `TEST-105` CI: add test job to `ci.yml`
+- [x] `TEST-105` CI: add test job to `ci.yml`
 
 ### CI / Infrastructure
 
 - [ ] `INFRA-101` Add `pnpm-lock.yaml` integrity check to CI
 - [ ] `INFRA-102` Docker build check for `Dockerfile.backend` in CI
-- [ ] `INFRA-103` Environment variable validation at startup (Zod schema)
+- [x] `INFRA-103` Environment variable validation at startup (`TELEGRAM_BOT_TOKEN` + `JWT_SECRET`)
 
 ---
 

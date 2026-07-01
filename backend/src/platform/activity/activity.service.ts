@@ -87,9 +87,7 @@ export class ActivityService {
       include: { _count: { select: { participants: true } } },
     });
 
-    return (activities as ActivityWithCount[]).map((a) =>
-      this.toSummary(a, a._count.participants)
-    );
+    return (activities as ActivityWithCount[]).map((a) => this.toSummary(a, a._count.participants));
   }
 
   async getActivityById(id: string): Promise<ActivityDetails | null> {
@@ -140,8 +138,38 @@ export class ActivityService {
       throw new Error('Activity is full');
     }
 
+    const existing = await this.prisma.activityParticipant.findUnique({
+      where: { activityId_userId: { activityId, userId } },
+    });
+    if (existing) throw new Error('Already joined');
+
     await this.prisma.activityParticipant.create({
       data: { activityId, userId },
+    });
+
+    const updated = (await this.prisma.activity.findUniqueOrThrow({
+      where: { id: activityId },
+      include: { _count: { select: { participants: true } } },
+    })) as ActivityWithCount;
+
+    return this.toSummary(updated, updated._count.participants);
+  }
+
+  async leaveActivity(activityId: string, userId: string): Promise<ActivitySummary> {
+    const activity = (await this.prisma.activity.findUnique({
+      where: { id: activityId },
+      include: { _count: { select: { participants: true } } },
+    })) as ActivityWithCount | null;
+
+    if (!activity) throw new Error('Activity not found');
+
+    const existing = await this.prisma.activityParticipant.findUnique({
+      where: { activityId_userId: { activityId, userId } },
+    });
+    if (!existing) throw new Error('Not a participant');
+
+    await this.prisma.activityParticipant.delete({
+      where: { activityId_userId: { activityId, userId } },
     });
 
     const updated = (await this.prisma.activity.findUniqueOrThrow({

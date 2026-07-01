@@ -86,3 +86,8 @@ body {
 .login-btn:active {
   opacity: 0.8;
 }
+
+button {
+  border: none;
+  cursor: pointer;
+}

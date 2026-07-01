@@ -5,6 +5,13 @@ interface AuthBody {
   initData: string;
 }
 
+function errorResponse(
+  message: string,
+  code: string
+): { success: false; error: string; code: string } {
+  return { success: false as const, error: message, code };
+}
+
 function serializeUser(user: {
   id: string;
   telegramId: bigint;
@@ -41,16 +48,17 @@ export async function registerAuthRoutes(
     const { initData } = request.body;
 
     if (!initData) {
-      return reply.status(400).send({ success: false, error: 'initData is required' });
+      return reply.status(400).send(errorResponse('initData is required', 'MISSING_INIT_DATA'));
     }
 
     try {
       const telegramUser = identityService.verifyInitData(initData);
       const user = await identityService.findOrCreateUser(telegramUser);
-      return reply.send({ success: true, data: { user: serializeUser(user) } });
+      const token = identityService.issueToken(user.id, user.telegramId.toString());
+      return reply.send({ success: true, data: { user: serializeUser(user), token } });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Authentication failed';
-      return reply.status(401).send({ success: false, error: message });
+      return reply.status(401).send(errorResponse(message, 'UNAUTHORIZED'));
     }
   });
 
@@ -58,16 +66,19 @@ export async function registerAuthRoutes(
     const { initData } = request.query;
 
     if (!initData) {
-      return reply.status(400).send({ success: false, error: 'initData query param is required' });
+      return reply
+        .status(400)
+        .send(errorResponse('initData query param is required', 'MISSING_INIT_DATA'));
     }
 
     try {
       const telegramUser = identityService.verifyInitData(initData);
       const user = await identityService.findOrCreateUser(telegramUser);
-      return reply.send({ success: true, data: { user: serializeUser(user) } });
+      const token = identityService.issueToken(user.id, user.telegramId.toString());
+      return reply.send({ success: true, data: { user: serializeUser(user), token } });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Authentication failed';
-      return reply.status(401).send({ success: false, error: message });
+      return reply.status(401).send(errorResponse(message, 'UNAUTHORIZED'));
     }
   });
 }

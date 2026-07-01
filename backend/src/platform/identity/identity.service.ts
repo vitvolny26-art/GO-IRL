@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto';
+import { sign, verify } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 
 export interface TelegramUser {
@@ -9,13 +10,22 @@ export interface TelegramUser {
   photo_url?: string;
 }
 
+export interface JwtPayload {
+  sub: string;
+  telegramId: string;
+  iat?: number;
+  exp?: number;
+}
+
 export class IdentityService {
   private readonly prisma: PrismaClient;
   private readonly telegramBotToken: string;
+  private readonly jwtSecret: string;
 
-  constructor(prisma: PrismaClient, telegramBotToken: string) {
+  constructor(prisma: PrismaClient, telegramBotToken: string, jwtSecret: string) {
     this.prisma = prisma;
     this.telegramBotToken = telegramBotToken;
+    this.jwtSecret = jwtSecret;
   }
 
   verifyInitData(initData: string): TelegramUser {
@@ -31,13 +41,9 @@ export class IdentityService {
       .map(([k, v]) => `${k}=${v}`)
       .join('\n');
 
-    const secretKey = createHmac('sha256', 'WebAppData')
-      .update(this.telegramBotToken)
-      .digest();
+    const secretKey = createHmac('sha256', 'WebAppData').update(this.telegramBotToken).digest();
 
-    const expectedHash = createHmac('sha256', secretKey)
-      .update(entries)
-      .digest('hex');
+    const expectedHash = createHmac('sha256', secretKey).update(entries).digest('hex');
 
     if (expectedHash !== hash) {
       throw new Error('Invalid initData signature');
@@ -49,6 +55,14 @@ export class IdentityService {
     }
 
     return JSON.parse(userParam) as TelegramUser;
+  }
+
+  issueToken(userId: string, telegramId: string): string {
+    return sign({ sub: userId, telegramId } as JwtPayload, this.jwtSecret, { expiresIn: '7d' });
+  }
+
+  verifyToken(token: string): JwtPayload {
+    return verify(token, this.jwtSecret) as JwtPayload;
   }
 
   async findOrCreateUser(telegramUser: TelegramUser): Promise<{
