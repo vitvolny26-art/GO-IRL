@@ -1,13 +1,20 @@
 {
   "name": "@go-irl/types",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --noEmit",
+    "lint": "echo \"no lint configured\"",
+    "test": "echo \"no tests configured\"",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

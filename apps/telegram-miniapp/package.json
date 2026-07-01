@@ -1,9 +1,29 @@
 {
   "name": "@go-irl/telegram-miniapp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "echo \"Telegram Mini App - Coming in Sprint 1\"",
-    "build": "echo \"Telegram Mini App - Coming in Sprint 1\""
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "echo \"no tests configured\"",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@go-irl/shared": "workspace:*",
+    "@go-irl/types": "workspace:*",
+    "@go-irl/contracts": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.1.0"
   }
 }

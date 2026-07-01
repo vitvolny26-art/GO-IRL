@@ -1,0 +1,40 @@
+# GO IRL Backend — production image
+# Uses `turbo prune` to generate a minimal subset of the monorepo
+# containing only what @go-irl/backend actually needs.
+
+FROM node:20-alpine AS base
+RUN corepack enable
+
+# ── Step 1: prune the monorepo down to backend's dependency graph ──────────
+FROM base AS pruner
+WORKDIR /repo
+RUN npm install -g turbo
+COPY . .
+RUN turbo prune @go-irl/backend --docker
+
+# ── Step 2: install only pruned dependencies ────────────────────────────────
+FROM base AS deps
+WORKDIR /repo
+COPY --from=pruner /repo/out/json/ .
+# pnpm-lock.yaml must be committed for --frozen-lockfile to work.
+RUN pnpm install --frozen-lockfile
+
+# ── Step 3: build with full source ──────────────────────────────────────────
+FROM base AS build
+WORKDIR /repo
+COPY --from=deps /repo/ .
+COPY --from=pruner /repo/out/full/ .
+RUN npm install -g turbo
+RUN turbo build --filter=@go-irl/backend
+
+# ── Step 4: minimal runtime image ────────────────────────────────────────────
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=build /repo/backend/dist ./dist
+COPY --from=build /repo/backend/package.json ./
+COPY --from=build /repo/node_modules ./node_modules
+
+EXPOSE 3000
+CMD ["node", "dist/src/main.js"]
