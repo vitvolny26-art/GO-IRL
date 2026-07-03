@@ -34,5 +34,4 @@ Confirmed work is ordered by priority.
 ## Technical Debt
 
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
-- Production deployment flow should be documented with Netlify and BotFather steps.
-- Add release checklist for schema migration, environment variables, and Telegram Mini App restart testing.
+- Add CI for `pnpm run test`, `pnpm run lint`, and `pnpm run build`.

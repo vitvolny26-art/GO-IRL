@@ -57,3 +57,4 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `ROADMAP.md` - product and engineering direction
 - `BACKLOG.md` - confirmed work queue
 - `RELEASE_NOTES.md` - release-ready notes for deployment
+- `DEPLOYMENT.md` - production deployment and smoke-test checklist
