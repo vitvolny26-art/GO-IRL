@@ -26,6 +26,7 @@ Required frontend environment variables:
 ```text
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
 ```
 
 Use only the publishable/anon key in frontend hosting. Never put a service role key in Netlify or client code.

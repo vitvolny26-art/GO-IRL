@@ -25,6 +25,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - GitHub Actions CI for test, lint, and build verification.
 - Sprint 0 production verification completed after applying Supabase RLS schema.
 - Netlify build configuration for automatic GitHub deploys.
+- Telegram bot username can be configured with `VITE_TELEGRAM_BOT_USERNAME`.
 
 ### Changed
 

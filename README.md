@@ -22,6 +22,7 @@ Create `.env.local` from `.env.example` and fill:
 ```text
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
 ```
 
 After starting Vite, open the local URL shown in the terminal. For Telegram testing, the deployed Mini App URL is configured in BotFather.
