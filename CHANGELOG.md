@@ -6,6 +6,7 @@ All notable confirmed changes to GO IRL are tracked here.
 
 ### Added
 
+- Sprint delivery plan covering Sprint 0 through Sprint 5.
 - Telegram Mini App MVP for GO IRL.
 - Supabase-backed activities and participants.
 - Public/private activity visibility.
@@ -28,6 +29,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Documentation now reflects the Supabase-backed runtime instead of local-only storage.
 - Invite activity id from Telegram `startapp` is sent to Supabase as a scoped request header.
 - Package versions are pinned to explicit semver ranges instead of `latest`.
+- Event cards now show clearer activity, date, time, location, participants, price, organizer RLI placeholder, and direct join/request action.
 
 ### Known Gaps
 

@@ -60,6 +60,23 @@ const dateLabel = (date: string, language: Language) =>
     month: "short",
   }).format(new Date(`${date}T12:00:00`));
 
+const compactDateLabel = (date: string, language: Language) => {
+  const t = getTranslation(language);
+  const eventDate = new Date(`${date}T12:00:00`);
+  const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (date === todayKey) return t.today;
+  if (date === tomorrow.toISOString().slice(0, 10)) return t.tomorrow;
+
+  return new Intl.DateTimeFormat(localeByLanguage[language], {
+    day: "numeric",
+    month: "short",
+  }).format(eventDate);
+};
+
 function App() {
   const store = useAppStore();
   const [selected, setSelected] = useState<Activity | null>(null);
@@ -146,11 +163,12 @@ function App() {
           <HomeView
             language={store.language}
             onOpen={setSelected}
+            onJoin={handleJoin}
             onRandom={openRandom}
             onCreate={() => store.setView("create")}
           />
         )}
-        {store.view === "explore" && <ExploreView language={store.language} onOpen={setSelected} />}
+        {store.view === "explore" && <ExploreView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
         {store.view === "create" && <CreateView language={store.language} initialActivity={editingActivity} onCancel={() => {
           setEditingActivity(null);
           store.setView("home");
@@ -183,7 +201,7 @@ function App() {
   );
 }
 
-function HomeView({ language, onOpen, onRandom, onCreate }: { language: Language; onOpen: (activity: Activity) => void; onRandom: () => void; onCreate: () => void }) {
+function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onRandom: () => void; onCreate: () => void }) {
   const { activities, setCategory } = useAppStore();
   const t = getTranslation(language);
   const today = new Date().toISOString().slice(0, 10);
@@ -213,14 +231,14 @@ function HomeView({ language, onOpen, onRandom, onCreate }: { language: Language
         ))}
       </div>
 
-      <ActivitySection title={t.nearby} activities={nearby} language={language} onOpen={onOpen} />
-      {urgent.length > 0 && <ActivitySection title={t.urgent} icon={<Zap size={18} />} activities={urgent} language={language} onOpen={onOpen} urgent />}
-      <ActivitySection title={t.popular} activities={popular} language={language} onOpen={onOpen} />
+      <ActivitySection title={t.nearby} activities={nearby} language={language} onOpen={onOpen} onJoin={onJoin} />
+      {urgent.length > 0 && <ActivitySection title={t.urgent} icon={<Zap size={18} />} activities={urgent} language={language} onOpen={onOpen} onJoin={onJoin} urgent />}
+      <ActivitySection title={t.popular} activities={popular} language={language} onOpen={onOpen} onJoin={onJoin} />
     </>
   );
 }
 
-function ExploreView({ language, onOpen }: { language: Language; onOpen: (activity: Activity) => void }) {
+function ExploreView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
   const { activities, selectedCategory, selectedCityId, setCategory } = useAppStore();
   const t = getTranslation(language);
   const city = getCity(selectedCityId);
@@ -238,7 +256,7 @@ function ExploreView({ language, onOpen }: { language: Language; onOpen: (activi
         ))}
       </div>
       <div className="activity-stack">
-        {filtered.length ? filtered.map((item) => <ActivityCard key={item.id} activity={item} language={language} onOpen={onOpen} />) : <EmptyState text={t.noEvents} />}
+        {filtered.length ? filtered.map((item) => <ActivityCard key={item.id} activity={item} language={language} onOpen={onOpen} onJoin={onJoin} />) : <EmptyState text={t.noEvents} />}
       </div>
     </section>
   );
@@ -362,31 +380,70 @@ function ProfileView({ language }: { language: Language }) {
   );
 }
 
-function ActivitySection({ title, activities, language, onOpen, icon, urgent = false }: { title: string; activities: Activity[]; language: Language; onOpen: (activity: Activity) => void; icon?: React.ReactNode; urgent?: boolean }) {
+function ActivitySection({ title, activities, language, onOpen, onJoin, icon, urgent = false }: { title: string; activities: Activity[]; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; icon?: React.ReactNode; urgent?: boolean }) {
   if (!activities.length) return null;
   return (
     <section className={urgent ? "activity-section urgent-section" : "activity-section"}>
       <SectionHeader title={title} icon={icon} />
-      <div className="activity-stack">{activities.map((activity) => <ActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} />)}</div>
+      <div className="activity-stack">{activities.map((activity) => <ActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />)}</div>
     </section>
   );
 }
 
-function ActivityCard({ activity, language, onOpen }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void }) {
+function ActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { joinedIds, waitingIds, pendingIds } = useAppStore();
   const t = getTranslation(language);
   const category = categories.find((item) => item.id === activity.categoryId)!;
   const free = activity.capacity - activity.participants;
+  const joined = joinedIds.includes(activity.id);
+  const waiting = waitingIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const isOrganizer = activity.organizerKey === getUserKey();
+  const full = activity.participants >= activity.capacity;
+  const action = isOrganizer
+    ? t.open
+    : pending
+      ? t.requested
+      : joined
+        ? t.joined
+        : waiting
+          ? t.waiting
+          : activity.visibility === "private"
+            ? t.request
+            : full
+              ? t.wait
+              : t.join;
+
   return (
-    <button className="activity-card" onClick={() => onOpen(activity)} type="button">
-      <div className={`category-icon category-${activity.categoryId}`}>{category.icon}</div>
-      <div className="activity-copy">
-        <div className="activity-label">{category.name[language]} · {activity.activity[language]}</div>
-        <h3>{activity.title[language]}</h3>
-        <div className="activity-meta"><span><CalendarDays size={14} />{dateLabel(activity.date, language)}, {activity.time}</span><span><MapPin size={14} />{activity.address}</span></div>
-        <div className="activity-bottom"><span className={free <= 1 ? "spots urgent" : "spots"}><UsersRound size={15} />{free > 0 ? `${free} ${t.left}` : t.waitingList}</span><span className="price">{activity.price ? `${activity.price} Kč` : t.free}</span></div>
+    <article className="activity-card">
+      <button className="activity-card-main" onClick={() => onOpen(activity)} type="button">
+        <div className={`category-icon category-${activity.categoryId}`}>{category.icon}</div>
+        <div className="activity-copy">
+          <div className="activity-label">{category.name[language]}</div>
+          <h3>{activity.activity[language]}</h3>
+          <p>{activity.title[language]}</p>
+        </div>
+        <ChevronRight className="card-arrow" size={18} />
+      </button>
+
+      <div className="activity-card-details">
+        <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
+        <div><Clock3 /><span>{activity.time}</span></div>
+        <div><MapPin /><span>{activity.address}</span></div>
+        <div><UsersRound /><span>{activity.participants} / {activity.capacity}</span></div>
+        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
+        <div><Star /><span>{t.organizerRli}</span></div>
       </div>
-      <ChevronRight className="card-arrow" size={18} />
-    </button>
+
+      <div className="activity-card-footer">
+        <span className={free <= 1 ? "spots urgent" : "spots"}>
+          <UsersRound />{free > 0 ? `${free} ${t.left}` : t.full}
+        </span>
+        <button className={joined || waiting || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button">
+          {action}
+        </button>
+      </div>
+    </article>
   );
 }
 

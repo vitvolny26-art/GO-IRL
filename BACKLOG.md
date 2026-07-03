@@ -35,3 +35,4 @@ Confirmed work is ordered by priority.
 
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
 - Confirm the first GitHub Actions CI run passes on `main`.
+- Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
