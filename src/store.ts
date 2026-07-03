@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { supabase, getUserKey } from "./supabase";
+import { getTelegramWebApp } from "./telegram";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
 import type { Activity, AppView, Language, NewActivity } from "./types";
@@ -47,6 +48,7 @@ type AppState = {
   loading: boolean;
   syncError: string | null;
   initialize: () => Promise<void>;
+  disposeRealtime: () => void;
   setLanguage: (language: Language) => void;
   setSelectedCity: (cityId: string) => void;
   setView: (view: AppView) => void;
@@ -57,7 +59,7 @@ type AppState = {
   reviewRequest: (activityId: string, memberKey: string, approved: boolean) => Promise<void>;
 };
 
-let realtimeStarted = false;
+let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 
 const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   id: row.id,
@@ -84,6 +86,7 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
 
 export const useAppStore = create<AppState>((set, get) => {
   const reload = async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
     const userKey = getUserKey();
     const [activitiesResult, membersResult] = await Promise.all([
       supabase.from("activities").select("*").order("event_date").order("event_time"),
@@ -95,7 +98,7 @@ export const useAppStore = create<AppState>((set, get) => {
 
     const rows = (activitiesResult.data || []) as DbActivity[];
     const members = (membersResult.data || []) as DbMember[];
-    const invitedActivityId = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+    const invitedActivityId = getTelegramWebApp()?.initDataUnsafe?.start_param;
     const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
 
     set({
@@ -125,12 +128,15 @@ export const useAppStore = create<AppState>((set, get) => {
       set({ loading: true });
       try {
         await reload();
-        if (!realtimeStarted) {
-          realtimeStarted = true;
-          supabase
+        if (!realtimeChannel && !(typeof document !== "undefined" && document.hidden)) {
+          realtimeChannel = supabase
             .channel("go-irl-live")
-            .on("postgres_changes", { event: "*", schema: "public", table: "activities" }, () => void reload())
-            .on("postgres_changes", { event: "*", schema: "public", table: "activity_members" }, () => void reload())
+            .on("postgres_changes", { event: "*", schema: "public", table: "activities" }, () => {
+              if (!(typeof document !== "undefined" && document.hidden)) void reload();
+            })
+            .on("postgres_changes", { event: "*", schema: "public", table: "activity_members" }, () => {
+              if (!(typeof document !== "undefined" && document.hidden)) void reload();
+            })
             .subscribe();
         }
       } catch (error) {
@@ -138,6 +144,13 @@ export const useAppStore = create<AppState>((set, get) => {
         set({ syncError: "database_unavailable" });
       } finally {
         set({ loading: false });
+      }
+    },
+
+    disposeRealtime: () => {
+      if (realtimeChannel) {
+        void supabase.removeChannel(realtimeChannel);
+        realtimeChannel = null;
       }
     },
 
@@ -170,7 +183,7 @@ export const useAppStore = create<AppState>((set, get) => {
       if (activity.participants >= activity.capacity) return "full";
 
       const status: DbMember["status"] = activity.visibility === "invite" ? "pending" : "joined";
-      const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const telegramUser = getTelegramWebApp()?.initDataUnsafe?.user;
       const displayName = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
       const { error } = await supabase.from("activity_members").insert({
         activity_id: id,
@@ -185,7 +198,7 @@ export const useAppStore = create<AppState>((set, get) => {
 
     createActivity: async (input) => {
       const userKey = getUserKey();
-      const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const telegramUser = getTelegramWebApp()?.initDataUnsafe?.user;
       const organizer = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
       const row = {
         category_id: input.categoryId,

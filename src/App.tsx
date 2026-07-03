@@ -29,25 +29,9 @@ import { cities, getCity } from "./config/cities";
 import { getTranslation, localeByLanguage } from "./i18n";
 import { useAppStore } from "./store";
 import { getUserKey } from "./supabase";
+import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
 import type { Activity, AppView, Language, NewActivity } from "./types";
 import { MAX_EVENT_PRICE, validateEventPrice } from "./validation";
-
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: {
-        ready: () => void;
-        expand: () => void;
-        initDataUnsafe?: {
-          start_param?: string;
-          user?: { id?: number; first_name?: string; last_name?: string; username?: string };
-        };
-        HapticFeedback?: { impactOccurred: (style: string) => void; notificationOccurred: (type: string) => void };
-        openTelegramLink?: (url: string) => void;
-      };
-    };
-  }
-}
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
@@ -82,20 +66,51 @@ function App() {
   const store = useAppStore();
   const [selected, setSelected] = useState<Activity | null>(null);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [completion, setCompletion] = useState("");
   const [notice, setNotice] = useState("");
   const invitationHandled = useRef(false);
+  const toastTimer = useRef<number | null>(null);
   const t = getTranslation(store.language);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    tg?.ready();
-    tg?.expand();
+    readyMiniApp();
+    expandMiniApp();
     void useAppStore.getState().initialize();
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        useAppStore.getState().disposeRealtime();
+      } else {
+        void useAppStore.getState().initialize();
+      }
+    };
+
+    window.addEventListener("focus", handleVisibility);
+    window.addEventListener("blur", handleVisibility);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+      window.removeEventListener("focus", handleVisibility);
+      window.removeEventListener("blur", handleVisibility);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      useAppStore.getState().disposeRealtime();
+    };
   }, []);
 
   useEffect(() => {
+    if (selected || store.view !== "home") {
+      return showBackButton(() => {
+        if (selected) setSelected(null);
+        else store.setView("home");
+      });
+    }
+    return undefined;
+  }, [selected, store.view, store]);
+
+  useEffect(() => {
     if (invitationHandled.current) return;
-    const tg = window.Telegram?.WebApp;
+    const tg = getTelegramWebApp();
     const startParam = tg?.initDataUnsafe?.start_param;
     if (startParam) {
       const invitedActivity = store.activities.find((item) => item.id === startParam);
@@ -108,13 +123,18 @@ function App() {
 
   const flash = (message: string) => {
     setNotice(message);
-    window.setTimeout(() => setNotice(""), 2200);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setNotice(""), 2200);
+  };
+
+  const requestCloseMiniApp = () => {
+    if (!closeMiniApp()) flash(t.telegramCloseFallback);
   };
 
   const openRandom = () => {
     const random = store.activities[Math.floor(Math.random() * store.activities.length)];
     if (random) setSelected(random);
-    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
+    impactTelegram("medium");
   };
 
   const handleJoin = async (activity: Activity) => {
@@ -130,7 +150,7 @@ function App() {
               ? t.privateJoinInfo
               : t.leave;
       flash(message);
-      window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred(result === "left" || result === "full" || result === "private" ? "warning" : "success");
+      notifyTelegram(result === "left" || result === "full" || result === "private" ? "warning" : "success");
     } catch {
       flash(t.joinError);
     }
@@ -141,8 +161,9 @@ function App() {
     const text = `${activity.title[store.language]} — ${dateLabel(activity.date, store.language)}, ${activity.time}. ${activity.address}`;
     const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
 
-    if (window.Telegram?.WebApp?.openTelegramLink) {
-      window.Telegram.WebApp.openTelegramLink(telegramShareUrl);
+    const webApp = getTelegramWebApp();
+    if (webApp?.openTelegramLink) {
+      webApp.openTelegramLink(telegramShareUrl);
       return;
     }
 
@@ -185,8 +206,9 @@ function App() {
           flash(editingActivity ? t.updatedSuccess : t.createdSuccess);
           setEditingActivity(null);
           setSelected(useAppStore.getState().activities.find((item) => item.id === id) || null);
+          setCompletion(editingActivity ? t.updatedSuccess : t.createdSuccess);
         }} />}
-        {store.view === "profile" && <ProfileView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
+        {store.view === "profile" && <ProfileView language={store.language} onOpen={setSelected} onJoin={handleJoin} onCloseMiniApp={requestCloseMiniApp} />}
       </main>
 
       <BottomNav view={store.view} setView={store.setView} language={store.language} />
@@ -206,8 +228,10 @@ function App() {
             setEditingActivity(activity);
             store.setView("create");
           }}
+          onCloseMiniApp={requestCloseMiniApp}
         />
       )}
+      {completion && <CompletionBar message={completion} language={store.language} onDismiss={() => setCompletion("")} onCloseMiniApp={requestCloseMiniApp} />}
       {notice && <div className="toast">{notice}</div>}
     </div>
   );
@@ -403,11 +427,11 @@ const loadProfile = (fallbackName: string, fallbackCityId: string): LocalProfile
   }
 };
 
-function ProfileView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onCloseMiniApp: () => void }) {
   const { activities, joinedIds, pendingIds, loading, syncError, selectedCityId, setSelectedCity } = useAppStore();
   const [editing, setEditing] = useState(false);
   const t = getTranslation(language);
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const tgUser = getTelegramWebApp()?.initDataUnsafe?.user;
   const fallbackName = [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(" ") || t.guestName;
   const [profile, setProfile] = useState(() => loadProfile(fallbackName, selectedCityId));
   const userKey = getUserKey();
@@ -434,7 +458,7 @@ function ProfileView({ language, onOpen, onJoin }: { language: Language; onOpen:
     setProfile(nextProfile);
     setSelectedCity(nextProfile.cityId);
     setEditing(false);
-    window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success");
+    notifyTelegram("success");
   };
 
   return (
@@ -481,6 +505,7 @@ function ProfileView({ language, onOpen, onJoin }: { language: Language; onOpen:
       <ProfileEventGroup title={t.organizing} activities={organized} language={language} emptyText={t.noOrganizedEvents} onOpen={onOpen} onJoin={onJoin} />
       <ProfileEventGroup title={t.participating} activities={participating} language={language} emptyText={t.noJoinedEvents} onOpen={onOpen} onJoin={onJoin} />
       <ProfileEventGroup title={t.waitingDecision} activities={pendingRequests} language={language} emptyText={t.noPendingRequests} onOpen={onOpen} onJoin={onJoin} />
+      <button className="telegram-close-button" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
     </section>
   );
 }
@@ -604,6 +629,7 @@ function ActivitySheet({
   onJoin,
   onShare,
   onEdit,
+  onCloseMiniApp,
 }: {
   activity: Activity;
   language: Language;
@@ -614,6 +640,7 @@ function ActivitySheet({
   onJoin: (activity: Activity) => void;
   onShare: (activity: Activity) => void;
   onEdit: (activity: Activity) => void;
+  onCloseMiniApp: () => void;
 }) {
   const { joinedIds, waitingIds, pendingIds, reviewRequest } = useAppStore();
   const [membersOpen, setMembersOpen] = useState(false);
@@ -734,7 +761,22 @@ function ActivitySheet({
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
         </div>
+        <button className="telegram-close-button compact" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
       </article>
+    </div>
+  );
+}
+
+function CompletionBar({ message, language, onDismiss, onCloseMiniApp }: { message: string; language: Language; onDismiss: () => void; onCloseMiniApp: () => void }) {
+  const t = getTranslation(language);
+  return (
+    <div className="completion-bar">
+      <div>
+        <strong>{message}</strong>
+        <span>{t.closeAfterDoneHint}</span>
+      </div>
+      <button onClick={onCloseMiniApp} type="button">{t.done}</button>
+      <button className="secondary" onClick={onDismiss} type="button">{t.close}</button>
     </div>
   );
 }

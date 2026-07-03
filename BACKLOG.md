@@ -24,6 +24,7 @@ Confirmed work is ordered by priority.
 - Verify deployed Vercel environment variables match `.env.example`.
 - Verify Supabase realtime is enabled for `activities` and `activity_members` in production.
 - Verify Telegram `startapp` links open the exact shared activity from a second account.
+- Verify `Telegram.WebApp.close()` behavior on iOS, Android, and Telegram Desktop.
 
 ## Security Issue
 
@@ -35,3 +36,4 @@ Confirmed work is ordered by priority.
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
 - Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
 - Add deeper empty-state actions on the home screen when there are no upcoming events.
+- Add server-side n8n notifications for requests and event updates; do not keep the Mini App running in background for notifications.

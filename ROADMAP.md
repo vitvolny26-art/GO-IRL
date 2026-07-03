@@ -9,6 +9,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - Add focused automated tests for activity creation, join flows, and private request review.
 - Harden Supabase RLS and document every policy.
 - Add Telegram `initData` validation on a trusted backend or edge function.
+- Keep Telegram Mini App lifecycle explicit: no surprise close, no background polling, user-triggered close only.
 
 ## Phase 2 - Product Quality
 
@@ -20,7 +21,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 ## Phase 3 - Growth
 
-- Add notifications for join requests and event updates.
+- Add server-side notifications for join requests and event updates through n8n.
 - Add user reputation/RLI details.
 - Add event moderation and abuse reporting.
 - Add analytics for activation, joins, shares, and completed offline events.

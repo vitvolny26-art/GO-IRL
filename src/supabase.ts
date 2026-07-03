@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { getTelegramWebApp } from "./telegram";
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -8,7 +9,7 @@ if (!url || !publishableKey) {
 }
 
 function resolveUserKey() {
-  const telegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+  const telegramId = getTelegramWebApp()?.initDataUnsafe?.user?.id;
   if (telegramId) return `telegram:${telegramId}`;
 
   const storageKey = "go-irl-guest-id";
@@ -21,7 +22,7 @@ function resolveUserKey() {
 }
 
 const userKey = resolveUserKey();
-const invitedActivityId = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+const invitedActivityId = getTelegramWebApp()?.initDataUnsafe?.start_param;
 
 export const supabase = createClient(url, publishableKey, {
   auth: { persistSession: false },

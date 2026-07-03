@@ -13,6 +13,8 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Supabase stores activities and participants and broadcasts realtime updates.
 - Supabase RLS now limits non-public activity visibility to organizers, participants, or invite-link visitors.
 - Header is fixed, safe-area aware, and ready for Telegram in-app browser behavior.
+- Mini App lifecycle UX includes explicit Done / Back to Telegram actions.
+- Realtime subscriptions are cleaned up when the app is hidden or unmounted; no background notification polling is used.
 - Russian and Czech localization structure is in place.
 
 ### Before Public Release
@@ -22,4 +24,5 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Re-check private activity visibility with an unrelated account after schema deployment.
 - Confirm RLS behavior with at least two Telegram accounts.
 - Validate Telegram share links through `@GOirl_bot`.
+- Validate explicit Mini App close behavior on real Telegram clients.
 - Add trusted Telegram `initData` validation before treating identity as secure.

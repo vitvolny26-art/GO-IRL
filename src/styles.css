@@ -169,6 +169,8 @@ button, input, textarea, select { letter-spacing: 0; }
 .profile-stats-grid .metric { min-height: 82px; }
 .profile-event-group { display: grid; gap: 10px; }
 .profile-event-group h3 { margin: 8px 0 0; font-size: 16px; }
+.telegram-close-button { width: 100%; min-height: 50px; border: 1px solid rgba(87,217,232,.28); border-radius: 8px; background: rgba(87,217,232,.08); color: var(--cyan); font-size: 14px; font-weight: 900; }
+.telegram-close-button.compact { margin-top: 10px; }
 .profile-skeleton { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 .profile-skeleton span { display: block; border-radius: 6px; background: linear-gradient(90deg, #1b1e24 0%, #262a32 42%, #1b1e24 82%); background-size: 220% 100%; animation: shimmer 1.15s ease-in-out infinite; }
 .profile-skeleton span:nth-child(1) { width: 72px; height: 72px; }
@@ -259,6 +261,12 @@ button, input, textarea, select { letter-spacing: 0; }
 .square-action { display: grid; place-items: center; background: var(--surface-2); color: var(--text); }
 .square-action.muted { color: var(--muted); }
 .toast { position: fixed; z-index: 80; left: 50%; bottom: calc(82px + env(safe-area-inset-bottom)); max-width: calc(100% - 32px); padding: 11px 15px; border-radius: 7px; background: var(--text); color: #111; font-size: 13px; font-weight: 800; transform: translateX(-50%); }
+.completion-bar { position: fixed; z-index: 75; left: 50%; bottom: calc(82px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; width: min(calc(100% - 24px), 536px); padding: 10px; border: 1px solid rgba(201,255,61,.28); border-radius: 8px; background: rgba(18,20,25,.98); box-shadow: 0 16px 40px rgba(0,0,0,.4); transform: translateX(-50%); animation: card-in 180ms ease-out; }
+.completion-bar div { display: grid; gap: 2px; min-width: 0; }
+.completion-bar strong { font-size: 13px; overflow-wrap: anywhere; }
+.completion-bar span { color: var(--muted); font-size: 11px; line-height: 1.25; }
+.completion-bar button { min-height: 40px; padding: 0 11px; border: 0; border-radius: 7px; background: var(--lime); color: var(--lime-text); font-size: 12px; font-weight: 900; }
+.completion-bar button.secondary { border: 1px solid var(--line); background: var(--surface-2); color: var(--text); }
 .empty-state { display: grid; place-items: center; gap: 8px; min-height: 150px; padding: 20px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); text-align: center; animation: fade-in 180ms ease-out; }
 .empty-state p { margin: 0; }
 .event-list-skeleton { display: grid; gap: 10px; }
@@ -295,6 +303,8 @@ button, input, textarea, select { letter-spacing: 0; }
   .card-status { width: 100%; }
   .card-join { width: 100%; }
   .achievements { grid-template-columns: repeat(2, 1fr); }
+  .completion-bar { grid-template-columns: 1fr; }
+  .completion-bar button { width: 100%; }
 }
 
 @media (min-width: 700px) {
