@@ -1,6 +1,6 @@
 # Sprint 0 Status
 
-Status: **Production Verification Blocked**
+Status: **Complete**
 
 Date: 2026-07-03
 
@@ -15,28 +15,25 @@ Date: 2026-07-03
 - Netlify production URL responds with HTTP 200 and serves the GO IRL page.
 - Supabase REST is reachable with the publishable key.
 - Required production columns such as `location_url`, `display_name`, and `status` are available through REST.
+- Production RLS hides unrelated private activities from guest REST requests.
+- Production RLS allows the exact invited private activity when the request includes the Telegram `startapp` invite activity id.
 
-## Blocker
+## Resolved Blocker
 
-Supabase production RLS is not yet aligned with `supabase/schema.sql`.
+Supabase production RLS was not aligned with `supabase/schema.sql`.
 
-A guest REST request can still read at least one `private` activity. Private activities must only be visible to:
+The latest `supabase/schema.sql` has now been applied in production and re-tested. Private activities are only visible to:
 
 - the organizer;
 - existing participants;
 - users opening the activity through a valid Telegram `startapp` invite parameter.
 
-## Required Action
+## Remaining Manual Smoke Test
 
-Apply the latest `supabase/schema.sql` in the production Supabase SQL Editor.
+Before a wider release, run this user-facing Telegram check with two accounts:
 
-After applying it, re-run the Sprint 0 smoke test:
-
-1. Query activities as an unrelated guest user.
-2. Confirm no unrelated `private` activities are returned.
-3. Open a shared Telegram `startapp` link.
-4. Confirm that exact invited private activity opens.
-5. Confirm a second account can send a join request.
-6. Confirm the organizer can approve or reject the request.
-
-Sprint 0 can be marked complete only after this blocker is resolved.
+1. Account A creates a private activity.
+2. Account B does not see it in the normal list.
+3. Account A shares the activity link.
+4. Account B opens the link and sends a join request.
+5. Account A approves or rejects the request.

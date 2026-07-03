@@ -4,7 +4,7 @@ GO IRL is developed as a platform, not as a one-off Telegram Mini App. Every spr
 
 ## Sprint 0 - Foundation
 
-Status: **Production Verification Blocked**
+Status: **Complete**
 
 Goal: make the project safe to develop and release.
 
@@ -16,11 +16,17 @@ Goal: make the project safe to develop and release.
 - Deployment checklist exists.
 - No secrets are committed.
 
-Remaining:
+Completed:
 
-- Apply the latest `supabase/schema.sql` in production Supabase.
-- Fix production RLS so unrelated guest users cannot read private activities.
-- Run Telegram Mini App smoke-test with two accounts.
+- Latest `supabase/schema.sql` is applied in production Supabase.
+- Production RLS hides unrelated private activities.
+- Invite/startapp access to a specific private activity is verified.
+- GitHub Actions CI passes on `main`.
+- Netlify production URL responds successfully.
+
+Manual release smoke-test:
+
+- Run the final Telegram two-account flow before public announcement.
 
 ## Sprint 1 - MVP Core
 

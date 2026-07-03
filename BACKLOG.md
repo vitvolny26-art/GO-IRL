@@ -24,11 +24,9 @@ Confirmed work is ordered by priority.
 - Verify deployed Netlify environment variables match `.env.example`.
 - Verify Supabase realtime is enabled for `activities` and `activity_members` in production.
 - Verify Telegram `startapp` links open the exact shared activity from a second account.
-- Apply the latest `supabase/schema.sql` to the production Supabase project before release.
 
 ## Security Issue
 
-- Production Supabase currently returns private activities to an unrelated guest REST request. Apply `supabase/schema.sql` and re-test before closing Sprint 0.
 - Telegram `initData` is not validated by a trusted backend yet.
 - Review the latest Supabase RLS policies in the production dashboard after applying `supabase/schema.sql`.
 

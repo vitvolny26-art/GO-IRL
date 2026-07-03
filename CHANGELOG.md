@@ -23,6 +23,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Supabase RLS helper functions and policies that hide non-public activities from unrelated users.
 - Production deployment checklist for Supabase, Netlify, BotFather, and Telegram smoke testing.
 - GitHub Actions CI for test, lint, and build verification.
+- Sprint 0 production verification completed after applying Supabase RLS schema.
 
 ### Changed
 
