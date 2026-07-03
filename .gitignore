@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env.local
+*.log
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+GO-IRL-MVP.zip
+SportCrew-miniapp.zip
+go-irl-*.png

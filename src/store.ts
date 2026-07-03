@@ -1,0 +1,274 @@
+import { create } from "zustand";
+import { supabase, getUserKey } from "./supabase";
+import { cities, defaultCityId } from "./config/cities";
+import { getTranslation } from "./i18n";
+import type { Activity, AppView, Language, NewActivity } from "./types";
+
+type JoinResult = "joined" | "waiting" | "pending" | "left";
+
+type DbActivity = {
+  id: string;
+  category_id: string;
+  activity_ru: string;
+  activity_cs: string;
+  title_ru: string;
+  title_cs: string;
+  description_ru: string;
+  description_cs: string;
+  event_date: string;
+  event_time: string;
+  address: string;
+  location_url: string | null;
+  price: number;
+  capacity: number;
+  organizer: string;
+  organizer_key: string;
+  visibility: Activity["visibility"];
+  urgent: boolean;
+  popular: boolean;
+};
+
+type DbMember = {
+  activity_id: string;
+  user_key: string;
+  display_name: string;
+  status: "joined" | "waiting" | "pending";
+};
+
+type AppState = {
+  language: Language;
+  selectedCityId: string;
+  view: AppView;
+  activities: Activity[];
+  joinedIds: string[];
+  waitingIds: string[];
+  pendingIds: string[];
+  selectedCategory: string | null;
+  loading: boolean;
+  syncError: string | null;
+  initialize: () => Promise<void>;
+  setLanguage: (language: Language) => void;
+  setSelectedCity: (cityId: string) => void;
+  setView: (view: AppView) => void;
+  setCategory: (id: string | null) => void;
+  toggleJoin: (id: string) => Promise<JoinResult>;
+  createActivity: (activity: NewActivity) => Promise<string>;
+  updateActivity: (id: string, activity: NewActivity) => Promise<string>;
+  reviewRequest: (activityId: string, memberKey: string, approved: boolean) => Promise<void>;
+};
+
+let realtimeStarted = false;
+
+const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
+  id: row.id,
+  categoryId: row.category_id,
+  activity: { ru: row.activity_ru, cs: row.activity_cs },
+  title: { ru: row.title_ru, cs: row.title_cs },
+  description: { ru: row.description_ru, cs: row.description_cs },
+  date: row.event_date,
+  time: row.event_time.slice(0, 5),
+  address: row.address,
+  locationUrl: row.location_url || undefined,
+  price: row.price,
+  capacity: row.capacity,
+  participants: members.filter((member) => member.activity_id === row.id && member.status === "joined").length,
+  members: members
+    .filter((member) => member.activity_id === row.id)
+    .map((member) => ({ userKey: member.user_key, name: member.display_name, status: member.status })),
+  organizer: row.organizer,
+  organizerKey: row.organizer_key,
+  visibility: row.visibility,
+  urgent: row.urgent,
+  popular: row.popular,
+});
+
+export const useAppStore = create<AppState>((set, get) => {
+  const reload = async () => {
+    const userKey = getUserKey();
+    const [activitiesResult, membersResult] = await Promise.all([
+      supabase.from("activities").select("*").order("event_date").order("event_time"),
+      supabase.from("activity_members").select("activity_id,user_key,display_name,status"),
+    ]);
+
+    const error = activitiesResult.error || membersResult.error;
+    if (error) throw error;
+
+    const rows = (activitiesResult.data || []) as DbActivity[];
+    const members = (membersResult.data || []) as DbMember[];
+    const invitedActivityId = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+    const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
+
+    set({
+      activities: visibleRows.map((row) => mapActivity(row, members)),
+      joinedIds: members.filter((member) => member.user_key === userKey && member.status === "joined").map((member) => member.activity_id),
+      waitingIds: members.filter((member) => member.user_key === userKey && member.status === "waiting").map((member) => member.activity_id),
+      pendingIds: members.filter((member) => member.user_key === userKey && member.status === "pending").map((member) => member.activity_id),
+      syncError: null,
+    });
+  };
+
+  return {
+    language: localStorage.getItem("go-irl-language") === "cs" ? "cs" : "ru",
+    selectedCityId: cities.some((city) => city.id === localStorage.getItem("go-irl-city"))
+      ? localStorage.getItem("go-irl-city")!
+      : defaultCityId,
+    view: "home",
+    activities: [],
+    joinedIds: [],
+    waitingIds: [],
+    pendingIds: [],
+    selectedCategory: null,
+    loading: true,
+    syncError: null,
+
+    initialize: async () => {
+      set({ loading: true });
+      try {
+        await reload();
+        if (!realtimeStarted) {
+          realtimeStarted = true;
+          supabase
+            .channel("go-irl-live")
+            .on("postgres_changes", { event: "*", schema: "public", table: "activities" }, () => void reload())
+            .on("postgres_changes", { event: "*", schema: "public", table: "activity_members" }, () => void reload())
+            .subscribe();
+        }
+      } catch (error) {
+        console.error(error);
+        set({ syncError: "database_unavailable" });
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    setLanguage: (language) => {
+      localStorage.setItem("go-irl-language", language);
+      set({ language });
+    },
+    setSelectedCity: (selectedCityId) => {
+      if (!cities.some((city) => city.id === selectedCityId)) return;
+      localStorage.setItem("go-irl-city", selectedCityId);
+      set({ selectedCityId });
+    },
+    setView: (view) => set({ view }),
+    setCategory: (selectedCategory) => set({ selectedCategory, view: "explore" }),
+
+    toggleJoin: async (id) => {
+      const userKey = getUserKey();
+      const { joinedIds, waitingIds, pendingIds, activities } = get();
+
+      if (joinedIds.includes(id) || waitingIds.includes(id) || pendingIds.includes(id)) {
+        const { error } = await supabase.from("activity_members").delete().eq("activity_id", id).eq("user_key", userKey);
+        if (error) throw error;
+        await reload();
+        return "left";
+      }
+
+      const activity = activities.find((item) => item.id === id);
+      if (!activity) throw new Error("Activity not found");
+      const status: DbMember["status"] = activity.visibility === "private"
+        ? "pending"
+        : activity.participants >= activity.capacity
+          ? "waiting"
+          : "joined";
+      const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const displayName = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
+      const { error } = await supabase.from("activity_members").insert({
+        activity_id: id,
+        user_key: userKey,
+        display_name: displayName,
+        status,
+      });
+      if (error) throw error;
+      await reload();
+      return status;
+    },
+
+    createActivity: async (input) => {
+      const userKey = getUserKey();
+      const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const organizer = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
+      const row = {
+        category_id: input.categoryId,
+        activity_ru: input.activityText,
+        activity_cs: input.activityText,
+        title_ru: input.titleText,
+        title_cs: input.titleText,
+        description_ru: input.descriptionText,
+        description_cs: input.descriptionText,
+        event_date: input.date,
+        event_time: input.time,
+        address: input.address,
+        location_url: input.locationUrl || null,
+        price: input.price,
+        capacity: input.capacity,
+        organizer,
+        organizer_key: userKey,
+        visibility: input.visibility,
+      };
+
+      const { data, error } = await supabase.from("activities").insert(row).select("id").single();
+      if (error) throw error;
+
+      const { error: memberError } = await supabase.from("activity_members").insert({
+        activity_id: data.id,
+        user_key: userKey,
+        display_name: organizer,
+        status: "joined",
+      });
+      if (memberError) throw memberError;
+
+      await reload();
+      set({ view: "home" });
+      return data.id as string;
+    },
+
+    updateActivity: async (id, input) => {
+      const userKey = getUserKey();
+      const current = get().activities.find((item) => item.id === id);
+      if (!current || current.organizerKey !== userKey) throw new Error("Only organizer can edit activity");
+
+      const row = {
+        category_id: input.categoryId,
+        activity_ru: input.activityText,
+        activity_cs: input.activityText,
+        title_ru: input.titleText,
+        title_cs: input.titleText,
+        description_ru: input.descriptionText,
+        description_cs: input.descriptionText,
+        event_date: input.date,
+        event_time: input.time,
+        address: input.address,
+        location_url: input.locationUrl || null,
+        price: input.price,
+        capacity: input.capacity,
+        visibility: input.visibility,
+      };
+
+      const { error } = await supabase.from("activities").update(row).eq("id", id);
+      if (error) throw error;
+      await reload();
+      set({ view: "home" });
+      return id;
+    },
+
+    reviewRequest: async (activityId, memberKey, approved) => {
+      const activity = get().activities.find((item) => item.id === activityId);
+      if (!activity || activity.organizerKey !== getUserKey()) throw new Error("Only organizer can review requests");
+
+      if (!approved) {
+        const { error } = await supabase.from("activity_members").delete().eq("activity_id", activityId).eq("user_key", memberKey);
+        if (error) throw error;
+      } else {
+        const status: DbMember["status"] = activity.participants >= activity.capacity ? "waiting" : "joined";
+        const { error } = await supabase
+          .from("activity_members")
+          .update({ status })
+          .eq("activity_id", activityId)
+          .eq("user_key", memberKey);
+        if (error) throw error;
+      }
+      await reload();
+    },
+  };
+});
