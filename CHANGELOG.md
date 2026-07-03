@@ -25,6 +25,7 @@ All notable confirmed changes to GO IRL are tracked here.
 
 - Documentation now reflects the Supabase-backed runtime instead of local-only storage.
 - Invite activity id from Telegram `startapp` is sent to Supabase as a scoped request header.
+- Package versions are pinned to explicit semver ranges instead of `latest`.
 
 ### Known Gaps
 
