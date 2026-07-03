@@ -1,3 +1,4 @@
+old/
 node_modules/
 dist/
 .env.local
@@ -7,4 +8,3 @@ vite.config.js
 vite.config.d.ts
 *.zip
 go-irl-*.png
-old/

@@ -7,6 +7,7 @@ export default [
     ignores: [
       "dist/**",
       "node_modules/**",
+      "old/**",
       "*.tsbuildinfo",
       "vite.config.js",
       "vite.config.d.ts",
