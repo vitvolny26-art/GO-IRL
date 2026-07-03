@@ -15,4 +15,13 @@ describe("activity taxonomy", () => {
       expect(activityOptions[category.id]?.length).toBeGreaterThan(0);
     }
   });
+
+  it("includes inline skating as a real activity category", () => {
+    const skating = categories.find((category) => category.id === "inline-skating");
+    expect(skating).toMatchObject({
+      icon: "🛼",
+      name: { ru: "Ролики", cs: "Inline bruslení" },
+    });
+    expect(activityOptions["inline-skating"].some((option) => option.name.ru === "Ролики")).toBe(true);
+  });
 });

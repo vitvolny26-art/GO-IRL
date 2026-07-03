@@ -13,7 +13,7 @@ create table if not exists public.activities (
   event_time time not null,
   address text not null,
   location_url text,
-  price integer not null default 0 check (price >= 0),
+  price integer not null default 0 check (price between 0 and 100000),
   capacity integer not null check (capacity between 2 and 100),
   organizer text not null,
   organizer_key text not null,

@@ -7,6 +7,7 @@ export const categories: Category[] = [
   { id: "nature", icon: "🌿", name: { ru: "Природа", cs: "Příroda" } },
   { id: "social", icon: "❤️", name: { ru: "Общение", cs: "Setkání" } },
   { id: "creativity", icon: "🎨", name: { ru: "Творчество", cs: "Tvorba" } },
+  { id: "inline-skating", icon: "🛼", name: { ru: "Ролики", cs: "Inline bruslení" } },
 ];
 
 export const activityOptions: Record<string, Array<{ icon: string; name: { ru: string; cs: string } }>> = {
@@ -53,6 +54,12 @@ export const activityOptions: Record<string, Array<{ icon: string; name: { ru: s
     { icon: "🏺", name: { ru: "Керамика", cs: "Keramika" } },
     { icon: "🎸", name: { ru: "Музыкальный джем", cs: "Hudební jam" } },
     { icon: "🧶", name: { ru: "Мастерская", cs: "Dílna" } },
+  ],
+  "inline-skating": [
+    { icon: "🛼", name: { ru: "Ролики", cs: "Inline bruslení" } },
+    { icon: "🌆", name: { ru: "Городской заезд", cs: "Městská jízda" } },
+    { icon: "🛣️", name: { ru: "Маршрут на роликах", cs: "Trasa na bruslích" } },
+    { icon: "✨", name: { ru: "Вечерние ролики", cs: "Večerní bruslení" } },
   ],
 };
 

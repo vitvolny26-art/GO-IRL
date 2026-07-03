@@ -30,6 +30,7 @@ import { getTranslation, localeByLanguage } from "./i18n";
 import { useAppStore } from "./store";
 import { getUserKey } from "./supabase";
 import type { Activity, AppView, Language, NewActivity } from "./types";
+import { MAX_EVENT_PRICE, validateEventPrice } from "./validation";
 
 declare global {
   interface Window {
@@ -302,6 +303,14 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
     const activityText = String(data.get("activityText"));
     const activityEmoji = activityText.split(" ")[0];
     const rawTitle = String(data.get("titleText")).trim();
+    const price = Number(data.get("price"));
+    const priceError = validateEventPrice(price, t);
+    if (priceError) {
+      setFormError(priceError);
+      setSubmitting(false);
+      return;
+    }
+
     const activity: NewActivity = {
       categoryId,
       activityText,
@@ -311,7 +320,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
       time: String(data.get("time")),
       address: String(data.get("address")),
       locationUrl: String(data.get("locationUrl") || "").trim() || undefined,
-      price: Number(data.get("price")),
+      price,
       capacity: Number(data.get("capacity")),
       visibility: String(data.get("visibility")) as NewActivity["visibility"],
     };
@@ -344,7 +353,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
         <label><span>{t.address}</span><input name="address" defaultValue={initialActivity?.address || selectedCity.name[language]} required /></label>
         <label><span>{t.locationUrl}</span><input name="locationUrl" type="url" defaultValue={initialActivity?.locationUrl} placeholder={t.locationPlaceholder} /></label>
         <div className="form-row">
-          <label><span>{t.price}</span><input name="price" type="number" min="0" defaultValue={initialActivity?.price || 0} required /></label>
+          <label><span>{t.price}</span><input name="price" type="number" min="0" max={MAX_EVENT_PRICE} defaultValue={initialActivity?.price || 0} required /></label>
           <label><span>{t.capacity}</span><input name="capacity" type="number" min="2" max="100" defaultValue={initialActivity?.capacity || 8} required /></label>
         </div>
         <fieldset>
