@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { activityOptions, categories } from "./data";
 import { AppHeader } from "./components/AppHeader";
-import { getCity } from "./config/cities";
+import { cities, getCity } from "./config/cities";
 import { getTranslation, localeByLanguage } from "./i18n";
 import { useAppStore } from "./store";
 import { getUserKey } from "./supabase";
@@ -185,7 +185,7 @@ function App() {
           setEditingActivity(null);
           setSelected(useAppStore.getState().activities.find((item) => item.id === id) || null);
         }} />}
-        {store.view === "profile" && <ProfileView language={store.language} />}
+        {store.view === "profile" && <ProfileView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
       </main>
 
       <BottomNav view={store.view} setView={store.setView} language={store.language} />
@@ -362,42 +362,139 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
   );
 }
 
-function ProfileView({ language }: { language: Language }) {
-  const { activities, joinedIds } = useAppStore();
+type LocalProfile = {
+  name: string;
+  bio: string;
+  cityId: string;
+  avatar: string;
+  registeredAt: string;
+};
+
+const avatarOptions = ["GI", "GO", "IRL", "🏐", "🎉", "🌿"];
+
+const loadProfile = (fallbackName: string, fallbackCityId: string): LocalProfile => {
+  const stored = localStorage.getItem("go-irl-profile");
+  const registeredAt = localStorage.getItem("go-irl-registered-at") || new Date().toISOString();
+  localStorage.setItem("go-irl-registered-at", registeredAt);
+  if (!stored) return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt };
+
+  try {
+    const parsed = JSON.parse(stored) as Partial<LocalProfile>;
+    return {
+      name: parsed.name || fallbackName,
+      bio: parsed.bio || "",
+      cityId: parsed.cityId || fallbackCityId,
+      avatar: parsed.avatar || "GI",
+      registeredAt: parsed.registeredAt || registeredAt,
+    };
+  } catch {
+    return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt };
+  }
+};
+
+function ProfileView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { activities, joinedIds, pendingIds, loading, syncError, selectedCityId, setSelectedCity } = useAppStore();
+  const [editing, setEditing] = useState(false);
   const t = getTranslation(language);
   const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  const name = [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(" ") || t.guestName;
-  const myEvents = activities.filter((item) => joinedIds.includes(item.id));
+  const fallbackName = [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(" ") || t.guestName;
+  const [profile, setProfile] = useState(() => loadProfile(fallbackName, selectedCityId));
+  const userKey = getUserKey();
+  const city = getCity(profile.cityId);
+  const today = new Date().toISOString().slice(0, 10);
+  const organized = activities.filter((item) => item.organizerKey === userKey);
+  const participating = activities.filter((item) => joinedIds.includes(item.id) && item.organizerKey !== userKey);
+  const pendingRequests = activities.filter((item) => pendingIds.includes(item.id));
+  const activeEvents = activities.filter((item) => item.date >= today && (item.organizerKey === userKey || joinedIds.includes(item.id) || pendingIds.includes(item.id)));
+  const joinedCount = activities.filter((item) => joinedIds.includes(item.id)).length;
+  const registeredLabel = new Intl.DateTimeFormat(localeByLanguage[language], { day: "numeric", month: "short", year: "numeric" }).format(new Date(profile.registeredAt));
+
+  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const nextProfile: LocalProfile = {
+      name: String(data.get("profileName") || fallbackName).trim() || fallbackName,
+      bio: String(data.get("profileBio") || "").trim(),
+      cityId: String(data.get("profileCity") || selectedCityId),
+      avatar: String(data.get("profileAvatar") || "GI"),
+      registeredAt: profile.registeredAt,
+    };
+    localStorage.setItem("go-irl-profile", JSON.stringify(nextProfile));
+    setProfile(nextProfile);
+    setSelectedCity(nextProfile.cityId);
+    setEditing(false);
+    window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success");
+  };
 
   return (
     <section className="page-section profile-page">
-      <div className="profile-head">
-        <div className="avatar">{name.slice(0, 2).toUpperCase()}</div>
-        <div><h1>{name}</h1><p>@{tgUser?.username || "go_irl_guest"}</p></div>
+      {loading && <ProfileSkeleton />}
+      {syncError && <div className="details-error profile-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
+      <div className="profile-hero">
+        <div className="profile-avatar">{profile.avatar}</div>
+        <div className="profile-main">
+          <div className="profile-kicker"><MapPin />{city.name[language]}</div>
+          <h1>{profile.name}</h1>
+          <p>{profile.bio || t.profileBioFallback}</p>
+          <small>{t.registeredAt}: {registeredLabel}</small>
+        </div>
+        <button className="profile-edit-button" onClick={() => setEditing((value) => !value)} type="button"><Pencil size={18} />{editing ? t.close : t.editProfile}</button>
       </div>
-      <div className="rli-panel">
-        <div className="rli-top"><span>{t.rli}</span><ShieldCheck size={22} /></div>
-        <strong>284</strong>
-        <p>12 {t.confirmed}</p>
-        <div className="rli-progress"><span /></div>
-        <small>{t.explorer} · 16 / 20</small>
+
+      {editing && (
+        <form className="profile-edit-form" onSubmit={saveProfile}>
+          <label><span>{t.name}</span><input name="profileName" defaultValue={profile.name} required /></label>
+          <label><span>{t.shortBio}</span><textarea name="profileBio" rows={3} defaultValue={profile.bio} placeholder={t.profileBioPlaceholder} /></label>
+          <label><span>{t.city}</span><select name="profileCity" defaultValue={profile.cityId}>{cities.map((item) => <option key={item.id} value={item.id}>{item.name[language]}</option>)}</select></label>
+          <div className="avatar-picker" role="radiogroup" aria-label={t.avatar}>
+            {avatarOptions.map((avatar) => (
+              <label key={avatar}>
+                <input name="profileAvatar" type="radio" value={avatar} defaultChecked={profile.avatar === avatar} />
+                <span>{avatar}</span>
+              </label>
+            ))}
+          </div>
+          <button className="publish-button" type="submit"><Pencil size={18} />{t.save}</button>
+        </form>
+      )}
+
+      <SectionHeader title={t.profileStats} />
+      <div className="life-grid profile-stats-grid">
+        <Metric icon={<Star />} value={String(organized.length)} label={t.createdEvents} />
+        <Metric icon={<UserRoundCheck />} value={String(joinedCount)} label={t.visitedEvents} />
+        <Metric icon={<Zap />} value={String(activeEvents.length)} label={t.activeEvents} />
+        <Metric icon={<Clock3 />} value={String(pendingRequests.length)} label={t.pendingRequests} />
       </div>
-      <SectionHeader title={t.lifeMap} />
-      <div className="life-grid">
-        <Metric icon={<CalendarDays />} value={String(12 + myEvents.length)} label={t.events} />
-        <Metric icon={<UsersRound />} value="27" label={t.people} />
-        <Metric icon={<Zap />} value="6" label={t.activeWeeks} />
-        <Metric icon={<Star />} value="4" label={t.organized} />
-      </div>
-      <SectionHeader title={t.achievements} />
-      <div className="achievements">
-        <div><Compass /><span>{t.explorer}</span></div>
-        <div><UserRoundCheck /><span>{t.social}</span></div>
-        <div className="locked"><Star /><span>{t.organizerLevel}</span></div>
-        <div className="locked"><Sparkles /><span>{t.legend}</span></div>
-      </div>
-      <button className="referral-button" type="button"><Ticket /><span><strong>{t.referral}</strong><small>{t.referralHint}</small></span><ChevronRight /></button>
+
+      <SectionHeader title={t.myEvents} />
+      <ProfileEventGroup title={t.organizing} activities={organized} language={language} emptyText={t.noOrganizedEvents} onOpen={onOpen} onJoin={onJoin} />
+      <ProfileEventGroup title={t.participating} activities={participating} language={language} emptyText={t.noJoinedEvents} onOpen={onOpen} onJoin={onJoin} />
+      <ProfileEventGroup title={t.waitingDecision} activities={pendingRequests} language={language} emptyText={t.noPendingRequests} onOpen={onOpen} onJoin={onJoin} />
     </section>
+  );
+}
+
+function ProfileEventGroup({ title, activities, language, emptyText, onOpen, onJoin }: { title: string; activities: Activity[]; language: Language; emptyText: string; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  return (
+    <section className="profile-event-group">
+      <h3>{title}</h3>
+      {activities.length ? (
+        <div className="activity-stack">{activities.map((activity) => <ActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />)}</div>
+      ) : (
+        <EmptyState text={emptyText} />
+      )}
+    </section>
+  );
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="profile-skeleton" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+      <span />
+    </div>
   );
 }
 

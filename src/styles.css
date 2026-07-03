@@ -143,10 +143,37 @@ button, input, textarea, select { letter-spacing: 0; }
 .publish-button:disabled { cursor: wait; opacity: .65; }
 .form-error { padding: 10px 12px; border: 1px solid rgba(255,111,97,.45); border-radius: 7px; background: rgba(255,111,97,.1); color: var(--coral); font-size: 13px; }
 
-.profile-head { display: flex; align-items: center; gap: 13px; margin: 12px 0 18px; }
+.profile-page { display: grid; gap: 14px; }
+.profile-hero { position: relative; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 13px; padding: 15px; border: 1px solid var(--line); border-radius: 8px; background: linear-gradient(180deg, #171a20 0%, #111319 100%); box-shadow: 0 16px 40px rgba(0,0,0,.22); animation: card-in 180ms ease-out; }
+.profile-avatar { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 8px; background: linear-gradient(135deg, var(--lime), var(--cyan)); color: var(--lime-text); font-size: 20px; font-weight: 950; }
+.profile-main { min-width: 0; padding-right: 8px; }
+.profile-kicker { display: flex; align-items: center; gap: 5px; color: var(--lime); font-size: 11px; font-weight: 850; text-transform: uppercase; }
+.profile-kicker svg { width: 14px; height: 14px; }
+.profile-main h1 { margin: 5px 0 5px; font-size: 26px; line-height: 1.05; overflow-wrap: anywhere; }
+.profile-main p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+.profile-main small { display: block; margin-top: 8px; color: #737b86; font-size: 11px; font-weight: 750; }
+.profile-edit-button { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 46px; border: 1px solid #3b4049; border-radius: 7px; background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 850; }
+.profile-edit-form { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); animation: card-in 180ms ease-out; }
+.profile-edit-form label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 650; }
+.profile-edit-form input, .profile-edit-form textarea, .profile-edit-form select { width: 100%; min-height: 49px; padding: 12px; border: 1px solid var(--line); border-radius: 7px; outline: none; background: #0f1116; color: var(--text); }
+.profile-edit-form textarea { resize: vertical; }
+.profile-edit-form input:focus, .profile-edit-form textarea:focus, .profile-edit-form select:focus { border-color: var(--lime); }
+.avatar-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.avatar-picker label { position: relative; }
+.avatar-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.avatar-picker span { display: grid; place-items: center; min-height: 44px; border: 1px solid var(--line); border-radius: 7px; background: #0f1116; color: var(--text); font-size: 14px; font-weight: 900; }
+.avatar-picker input:checked + span { border-color: var(--lime); background: var(--lime); color: var(--lime-text); }
+.profile-stats-grid .metric { min-height: 82px; }
+.profile-event-group { display: grid; gap: 10px; }
+.profile-event-group h3 { margin: 8px 0 0; font-size: 16px; }
+.profile-skeleton { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.profile-skeleton span { display: block; border-radius: 6px; background: linear-gradient(90deg, #1b1e24 0%, #262a32 42%, #1b1e24 82%); background-size: 220% 100%; animation: shimmer 1.15s ease-in-out infinite; }
+.profile-skeleton span:nth-child(1) { width: 72px; height: 72px; }
+.profile-skeleton span:nth-child(2) { width: 68%; height: 24px; }
+.profile-skeleton span:nth-child(3) { width: 100%; height: 42px; }
+.profile-skeleton span:nth-child(4) { width: 100%; height: 82px; }
+.profile-error { margin: 0; }
 .avatar { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 8px; background: var(--violet); color: #130b24; font-weight: 900; }
-.profile-head h1 { margin: 0; font-size: 23px; }
-.profile-head p { margin: 4px 0 0; color: var(--muted); }
 .rli-panel { padding: 18px; border: 1px solid #3a421f; border-radius: 8px; background: #15190d; }
 .rli-top { display: flex; justify-content: space-between; color: var(--lime); font-size: 13px; font-weight: 800; text-transform: uppercase; }
 .rli-panel > strong { display: block; margin-top: 8px; font-size: 46px; line-height: 1; }
