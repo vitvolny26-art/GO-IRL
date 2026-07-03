@@ -4,7 +4,7 @@ import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
 import type { Activity, AppView, Language, NewActivity } from "./types";
 
-type JoinResult = "joined" | "waiting" | "pending" | "left";
+type JoinResult = "joined" | "pending" | "left" | "full" | "private";
 
 type DbActivity = {
   id: string;
@@ -166,11 +166,10 @@ export const useAppStore = create<AppState>((set, get) => {
 
       const activity = activities.find((item) => item.id === id);
       if (!activity) throw new Error("Activity not found");
-      const status: DbMember["status"] = activity.visibility === "private"
-        ? "pending"
-        : activity.participants >= activity.capacity
-          ? "waiting"
-          : "joined";
+      if (activity.visibility === "private") return "private";
+      if (activity.participants >= activity.capacity) return "full";
+
+      const status: DbMember["status"] = activity.visibility === "invite" ? "pending" : "joined";
       const telegramUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
       const displayName = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
       const { error } = await supabase.from("activity_members").insert({

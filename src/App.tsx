@@ -119,9 +119,17 @@ function App() {
   const handleJoin = async (activity: Activity) => {
     try {
       const result = await store.toggleJoin(activity.id);
-      const message = result === "joined" ? t.joined : result === "waiting" ? t.waiting : result === "pending" ? t.requested : t.leave;
+      const message = result === "joined"
+        ? t.joined
+        : result === "pending"
+          ? t.requested
+          : result === "full"
+            ? t.eventFull
+            : result === "private"
+              ? t.privateJoinInfo
+              : t.leave;
       flash(message);
-      window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred(result === "left" ? "warning" : "success");
+      window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred(result === "left" || result === "full" || result === "private" ? "warning" : "success");
     } catch {
       flash(t.joinError);
     }
@@ -186,6 +194,9 @@ function App() {
         <ActivitySheet
           activity={store.activities.find((item) => item.id === selected.id) || selected}
           language={store.language}
+          cityName={getCity(store.selectedCityId).name[store.language]}
+          loading={store.loading}
+          error={store.syncError}
           onClose={() => setSelected(null)}
           onJoin={handleJoin}
           onShare={shareActivity}
@@ -202,7 +213,7 @@ function App() {
 }
 
 function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onRandom: () => void; onCreate: () => void }) {
-  const { activities, selectedCityId, setCategory } = useAppStore();
+  const { activities, loading, selectedCityId, setCategory } = useAppStore();
   const t = getTranslation(language);
   const city = getCity(selectedCityId);
   const today = new Date().toISOString().slice(0, 10);
@@ -241,7 +252,7 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
         ))}
       </div>
 
-      {nearby.length ? <ActivitySection title={t.nearby} activities={nearby} language={language} onOpen={onOpen} onJoin={onJoin} /> : <EmptyState text={t.noEvents} />}
+      {loading ? <EventListSkeleton /> : nearby.length ? <ActivitySection title={t.nearby} activities={nearby} language={language} onOpen={onOpen} onJoin={onJoin} /> : <EmptyState text={t.noEvents} />}
       {urgent.length > 0 && <ActivitySection title={t.urgent} icon={<Zap size={18} />} activities={urgent} language={language} onOpen={onOpen} onJoin={onJoin} urgent />}
       <ActivitySection title={t.popular} activities={popular} language={language} onOpen={onOpen} onJoin={onJoin} />
     </>
@@ -249,7 +260,7 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
 }
 
 function ExploreView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
-  const { activities, selectedCategory, selectedCityId, setCategory } = useAppStore();
+  const { activities, loading, selectedCategory, selectedCityId, setCategory } = useAppStore();
   const t = getTranslation(language);
   const city = getCity(selectedCityId);
   const filtered = selectedCategory ? activities.filter((item) => item.categoryId === selectedCategory) : activities;
@@ -266,7 +277,7 @@ function ExploreView({ language, onOpen, onJoin }: { language: Language; onOpen:
         ))}
       </div>
       <div className="activity-stack">
-        {filtered.length ? filtered.map((item) => <ActivityCard key={item.id} activity={item} language={language} onOpen={onOpen} onJoin={onJoin} />) : <EmptyState text={t.noEvents} />}
+        {loading ? <EventListSkeleton /> : filtered.length ? filtered.map((item) => <ActivityCard key={item.id} activity={item} language={language} onOpen={onOpen} onJoin={onJoin} />) : <EmptyState text={t.noEvents} />}
       </div>
     </section>
   );
@@ -419,10 +430,27 @@ function ActivityCard({ activity, language, onOpen, onJoin }: { activity: Activi
         : waiting
           ? t.waiting
           : activity.visibility === "private"
-            ? t.request
+            ? t.privateAccess
             : full
-              ? t.wait
-              : t.join;
+              ? t.eventFull
+              : activity.visibility === "invite"
+                ? t.request
+                : t.join;
+  const status = isOrganizer
+    ? t.organizerStatus
+    : pending
+      ? t.requested
+      : joined
+        ? t.joined
+        : waiting
+          ? t.waiting
+          : full
+            ? t.eventFull
+            : activity.visibility === "private"
+              ? t.privateAccess
+              : activity.visibility === "invite"
+                ? t.inviteStatus
+                : t.publicStatus;
 
   return (
     <article className="activity-card">
@@ -449,6 +477,7 @@ function ActivityCard({ activity, language, onOpen, onJoin }: { activity: Activi
         <span className={free <= 1 ? "spots urgent" : "spots"}>
           <UsersRound />{free > 0 ? `${free} ${t.left}` : t.full}
         </span>
+        <span className="card-status">{status}</span>
         <button className={joined || waiting || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button">
           {action}
         </button>
@@ -457,7 +486,27 @@ function ActivityCard({ activity, language, onOpen, onJoin }: { activity: Activi
   );
 }
 
-function ActivitySheet({ activity, language, onClose, onJoin, onShare, onEdit }: { activity: Activity; language: Language; onClose: () => void; onJoin: (activity: Activity) => void; onShare: (activity: Activity) => void; onEdit: (activity: Activity) => void }) {
+function ActivitySheet({
+  activity,
+  language,
+  cityName,
+  loading,
+  error,
+  onClose,
+  onJoin,
+  onShare,
+  onEdit,
+}: {
+  activity: Activity;
+  language: Language;
+  cityName: string;
+  loading: boolean;
+  error: string | null;
+  onClose: () => void;
+  onJoin: (activity: Activity) => void;
+  onShare: (activity: Activity) => void;
+  onEdit: (activity: Activity) => void;
+}) {
   const { joinedIds, waitingIds, pendingIds, reviewRequest } = useAppStore();
   const [membersOpen, setMembersOpen] = useState(false);
   const t = getTranslation(language);
@@ -467,6 +516,7 @@ function ActivitySheet({ activity, language, onClose, onJoin, onShare, onEdit }:
   const waiting = waitingIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
   const full = activity.participants >= activity.capacity;
+  const freeSpots = Math.max(activity.capacity - activity.participants, 0);
   const action = isOrganizer
     ? t.edit
     : pending
@@ -474,10 +524,28 @@ function ActivitySheet({ activity, language, onClose, onJoin, onShare, onEdit }:
       : joined || waiting
         ? t.leave
         : activity.visibility === "private"
-          ? t.request
+          ? t.privateAccess
           : full
-            ? t.wait
-            : t.join;
+            ? t.eventFull
+            : activity.visibility === "invite"
+              ? t.request
+              : t.join;
+  const status = isOrganizer
+    ? t.organizerStatus
+    : pending
+      ? t.requested
+      : joined
+        ? t.joined
+        : waiting
+          ? t.waiting
+          : full
+            ? t.eventFull
+            : activity.visibility === "private"
+              ? t.privateJoinInfo
+              : activity.visibility === "invite"
+                ? t.inviteStatus
+                : t.publicStatus;
+  const accessLabel = activity.visibility === "public" ? t.publicAccess : activity.visibility === "private" ? t.privateAccess : t.inviteAccess;
   const joinedMembers = activity.members.filter((member) => member.status === "joined");
   const waitingMembers = activity.members.filter((member) => member.status === "waiting");
   const pendingMembers = activity.members.filter((member) => member.status === "pending");
@@ -491,16 +559,25 @@ function ActivitySheet({ activity, language, onClose, onJoin, onShare, onEdit }:
       <article className="activity-sheet" onMouseDown={(event) => event.stopPropagation()}>
         <div className="sheet-handle" />
         <button className="sheet-close" onClick={onClose} type="button" aria-label="Close"><X /></button>
+        {loading && <EventDetailsSkeleton />}
+        {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
         <div className={`sheet-symbol category-${activity.categoryId}`}>{category.icon}</div>
         <div className="sheet-label">{category.name[language]} · {activity.activity[language]}</div>
         <h2>{activity.title[language]}</h2>
         <p className="sheet-description">{activity.description[language]}</p>
+        <div className="details-status-row">
+          <span className={isOrganizer ? "details-status organizer" : pending ? "details-status pending" : joined ? "details-status joined" : full ? "details-status full" : "details-status"}>{status}</span>
+          <span className="details-access">{accessLabel}</span>
+        </div>
         <div className="detail-list">
+          <div><Sparkles /><span>{t.category}</span><strong>{category.name[language]}</strong></div>
           <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
+          <div><Compass /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
+          <div><UsersRound /><span>{t.freeSpots}</span><strong>{freeSpots} / {activity.capacity}</strong></div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
           <div><CircleUserRound /><span>{t.organizer}</span><strong>{activity.organizer}</strong></div>
-          <div><ShieldCheck /><span>{t.visibility}</span><strong>{activity.visibility === "public" ? t.public : activity.visibility === "private" ? t.private : t.invite}</strong></div>
+          <div><ShieldCheck /><span>{t.visibility}</span><strong>{accessLabel}</strong></div>
           <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button">
             <UsersRound />
             <span>{t.participants}</span>
@@ -542,12 +619,24 @@ function ActivitySheet({ activity, language, onClose, onJoin, onShare, onEdit }:
           </div>
         )}
         {!isOrganizer && (joined || waiting || pending) && <div className="status-banner">{joined ? <UserRoundCheck /> : <Clock3 />}<span>{joined ? t.joined : waiting ? t.waiting : t.requested}</span></div>}
+        {!isOrganizer && activity.visibility === "private" && !joined && !waiting && !pending && <div className="status-banner neutral"><ShieldCheck /><span>{t.privateJoinInfo}</span></div>}
+        {full && !joined && !waiting && !pending && !isOrganizer && <div className="status-banner danger"><UsersRound /><span>{t.eventFull}</span></div>}
         <div className="sheet-actions">
-          <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button">{isOrganizer && <Pencil size={18} />}{action}</button>
+          <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !waiting && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
         </div>
       </article>
+    </div>
+  );
+}
+
+function EventDetailsSkeleton() {
+  return (
+    <div className="details-skeleton" aria-hidden="true">
+      <span />
+      <span />
+      <span />
     </div>
   );
 }
@@ -573,6 +662,21 @@ function Metric({ icon, value, label }: { icon: React.ReactNode; value: string; 
 
 function EmptyState({ text }: { text: string }) {
   return <div className="empty-state"><Dices /><p>{text}</p></div>;
+}
+
+function EventListSkeleton() {
+  return (
+    <div className="event-list-skeleton" aria-hidden="true">
+      {[0, 1, 2].map((item) => (
+        <div className="event-skeleton-card" key={item}>
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default App;
