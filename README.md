@@ -50,6 +50,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Safe-area aware fixed header for Telegram Mini App
 - Supabase schema and RLS policies in `supabase/schema.sql`
 - ESLint and Vitest quality gates
+- Netlify build configuration in `netlify.toml`
 
 ## Project Documents
 

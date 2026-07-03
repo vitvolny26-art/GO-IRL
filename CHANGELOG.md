@@ -24,6 +24,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Production deployment checklist for Supabase, Netlify, BotFather, and Telegram smoke testing.
 - GitHub Actions CI for test, lint, and build verification.
 - Sprint 0 production verification completed after applying Supabase RLS schema.
+- Netlify build configuration for automatic GitHub deploys.
 
 ### Changed
 

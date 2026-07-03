@@ -35,8 +35,20 @@ Use only the publishable/anon key in frontend hosting. Never put a service role 
 1. Set the environment variables from `.env.example`.
 2. Build command: `pnpm run build`.
 3. Publish directory: `dist`.
-4. Deploy from the `main` branch.
-5. Open the production URL and verify the app renders.
+4. Connect the site to the GitHub repository `vitvolny26-art/GO-IRL`.
+5. Deploy from the `main` branch.
+6. Open the production URL and verify the app renders.
+
+The repository includes `netlify.toml`, so Netlify should detect:
+
+```text
+Build command: pnpm run build
+Publish directory: dist
+Node: 24
+pnpm: 11.7.0
+```
+
+After the GitHub connection is active, every push to `main` should trigger a production deploy automatically.
 
 ## 4. Telegram BotFather
 
