@@ -21,10 +21,16 @@ function resolveUserKey() {
 }
 
 const userKey = resolveUserKey();
+const invitedActivityId = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
 
 export const supabase = createClient(url, publishableKey, {
   auth: { persistSession: false },
-  global: { headers: { "x-go-irl-user-key": userKey } },
+  global: {
+    headers: {
+      "x-go-irl-user-key": userKey,
+      ...(invitedActivityId ? { "x-go-irl-invite-activity": invitedActivityId } : {}),
+    },
+  },
 });
 
 export function getUserKey() {

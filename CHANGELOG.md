@@ -19,10 +19,12 @@ All notable confirmed changes to GO IRL are tracked here.
 - Activity creation fields for category, activity type, location address, and optional location URL.
 - ESLint flat config and `pnpm run lint`.
 - Vitest and unit coverage for city configuration, activity taxonomy, and localization basics.
+- Supabase RLS helper functions and policies that hide non-public activities from unrelated users.
 
 ### Changed
 
 - Documentation now reflects the Supabase-backed runtime instead of local-only storage.
+- Invite activity id from Telegram `startapp` is sent to Supabase as a scoped request header.
 
 ### Known Gaps
 

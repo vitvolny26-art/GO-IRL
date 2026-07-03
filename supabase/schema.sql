@@ -50,6 +50,90 @@ create index if not exists activity_members_status_idx on public.activity_member
 alter table public.activities enable row level security;
 alter table public.activity_members enable row level security;
 
+create or replace function public.go_irl_request_user_key()
+returns text
+language sql
+stable
+as $$
+  select current_setting('request.headers', true)::json ->> 'x-go-irl-user-key';
+$$;
+
+create or replace function public.go_irl_request_invite_activity()
+returns text
+language sql
+stable
+as $$
+  select current_setting('request.headers', true)::json ->> 'x-go-irl-invite-activity';
+$$;
+
+create or replace function public.go_irl_can_read_activity(
+  p_activity_id uuid,
+  p_visibility text,
+  p_organizer_key text
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    p_visibility = 'public'
+    or p_organizer_key = public.go_irl_request_user_key()
+    or p_activity_id::text = public.go_irl_request_invite_activity()
+    or exists (
+      select 1
+      from public.activity_members member
+      where member.activity_id = p_activity_id
+        and member.user_key = public.go_irl_request_user_key()
+    );
+$$;
+
+create or replace function public.go_irl_can_read_activity_member(
+  p_activity_id uuid,
+  p_member_user_key text
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    p_member_user_key = public.go_irl_request_user_key()
+    or exists (
+      select 1
+      from public.activities activity
+      where activity.id = p_activity_id
+        and public.go_irl_can_read_activity(activity.id, activity.visibility, activity.organizer_key)
+    );
+$$;
+
+create or replace function public.go_irl_can_insert_activity_member(
+  p_activity_id uuid,
+  p_member_status text,
+  p_member_user_key text
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    p_member_user_key = public.go_irl_request_user_key()
+    and exists (
+      select 1
+      from public.activities activity
+      where activity.id = p_activity_id
+        and (
+          activity.organizer_key = public.go_irl_request_user_key()
+          or (activity.visibility = 'private' and p_member_status = 'pending')
+          or (activity.visibility in ('public', 'invite') and p_member_status in ('joined', 'waiting'))
+        )
+    );
+$$;
+
 drop policy if exists "public activities read" on public.activities;
 drop policy if exists "public activities create" on public.activities;
 drop policy if exists "public members read" on public.activity_members;
@@ -58,53 +142,55 @@ drop policy if exists "public members update" on public.activity_members;
 drop policy if exists "public members delete" on public.activity_members;
 
 create policy "public activities read"
-on public.activities for select to anon using (true);
+on public.activities for select to anon using (
+  public.go_irl_can_read_activity(id, visibility, organizer_key)
+);
 
 create policy "public activities create"
 on public.activities for insert to anon with check (
-  organizer_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
+  organizer_key = public.go_irl_request_user_key()
 );
 
 drop policy if exists "organizer activities update" on public.activities;
 create policy "organizer activities update"
 on public.activities for update to anon
-using (organizer_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key'))
-with check (organizer_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key'));
+using (organizer_key = public.go_irl_request_user_key())
+with check (organizer_key = public.go_irl_request_user_key());
 
 create policy "public members read"
-on public.activity_members for select to anon using (true);
+on public.activity_members for select to anon using (
+  public.go_irl_can_read_activity_member(activity_id, user_key)
+);
 
 create policy "public members create"
 on public.activity_members for insert to anon with check (
-  user_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
+  public.go_irl_can_insert_activity_member(activity_id, status, user_key)
 );
 
 create policy "public members update"
 on public.activity_members for update to anon
 using (
-  user_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
-  or exists (
+  exists (
     select 1 from public.activities
     where activities.id = activity_members.activity_id
-      and activities.organizer_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
+      and activities.organizer_key = public.go_irl_request_user_key()
   )
 )
 with check (
-  user_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
-  or exists (
+  exists (
     select 1 from public.activities
     where activities.id = activity_members.activity_id
-      and activities.organizer_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
+      and activities.organizer_key = public.go_irl_request_user_key()
   )
 );
 
 create policy "public members delete"
 on public.activity_members for delete to anon using (
-  user_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
+  user_key = public.go_irl_request_user_key()
   or exists (
     select 1 from public.activities
     where activities.id = activity_members.activity_id
-      and activities.organizer_key = (current_setting('request.headers', true)::json ->> 'x-go-irl-user-key')
+      and activities.organizer_key = public.go_irl_request_user_key()
   )
 );
 
