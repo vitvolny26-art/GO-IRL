@@ -50,6 +50,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Russian and Czech localization architecture
 - Safe-area aware fixed header for Telegram Mini App
 - Supabase schema and RLS policies in `supabase/schema.sql`
+- Supabase setup guide in `supabase/README.md`
 - ESLint and Vitest quality gates
 - Netlify build configuration in `netlify.toml`
 - Vercel fallback deployment configuration in `vercel.json`
@@ -63,3 +64,4 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `BACKLOG.md` - confirmed work queue
 - `RELEASE_NOTES.md` - release-ready notes for deployment
 - `DEPLOYMENT.md` - production deployment and smoke-test checklist
+- `supabase/README.md` - Supabase setup, migration, RLS, env, and verification guide

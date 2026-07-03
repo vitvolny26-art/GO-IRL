@@ -1,0 +1,81 @@
+-- GO IRL migration v1
+-- Apply this in Supabase SQL Editor after the base schema.sql.
+
+create extension if not exists pgcrypto;
+
+alter table public.activities
+add column if not exists updated_at timestamptz not null default now();
+
+update public.activities
+set price = 0
+where price < 0;
+
+update public.activities
+set price = 100000
+where price > 100000;
+
+alter table public.activities
+drop constraint if exists activities_price_check;
+
+alter table public.activities
+add constraint activities_price_check check (price between 0 and 100000);
+
+alter table public.activity_members
+drop constraint if exists activity_members_status_check;
+
+alter table public.activity_members
+add constraint activity_members_status_check check (status in ('joined', 'waiting', 'pending'));
+
+create index if not exists activities_organizer_idx
+on public.activities(organizer_key, event_date);
+
+create index if not exists activities_visibility_date_idx
+on public.activities(visibility, event_date, event_time);
+
+create index if not exists activity_members_user_status_idx
+on public.activity_members(user_key, status, activity_id);
+
+create or replace function public.go_irl_touch_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists activities_touch_updated_at on public.activities;
+create trigger activities_touch_updated_at
+before update on public.activities
+for each row
+execute function public.go_irl_touch_updated_at();
+
+create or replace function public.go_irl_can_insert_activity_member(
+  p_activity_id uuid,
+  p_member_status text,
+  p_member_user_key text
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    p_member_user_key = public.go_irl_request_user_key()
+    and exists (
+      select 1
+      from public.activities activity
+      where activity.id = p_activity_id
+        and (
+          activity.organizer_key = public.go_irl_request_user_key()
+          or (activity.visibility = 'public' and p_member_status = 'joined')
+          or (activity.visibility = 'invite' and p_member_status = 'pending')
+          or (p_member_status = 'waiting' and activity.visibility in ('public', 'invite'))
+        )
+    );
+$$;
+
+alter table public.activities enable row level security;
+alter table public.activity_members enable row level security;

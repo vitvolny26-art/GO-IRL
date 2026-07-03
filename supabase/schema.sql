@@ -20,11 +20,15 @@ create table if not exists public.activities (
   visibility text not null default 'public' check (visibility in ('public', 'private', 'invite')),
   urgent boolean not null default false,
   popular boolean not null default false,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 alter table public.activities
 add column if not exists location_url text;
+
+alter table public.activities
+add column if not exists updated_at timestamptz not null default now();
 
 create table if not exists public.activity_members (
   activity_id uuid not null references public.activities(id) on delete cascade,
@@ -45,7 +49,26 @@ alter table public.activity_members
 add constraint activity_members_status_check check (status in ('joined', 'waiting', 'pending'));
 
 create index if not exists activities_date_idx on public.activities(event_date, event_time);
+create index if not exists activities_organizer_idx on public.activities(organizer_key, event_date);
+create index if not exists activities_visibility_date_idx on public.activities(visibility, event_date, event_time);
 create index if not exists activity_members_status_idx on public.activity_members(activity_id, status, created_at);
+create index if not exists activity_members_user_status_idx on public.activity_members(user_key, status, activity_id);
+
+create or replace function public.go_irl_touch_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists activities_touch_updated_at on public.activities;
+create trigger activities_touch_updated_at
+before update on public.activities
+for each row
+execute function public.go_irl_touch_updated_at();
 
 alter table public.activities enable row level security;
 alter table public.activity_members enable row level security;
@@ -128,8 +151,9 @@ as $$
       where activity.id = p_activity_id
         and (
           activity.organizer_key = public.go_irl_request_user_key()
-          or (activity.visibility = 'private' and p_member_status = 'pending')
-          or (activity.visibility in ('public', 'invite') and p_member_status in ('joined', 'waiting'))
+          or (activity.visibility = 'public' and p_member_status = 'joined')
+          or (activity.visibility = 'invite' and p_member_status = 'pending')
+          or (p_member_status = 'waiting' and activity.visibility in ('public', 'invite'))
         )
     );
 $$;

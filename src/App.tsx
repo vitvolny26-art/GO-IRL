@@ -291,6 +291,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
   const [categoryId, setCategoryId] = useState(initialActivity?.categoryId || "sport");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [priceError, setPriceError] = useState("");
   const t = getTranslation(language);
   const selectedCity = getCity(selectedCityId);
   const today = new Date().toISOString().slice(0, 10);
@@ -306,7 +307,8 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
     const price = Number(data.get("price"));
     const priceError = validateEventPrice(price, t);
     if (priceError) {
-      setFormError(priceError);
+      setPriceError(priceError);
+      setFormError("");
       setSubmitting(false);
       return;
     }
@@ -353,7 +355,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
         <label><span>{t.address}</span><input name="address" defaultValue={initialActivity?.address || selectedCity.name[language]} required /></label>
         <label><span>{t.locationUrl}</span><input name="locationUrl" type="url" defaultValue={initialActivity?.locationUrl} placeholder={t.locationPlaceholder} /></label>
         <div className="form-row">
-          <label><span>{t.price}</span><input name="price" type="number" min="0" max={MAX_EVENT_PRICE} defaultValue={initialActivity?.price || 0} required /></label>
+          <label className="price-field"><span>{t.price}</span><input name="price" type="number" min="0" max={MAX_EVENT_PRICE} defaultValue={initialActivity?.price || 0} onInput={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} onChange={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} required /><small className="field-error">{priceError || t.priceTooHigh}</small></label>
           <label><span>{t.capacity}</span><input name="capacity" type="number" min="2" max="100" defaultValue={initialActivity?.capacity || 8} required /></label>
         </div>
         <fieldset>
@@ -365,7 +367,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
           </div>
         </fieldset>
         {formError && <div className="form-error">{formError}</div>}
-        <button className="publish-button" type="submit" disabled={submitting}>{initialActivity ? <Pencil size={20} /> : <Sparkles size={20} />}{submitting ? "…" : initialActivity ? t.save : t.publish}</button>
+        <button className="publish-button" type="submit" disabled={submitting || Boolean(priceError)}>{initialActivity ? <Pencil size={20} /> : <Sparkles size={20} />}{submitting ? "…" : initialActivity ? t.save : t.publish}</button>
       </form>
     </section>
   );
@@ -664,7 +666,7 @@ function ActivitySheet({
     <div className="sheet-backdrop" onMouseDown={onClose}>
       <article className="activity-sheet" onMouseDown={(event) => event.stopPropagation()}>
         <div className="sheet-handle" />
-        <button className="sheet-close" onClick={onClose} type="button" aria-label="Close"><X /></button>
+        <button className="sheet-close" onClick={onClose} type="button" aria-label={t.close}><X /></button>
         {loading && <EventDetailsSkeleton />}
         {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
         <div className={`sheet-symbol category-${activity.categoryId}`}>{category.icon}</div>
