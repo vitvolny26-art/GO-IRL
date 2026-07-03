@@ -17,7 +17,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 
 ### Before Public Release
 
-- Configure production environment variables on Netlify.
+- Configure production environment variables on Vercel.
 - Apply `supabase/schema.sql` to the production Supabase project.
 - Re-check private activity visibility with an unrelated account after schema deployment.
 - Confirm RLS behavior with at least two Telegram accounts.
