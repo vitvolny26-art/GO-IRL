@@ -27,6 +27,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Netlify build configuration for automatic GitHub deploys.
 - Telegram bot username can be configured with `VITE_TELEGRAM_BOT_USERNAME`.
 - Vite output filenames now use a `go-irl-v0` prefix to avoid stale Netlify asset reuse.
+- Vercel deployment configuration as a fallback when Netlify deploys are unavailable.
 
 ### Changed
 

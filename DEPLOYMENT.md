@@ -51,6 +51,25 @@ pnpm: 11.7.0
 
 After the GitHub connection is active, every push to `main` should trigger a production deploy automatically.
 
+## 3a. Vercel Fallback Hosting
+
+Use Vercel if Netlify production deploys are unavailable.
+
+1. Import the GitHub repository `vitvolny26-art/GO-IRL`.
+2. Framework preset: `Vite`.
+3. Build command: `pnpm run build`.
+4. Install command: `pnpm install --frozen-lockfile`.
+5. Output directory: `dist`.
+6. Add environment variables:
+
+```text
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
+```
+
+The repository includes `vercel.json`, so Vercel should pick up the correct settings automatically.
+
 ## 4. Telegram BotFather
 
 1. Open `@BotFather`.

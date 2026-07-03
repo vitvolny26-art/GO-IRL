@@ -52,6 +52,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Supabase schema and RLS policies in `supabase/schema.sql`
 - ESLint and Vitest quality gates
 - Netlify build configuration in `netlify.toml`
+- Vercel fallback deployment configuration in `vercel.json`
 
 ## Project Documents
 
