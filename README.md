@@ -1,28 +1,58 @@
 # GO IRL Telegram Mini App
 
-Кликабельный MVP универсальной платформы для офлайн-активностей в Olomouc.
+GO IRL (Go In Real Life) is a Telegram Mini App for creating and joining offline activities, starting with Olomouc.
 
-## Запуск
+## Current Stack
+
+- React, TypeScript, Vite
+- Zustand for client state
+- Supabase for activities, participants, private join requests, and realtime updates
+- Telegram WebApp bootstrap with guest fallback for local browser testing
+- Dark mobile-first UI with safe-area aware header
+
+## Setup
 
 ```powershell
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
-После запуска открой адрес, который покажет Vite (обычно `http://127.0.0.1:5173`).
+Create `.env.local` from `.env.example` and fill:
 
-## Реализовано в прототипе
+```text
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
 
-- универсальная сущность Activity;
-- категории спорта, активностей, вечеринок, природы и общения;
-- ближайшие, популярные и срочные события;
-- «Удиви меня»;
-- создание события;
-- присоединение, выход и waiting list;
-- карточка события и системный share;
-- профиль, RLI, карта жизни и достижения;
-- русский и чешский языки;
-- Telegram WebApp bootstrap;
-- dark mode.
+After starting Vite, open the local URL shown in the terminal. For Telegram testing, the deployed Mini App URL is configured in BotFather.
 
-Данные пока хранятся локально в браузере через Zustand persist. Для production нужны backend Fastify, PostgreSQL/Supabase, Telegram initData validation, REST API/WebSocket, bot и n8n workflows.
+## Verification
+
+```powershell
+pnpm run build
+```
+
+The build command runs `tsc -b` and then creates the production Vite bundle.
+
+There are no lint or automated test scripts yet. This is tracked in `BACKLOG.md`.
+
+## Implemented
+
+- Universal `Activity` model
+- Public and private activities
+- Organizer edit flow
+- Private join requests with approve/reject actions
+- Participants list with joined, waiting, and pending states
+- Activity creation with category, activity type, address, and optional location URL
+- Share link that opens the Telegram Mini App with `startapp`
+- City selection architecture with Olomouc as the first city
+- Russian and Czech localization architecture
+- Safe-area aware fixed header for Telegram Mini App
+- Supabase schema and RLS policies in `supabase/schema.sql`
+
+## Project Documents
+
+- `CHANGELOG.md` - shipped changes
+- `ROADMAP.md` - product and engineering direction
+- `BACKLOG.md` - confirmed work queue
+- `RELEASE_NOTES.md` - release-ready notes for deployment

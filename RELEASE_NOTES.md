@@ -1,0 +1,23 @@
+# Release Notes
+
+## 0.1.0 - Internal Telegram Mini App MVP
+
+GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
+
+### Included
+
+- Create, view, share, edit, and join offline activities.
+- Public events join immediately when capacity is available.
+- Full events put users into a waiting state.
+- Private events create pending requests that the organizer can approve or reject.
+- Supabase stores activities and participants and broadcasts realtime updates.
+- Header is fixed, safe-area aware, and ready for Telegram in-app browser behavior.
+- Russian and Czech localization structure is in place.
+
+### Before Public Release
+
+- Configure production environment variables on Netlify.
+- Apply `supabase/schema.sql` to the production Supabase project.
+- Confirm RLS behavior with at least two Telegram accounts.
+- Validate Telegram share links through `@gosportovatBot`.
+- Add trusted Telegram `initData` validation before treating identity as secure.
