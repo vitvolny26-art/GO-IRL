@@ -21,5 +21,5 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Apply `supabase/schema.sql` to the production Supabase project.
 - Re-check private activity visibility with an unrelated account after schema deployment.
 - Confirm RLS behavior with at least two Telegram accounts.
-- Validate Telegram share links through `@gosportovatBot`.
+- Validate Telegram share links through `@GOirl_bot`.
 - Add trusted Telegram `initData` validation before treating identity as secure.
