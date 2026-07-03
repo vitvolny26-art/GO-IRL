@@ -56,6 +56,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `CHANGELOG.md` - shipped changes
 - `ROADMAP.md` - product and engineering direction
 - `SPRINTS.md` - sprint-by-sprint delivery plan
+- `SPRINT0_STATUS.md` - current Sprint 0 production verification status
 - `BACKLOG.md` - confirmed work queue
 - `RELEASE_NOTES.md` - release-ready notes for deployment
 - `DEPLOYMENT.md` - production deployment and smoke-test checklist

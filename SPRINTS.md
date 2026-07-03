@@ -4,6 +4,8 @@ GO IRL is developed as a platform, not as a one-off Telegram Mini App. Every spr
 
 ## Sprint 0 - Foundation
 
+Status: **Production Verification Blocked**
+
 Goal: make the project safe to develop and release.
 
 - GitHub repository connected.
@@ -17,7 +19,7 @@ Goal: make the project safe to develop and release.
 Remaining:
 
 - Apply the latest `supabase/schema.sql` in production Supabase.
-- Confirm first GitHub Actions CI run passes on `main`.
+- Fix production RLS so unrelated guest users cannot read private activities.
 - Run Telegram Mini App smoke-test with two accounts.
 
 ## Sprint 1 - MVP Core

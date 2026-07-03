@@ -28,11 +28,11 @@ Confirmed work is ordered by priority.
 
 ## Security Issue
 
+- Production Supabase currently returns private activities to an unrelated guest REST request. Apply `supabase/schema.sql` and re-test before closing Sprint 0.
 - Telegram `initData` is not validated by a trusted backend yet.
 - Review the latest Supabase RLS policies in the production dashboard after applying `supabase/schema.sql`.
 
 ## Technical Debt
 
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
-- Confirm the first GitHub Actions CI run passes on `main`.
 - Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
