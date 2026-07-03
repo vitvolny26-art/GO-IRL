@@ -17,6 +17,8 @@ All notable confirmed changes to GO IRL are tracked here.
 - City configuration architecture with Olomouc as the first supported city.
 - Russian and Czech localization architecture.
 - Activity creation fields for category, activity type, location address, and optional location URL.
+- ESLint flat config and `pnpm run lint`.
+- Vitest and unit coverage for city configuration, activity taxonomy, and localization basics.
 
 ### Changed
 
@@ -24,6 +26,4 @@ All notable confirmed changes to GO IRL are tracked here.
 
 ### Known Gaps
 
-- No lint script is configured yet.
-- No automated test suite is configured yet.
 - Telegram `initData` validation still needs a production backend or secure edge function.

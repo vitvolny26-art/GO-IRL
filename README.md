@@ -29,12 +29,12 @@ After starting Vite, open the local URL shown in the terminal. For Telegram test
 ## Verification
 
 ```powershell
+pnpm run test
+pnpm run lint
 pnpm run build
 ```
 
 The build command runs `tsc -b` and then creates the production Vite bundle.
-
-There are no lint or automated test scripts yet. This is tracked in `BACKLOG.md`.
 
 ## Implemented
 
@@ -49,6 +49,7 @@ There are no lint or automated test scripts yet. This is tracked in `BACKLOG.md`
 - Russian and Czech localization architecture
 - Safe-area aware fixed header for Telegram Mini App
 - Supabase schema and RLS policies in `supabase/schema.sql`
+- ESLint and Vitest quality gates
 
 ## Project Documents
 

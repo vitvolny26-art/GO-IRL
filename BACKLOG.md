@@ -12,13 +12,12 @@ Confirmed work is ordered by priority.
 
 ## Lint Blocker
 
-- No lint command exists in `package.json`.
-- Add ESLint only after choosing a minimal config compatible with the current React/Vite/TypeScript stack.
+- None confirmed. `pnpm run lint` passes as of 2026-07-03.
 
 ## Test Blocker
 
-- No automated test command exists in `package.json`.
-- Add focused tests for activity creation, join/leave, waiting list, private pending requests, organizer approvals, and edit permissions.
+- None confirmed. `pnpm run test` passes as of 2026-07-03.
+- Add deeper tests for activity creation, join/leave, waiting list, private pending requests, organizer approvals, and edit permissions.
 
 ## Runtime Bug
 
