@@ -34,4 +34,4 @@ Confirmed work is ordered by priority.
 ## Technical Debt
 
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
-- Add CI for `pnpm run test`, `pnpm run lint`, and `pnpm run build`.
+- Confirm the first GitHub Actions CI run passes on `main`.

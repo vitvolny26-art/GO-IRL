@@ -21,6 +21,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Vitest and unit coverage for city configuration, activity taxonomy, and localization basics.
 - Supabase RLS helper functions and policies that hide non-public activities from unrelated users.
 - Production deployment checklist for Supabase, Netlify, BotFather, and Telegram smoke testing.
+- GitHub Actions CI for test, lint, and build verification.
 
 ### Changed
 
