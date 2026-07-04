@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { categories } from "./data";
 import { supabase, getUserKey } from "./supabase";
 import { getTelegramWebApp } from "./telegram";
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
@@ -73,9 +74,14 @@ const localizedDbText = (ru: string, cs: string) => ({
   en: ru,
 });
 
+const normalizeCategoryId = (categoryId: string) => {
+  if (categoryId === "inline-skating") return "activities";
+  return categories.some((category) => category.id === categoryId) ? categoryId : "activities";
+};
+
 const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   id: row.id,
-  categoryId: row.category_id,
+  categoryId: normalizeCategoryId(row.category_id),
   activity: localizedDbText(row.activity_ru, row.activity_cs),
   title: localizedDbText(row.title_ru, row.title_cs),
   description: localizedDbText(row.description_ru, row.description_cs),

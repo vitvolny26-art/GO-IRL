@@ -39,7 +39,7 @@ import {
 import { useAppStore } from "./store";
 import { getUserKey } from "./supabase";
 import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
-import type { Activity, AppView, Language, NewActivity } from "./types";
+import type { Activity, AppView, Category, Language, NewActivity } from "./types";
 import {
   MAX_EVENT_ADDRESS_LENGTH,
   MAX_EVENT_CAPACITY,
@@ -83,6 +83,20 @@ const compactDateLabel = (date: string, language: Language) => {
     day: "numeric",
     month: "short",
   }).format(eventDate);
+};
+
+const fallbackCategory: Category = {
+  id: "custom",
+  icon: "✨",
+  name: { ru: "Событие", uk: "Подія", cs: "Událost", en: "Event" },
+};
+
+const getActivityCategory = (activity: Activity) =>
+  categories.find((item) => item.id === activity.categoryId) || fallbackCategory;
+
+const safeDate = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
 };
 
 const favoriteActivityOptions = (language: Language) => {
@@ -493,7 +507,7 @@ function DiscoverSection({ title, activities, language, onOpen, onJoin }: { titl
 function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
   const { joinedIds, pendingIds } = useAppStore();
   const t = getTranslation(language);
-  const category = categories.find((item) => item.id === activity.categoryId)!;
+  const category = getActivityCategory(activity);
   const joined = joinedIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
   const freeSpots = Math.max(activity.capacity - activity.participants, 0);
@@ -502,7 +516,7 @@ function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity
   return (
     <article className="discover-card">
       <button className="discover-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className={`category-icon category-${activity.categoryId}`}>{category.icon}</div>
+        <div className={`category-icon category-${category.id}`}>{category.icon}</div>
         <div>
           <span>{category.name[language]}</span>
           <h3>{activity.activity[language]}</h3>
@@ -747,7 +761,7 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
   const pendingRequests = activities.filter((item) => pendingIds.includes(item.id));
   const activeEvents = activities.filter((item) => item.date >= today && (item.organizerKey === userKey || joinedIds.includes(item.id) || pendingIds.includes(item.id)));
   const joinedCount = activities.filter((item) => joinedIds.includes(item.id)).length;
-  const registeredLabel = new Intl.DateTimeFormat(localeByLanguage[language], { day: "numeric", month: "short", year: "numeric" }).format(new Date(profile.registeredAt));
+  const registeredLabel = new Intl.DateTimeFormat(localeByLanguage[language], { day: "numeric", month: "short", year: "numeric" }).format(safeDate(profile.registeredAt));
   const favoriteOptions = favoriteActivityOptions(language);
   const selectedFavorites = favoriteOptions.filter((option) => profile.favoriteActivities.includes(option.id));
 
@@ -876,7 +890,7 @@ function ActivitySection({ title, activities, language, onOpen, onJoin, icon, ur
 function ActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
   const { joinedIds, waitingIds, pendingIds } = useAppStore();
   const t = getTranslation(language);
-  const category = categories.find((item) => item.id === activity.categoryId)!;
+  const category = getActivityCategory(activity);
   const free = activity.capacity - activity.participants;
   const joined = joinedIds.includes(activity.id);
   const waiting = waitingIds.includes(activity.id);
@@ -917,7 +931,7 @@ function ActivityCard({ activity, language, onOpen, onJoin }: { activity: Activi
   return (
     <article className="activity-card">
       <button className="activity-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className={`category-icon category-${activity.categoryId}`}>{category.icon}</div>
+        <div className={`category-icon category-${category.id}`}>{category.icon}</div>
         <div className="activity-copy">
           <div className="activity-label">{category.name[language]}</div>
           <h3>{activity.activity[language]}</h3>
@@ -976,7 +990,7 @@ function ActivitySheet({
   const { joinedIds, waitingIds, pendingIds, reviewRequest, userRole } = useAppStore();
   const [membersOpen, setMembersOpen] = useState(false);
   const t = getTranslation(language);
-  const category = categories.find((item) => item.id === activity.categoryId)!;
+  const category = getActivityCategory(activity);
   const isOrganizer = activity.organizerKey === getUserKey();
   const canDelete = isOrganizer || userRole === "admin";
   const joined = joinedIds.includes(activity.id);
@@ -1028,7 +1042,7 @@ function ActivitySheet({
         <button className="sheet-close" onClick={onClose} type="button" aria-label={t.close}><X /></button>
         {loading && <EventDetailsSkeleton />}
         {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
-        <div className={`sheet-symbol category-${activity.categoryId}`}>{category.icon}</div>
+        <div className={`sheet-symbol category-${category.id}`}>{category.icon}</div>
         <div className="sheet-label">{category.name[language]} · {activity.activity[language]}</div>
         <h2>{activity.title[language]}</h2>
         <p className="sheet-description">{activity.description[language]}</p>
