@@ -6,6 +6,7 @@ This document describes the target database model for GO IRL after Sprint 1. It 
 
 - Keep current Sprint 1 tables stable.
 - Separate public profile data, private notification data, event data, external-source data, and AI review logs.
+- Model GO IRL as vertical experience modules, not one universal event flow.
 - Use RLS on every user-facing table.
 - Use service-role access only for n8n/server jobs.
 - Store only data required for event discovery, matching, notifications, safety, and account control.
@@ -126,6 +127,7 @@ Purpose: canonical user-created and validated external events. This is the futur
 
 Fields:
 - `id uuid primary key`
+- `activity_type text`
 - `category_id uuid references event_categories(id)`
 - `organizer_user_id uuid references users(id)`
 - `source_type text`
@@ -141,15 +143,18 @@ Fields:
 - `capacity integer`
 - `visibility text`
 - `status text`
+- `metadata jsonb`
 - `created_at timestamptz`
 - `updated_at timestamptz`
 
 Constraints and indexes:
+- check activity_type in `sport`, `dating`, `friends`, `food`, `culture`, `local`, `custom`
 - check price between 0 and 100000
 - check capacity between 2 and 1000 when present
 - check visibility in `public`, `invite`, `private`
 - check status in `draft`, `published`, `cancelled`, `archived`
 - index `(city_id, starts_at)`
+- index `(activity_type, city_id, starts_at)`
 - index `(category_id, starts_at)`
 - index `(organizer_user_id, starts_at)`
 
@@ -158,6 +163,69 @@ RLS:
 - invite/private events require organizer, participant, invite token, or approved access.
 - owner can insert/update own events.
 - service role can insert validated discovered events.
+
+Vertical metadata:
+- early-stage vertical fields may live in `metadata`
+- example keys: `sport_meta`, `friends_meta`, `food_meta`, `custom_meta`
+- dating should not be launched as a normal event join flow; it needs a separate dating profile/match model before production
+- when a vertical stabilizes, move query-heavy metadata into normalized vertical tables
+
+### sport_event_meta
+
+Future normalized table for sport-specific data.
+
+Fields:
+- `event_id uuid primary key references events(id) on delete cascade`
+- `sport_type text`
+- `skill_level text`
+- `format text`
+- `equipment text[]`
+- `weather_dependent boolean`
+- `team_size integer`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints:
+- check skill_level in `beginner`, `intermediate`, `advanced`
+- check format in `casual`, `training`, `competition`
+
+### dating_profiles
+
+Future table for the Dating vertical. It must not use the generic event join model.
+
+Fields:
+- `user_id uuid primary key references users(id) on delete cascade`
+- `city_id text`
+- `display_name text`
+- `bio text`
+- `looking_for text`
+- `communication_format text`
+- `anonymous_mode boolean`
+- `visibility text`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Privacy:
+- Telegram username, phone, email, and internal IDs are not public.
+- identity reveal requires mutual consent.
+- RLS must respect blocks, reports, visibility, and age/safety rules.
+
+### dating_matches
+
+Future table for Dating matching.
+
+Fields:
+- `id uuid primary key`
+- `user_id uuid references users(id) on delete cascade`
+- `target_user_id uuid references users(id) on delete cascade`
+- `action text`
+- `matched_at timestamptz`
+- `reveal_status text`
+- `created_at timestamptz`
+
+Constraints:
+- check action in `like`, `pass`, `block`, `report`
+- unique `(user_id, target_user_id)`
 
 ### event_sources
 

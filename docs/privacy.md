@@ -72,6 +72,20 @@ Planned:
 - hidden location until approved
 - anonymous chat later
 
+## Dating Privacy
+
+Dating is a separate vertical with stronger privacy defaults.
+
+Rules:
+
+- no public Telegram username leakage
+- contacts revealed only by mutual consent
+- anonymous chat before identity reveal
+- block/report available in every step
+- rate limits and anti-spam required before public launch
+- age gate required before public launch
+- dating profile visibility separate from generic event profile visibility
+
 ## AI Data Use
 
 AI should analyze public external events, not private user profiles.

@@ -5,6 +5,9 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 ## Phase 1 - Production Foundation
 
 - Keep build and TypeScript checks green.
+- Preserve the current generic event MVP as the fallback experience.
+- Add the Vertical Experiences architecture layer.
+- Document the Sport/Dating/Friends/Food split without launching full Dating yet.
 - Add linting with the smallest dependency set that matches the project.
 - Add focused automated tests for activity creation, join flows, and private request review.
 - Harden Supabase RLS and document every policy.
@@ -16,6 +19,8 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 ## Phase 2 - Product Quality
 
+- Sport vertical MVP.
+- Sport-specific filters, skill level, format, equipment, and create flow.
 - Redesign event cards for faster scanning and a more premium 2026 feel.
 - Redesign the home screen around discovery actions and large categories.
 - Add Discover / For You screen with search, quick filters, and simple matching by city, interests, date, and free spots.
@@ -32,6 +37,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 ## Phase 3 - Growth
 
+- Friends vertical with invite/request flow and group social matching.
 - Add server-side notifications for join requests and event updates through n8n.
 - Add user reputation/RLI details.
 - Add event moderation and abuse reporting.
@@ -50,6 +56,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 ## Phase 4 - Discovery and Digest
 
+- Dating vertical MVP with dating profile, like/pass, mutual match, anonymous chat, mutual reveal, block/report, and safety-first rules.
 - Evening personalized digest.
 - Digest matching respects user city, interests, language, price limits, quiet hours, and working hours.
 - n8n sends personalized digest through the selected notification channel and prevents duplicate event sends.
@@ -63,6 +70,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 ## Phase 5 - Privacy and Security Hardening
 
+- AI recommendations per vertical.
 - GDPR-style export/delete.
 - Security review.
 - Privacy review.
@@ -80,3 +88,10 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - Masked profiles: hide Telegram ID, phone, email, exact address, and internal IDs.
 - Event privacy: private and invite-only events can hide location/details until approved.
 - AI privacy: AI uses public external event data and anonymized interests only.
+
+## Vertical Experiences
+
+- GO IRL is composed of vertical experience modules, not one universal event flow.
+- Sport, Dating, Friends, Food, Culture, Local, and Custom can own their fields, filters, cards, create forms, details screens, recommendation engines, privacy rules, safety rules, and notification rules.
+- Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.
+- Generic Activity/Event remains as fallback until a vertical-specific experience is implemented.

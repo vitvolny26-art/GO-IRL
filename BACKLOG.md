@@ -41,6 +41,9 @@ Confirmed work is ordered by priority.
 
 ## Sprint 2 - Database and Preferences
 
+- VERT-006 Sport vertical MVP.
+- VERT-007 Sport skill matching.
+- VERT-003 Vertical-specific create forms.
 - Real Supabase database.
 - User interests.
 - Favorite activity persistence in Supabase.
@@ -51,6 +54,7 @@ Confirmed work is ordered by priority.
 
 ## Sprint 3 - AI Event Discovery
 
+- VERT-015 Friends vertical.
 - Replace `SimpleRecommendationEngine` with an AI-backed implementation behind the existing `RecommendationEngine` interface.
 - n8n event discovery workflow.
 - Discovery source coverage: public event websites, Facebook Events, Meetup, Eventbrite, city sites, universities, Telegram, Discord, Reddit, and public calendars.
@@ -66,6 +70,13 @@ Confirmed work is ordered by priority.
 
 ## Sprint 4 - Evening Digest and Admin
 
+- VERT-008 Dating vertical architecture.
+- VERT-009 Dating profile.
+- VERT-010 Like/pass flow.
+- VERT-011 Mutual match.
+- VERT-012 Anonymous dating chat.
+- VERT-013 Mutual identity reveal.
+- VERT-014 Dating safety: report/block.
 - Evening personalized digest.
 - Respect quiet hours and working hours; never send AI/n8n digest at night.
 - Store discovered events in the database before digest selection.
@@ -120,3 +131,23 @@ Confirmed work is ordered by priority.
 - SRC-002 Add user-submitted event suggestions.
 - SRC-003 Add manual moderation queue for `pending_review`.
 - SRC-004 Document and enforce no Facebook credential storage.
+
+## Vertical Experiences
+
+- VERT-001 Vertical Experience Architecture.
+- VERT-002 ActivityRendererRegistry.
+- VERT-003 Vertical-specific create forms.
+- VERT-004 Vertical-specific details screens.
+- VERT-005 Vertical-specific filters.
+- VERT-006 Sport vertical MVP.
+- VERT-007 Sport skill matching.
+- VERT-008 Dating vertical architecture.
+- VERT-009 Dating profile.
+- VERT-010 Like/pass flow.
+- VERT-011 Mutual match.
+- VERT-012 Anonymous dating chat.
+- VERT-013 Mutual identity reveal.
+- VERT-014 Dating safety: report/block.
+- VERT-015 Friends vertical.
+- VERT-016 Food vertical.
+- VERT-017 AI recommendations per vertical.

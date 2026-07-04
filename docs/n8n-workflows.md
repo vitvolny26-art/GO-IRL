@@ -54,6 +54,13 @@ Steps:
 
 The digest uses user preferences but does not send private identifiers to AI.
 
+Digest ranking should be vertical-aware:
+
+- sport digest can mention skill level, missing players, equipment, and weather dependency.
+- friends digest can mention group format and approval mode.
+- food digest can mention cuisine, average check, reservation, and payment format.
+- dating digest must not expose private dating profiles or contacts; dating notifications need a separate consent-first flow.
+
 ## Workflow 3: Event Lifecycle
 
 Schedule: hourly or daily.

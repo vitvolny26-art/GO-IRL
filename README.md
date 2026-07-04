@@ -75,6 +75,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `DEPLOYMENT.md` - production deployment and smoke-test checklist
 - `supabase/README.md` - Supabase setup, migration, RLS, env, and verification guide
 - `docs/database.md` - target database architecture for users, interests, discovery, and digest
+- `docs/vertical-experiences.md` - vertical modules architecture for sport, dating, friends, food, and generic fallback
 - `docs/ai-event-discovery.md` - AI event discovery pipeline plan
 - `docs/notifications.md` - notification preferences and evening digest plan
 - `docs/n8n-workflows.md` - future n8n workflow architecture

@@ -1,6 +1,15 @@
 export type Language = "ru" | "uk" | "cs" | "en";
 export type AppView = "home" | "discover" | "explore" | "create" | "profile";
 export type UserRole = "user" | "organizer" | "admin";
+export type ActivityType = "sport" | "dating" | "friends" | "food" | "culture" | "local" | "custom";
+
+export type ActivityMetadata = {
+  sport?: Record<string, unknown>;
+  dating?: Record<string, unknown>;
+  friends?: Record<string, unknown>;
+  food?: Record<string, unknown>;
+  custom?: Record<string, unknown>;
+};
 
 export type Category = {
   id: string;
@@ -16,6 +25,7 @@ export type ActivityMember = {
 
 export type Activity = {
   id: string;
+  type?: ActivityType;
   categoryId: string;
   activity: Record<Language, string>;
   title: Record<Language, string>;
@@ -35,6 +45,7 @@ export type Activity = {
   visibility: "public" | "private" | "invite";
   urgent?: boolean;
   popular?: boolean;
+  metadata?: ActivityMetadata;
 };
 
 export type NewActivity = Omit<Activity, "id" | "participants" | "members" | "organizer" | "organizerKey" | "activity" | "title" | "description"> & {

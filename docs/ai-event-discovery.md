@@ -213,6 +213,20 @@ Not allowed:
 
 For recommendations, use anonymized interests and city/language preferences. Do not send user identity to AI.
 
+## Vertical Recommendation Engines
+
+GO IRL recommendations should be vertical-aware.
+
+Future engines:
+
+- `SportRecommendationEngine`: sport type, skill level, format, time, city, free spots, equipment, weather.
+- `FriendsRecommendationEngine`: shared interests, group size, city, trust, time window.
+- `FoodRecommendationEngine`: cuisine, average check, reservation, budget, place, time.
+- `DatingMatchingEngine`: consent, safety, privacy, age gate, blocks/reports, mutual likes, reveal state.
+- `GenericRecommendationEngine`: fallback for events without a specialized vertical.
+
+Dating matching is not event recommendation and must not use the generic join/request model.
+
 ## Why Mini App Does Not Work In Background
 
 Telegram Mini Apps are user-facing UI sessions, not background workers.
