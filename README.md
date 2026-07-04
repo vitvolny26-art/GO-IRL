@@ -4,6 +4,8 @@
 
 GO IRL (Go In Real Life) is a Telegram Mini App for creating and joining offline activities, starting with Olomouc.
 
+All major product and architecture decisions must follow the [GO IRL Constitution](docs/GO_IRL_CONSTITUTION.md).
+
 ## Current Stack
 
 - React, TypeScript, Vite
@@ -50,6 +52,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Private join requests with approve/reject actions
 - Participants list with joined, waiting, and pending states
 - Activity creation with category, activity type, address, and optional location URL
+- Save Activity to Google Calendar through a template link without Google OAuth
 - Share link that opens the Telegram Mini App with `startapp`
 - City selection architecture with Olomouc as the first city
 - City expansion with Praha/Prague available through configuration
@@ -68,6 +71,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 
 ## Project Documents
 
+- `docs/GO_IRL_CONSTITUTION.md` - product and architecture source of truth
 - `CHANGELOG.md` - shipped changes
 - `ROADMAP.md` - product and engineering direction
 - `SPRINTS.md` - sprint-by-sprint delivery plan

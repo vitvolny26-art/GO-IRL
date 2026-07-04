@@ -39,6 +39,8 @@ All notable confirmed changes to GO IRL are tracked here.
 - Discover / For You screen with instant search, quick filters, horizontal recommendation sections, and profile-based favorite activities.
 - Recommendation engine interface with a simple city/interests/date/free-spots matching implementation ready for future AI replacement.
 - Sprint 2 Sport Vertical MVP with ActivityRendererRegistry, SportActivityCard, Sport details, Sport create fields, sport demo data, and SportRecommendationEngine.
+- GO IRL Constitution as the product and architecture source of truth.
+- Google Calendar save action for activities using a template link without Google OAuth.
 
 ### Changed
 

@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronRight, CircleUserRound, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
+import { CalendarDays, CalendarPlus, ChevronRight, CircleUserRound, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
@@ -21,6 +21,7 @@ type SportSheetProps = {
   onClose: () => void;
   onJoin: (activity: Activity) => void;
   onShare: (activity: Activity) => void;
+  onCalendar: (activity: Activity) => void;
   onEdit: (activity: Activity) => void;
   onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
@@ -133,6 +134,7 @@ export function SportActivitySheet({
   onClose,
   onJoin,
   onShare,
+  onCalendar,
   onEdit,
   onDelete,
   onCloseMiniApp,
@@ -186,6 +188,7 @@ export function SportActivitySheet({
         <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
+          <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
           <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
         </div>
         {canDelete && <button className="danger-action" onClick={() => onDelete(activity)} type="button"><Trash2 size={18} />{t.delete}</button>}

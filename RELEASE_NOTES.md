@@ -28,6 +28,8 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Recommendation matching is isolated behind an engine interface so a future AI engine can replace the simple algorithm without rewriting UI.
 - Sport Vertical MVP is live with sport-specific cards, details, create fields, skill level, indoor/outdoor, equipment, duration, demo examples, and a dedicated SportRecommendationEngine.
 - Production Supabase now persists `city_id`, `metadata`, `participant_note`, and `activity_type` for events as primary database fields.
+- Activities can be saved to Google Calendar through a template link. No Google OAuth or calendar sync is used in this MVP.
+- GO IRL Constitution is now the source of truth for product and architecture decisions.
 
 ### Before Public Release
 

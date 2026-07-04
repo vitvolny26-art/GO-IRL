@@ -2,6 +2,8 @@
 
 Confirmed work is ordered by priority.
 
+All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md).
+
 ## Strategic Priority Order
 
 1. Infrastructure Hardening
@@ -93,6 +95,7 @@ Confirmed work is ordered by priority.
 
 ## Sprint 3 - Performance and n8n Notifications
 
+- CAL-001 Save Activity to Google Calendar through a template URL without OAuth.
 - Rich Telegram share via bot message: send event invitations through Telegram Bot API with an inline `[Присоединиться]` button so the URL is not visible in the message text.
 - Lazy loading for heavy screens and vertical modules.
 - Code splitting for Dashboard, Discover, Create Event, Event Details, Profile, Organizer Dashboard, and Sport vertical.
@@ -195,6 +198,12 @@ Confirmed work is ordered by priority.
 - SRC-002 Add user-submitted event suggestions.
 - SRC-003 Add manual moderation queue for `pending_review`.
 - SRC-004 Document and enforce no Facebook credential storage.
+
+## Calendar
+
+- CAL-001 Save Activity to Google Calendar through a template URL without OAuth.
+- CAL-002 Future native calendar integration.
+- CAL-003 Future Google OAuth calendar sync.
 
 ## Vertical Experiences
 

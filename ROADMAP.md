@@ -2,6 +2,8 @@
 
 GO IRL is being built as a platform, not a one-off Telegram Mini App. New work should stay compatible with future web, Android, and iOS clients.
 
+All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md).
+
 ## Strategic Development Order
 
 The current product priority is foundation and infrastructure. Friends, Travel, and Dating are intentionally deferred until the platform layer is stable.
@@ -56,6 +58,7 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 ## Phase 2 - Performance and Product Quality
 
 - Keep Sport vertical MVP as the reference vertical.
+- CAL-001 Save Activity to Google Calendar through a template URL without OAuth.
 - Maintain ActivityRendererRegistry with Sport and Generic registrations.
 - Continue improving event cards, create flow, details, profile, and organizer controls only where needed for current MVP quality.
 - Add Discover / For You screen with search, quick filters, and simple matching by city, interests, date, and free spots.
@@ -90,6 +93,8 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 5 - Deferred Verticals
 
+- CAL-002 Future native calendar integration.
+- CAL-003 Future Google OAuth calendar sync.
 - Friends vertical starts only after database and notification foundation is stable.
 - Travel vertical starts only after Friends and source discovery architecture are stable.
 - Dating vertical is last and must not begin until privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.

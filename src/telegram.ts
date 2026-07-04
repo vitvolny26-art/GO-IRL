@@ -24,6 +24,7 @@ declare global {
         };
         HapticFeedback?: { impactOccurred: (style: string) => void; notificationOccurred: (type: string) => void };
         openTelegramLink?: (url: string) => void;
+        openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
       };
     };
   }
