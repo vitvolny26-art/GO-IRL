@@ -5,7 +5,7 @@ import type { UserRole } from "./types";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const legacyDemoAuthEnabled = import.meta.env.DEV || import.meta.env.VITE_GO_IRL_LEGACY_DEMO_AUTH === "true";
-const sessionStorageKey = "go-irl-trusted-session";
+const sessionStorageKey = "go-irl-trusted-session-v2";
 
 export type TrustedAuthUser = {
   id: string;

@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import { categories } from "./data";
 import { supabase, getUserKey } from "./supabase";
-import { getCurrentDisplayName, getCurrentStartParam, getCurrentUserRole as getTrustedUserRole, initializeTrustedAuth, isTrustedAuthReady } from "./authSession";
+import {
+  getCurrentDisplayName,
+  getCurrentStartParam,
+  getCurrentUserRole as getTrustedUserRole,
+  initializeTrustedAuth,
+  isTrustedAuthReady,
+} from "./authSession";
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
@@ -290,6 +296,7 @@ export const useAppStore = create<AppState>((set, get) => {
     initialize: async () => {
       set({ loading: true });
       try {
+        set({ userRole: getTrustedUserRole() === "user" ? getCurrentUserRole(getUserKey()) : getTrustedUserRole() });
         await reload();
         if (!realtimeChannel && !(typeof document !== "undefined" && document.hidden)) {
           realtimeChannel = supabase
@@ -475,7 +482,8 @@ export const useAppStore = create<AppState>((set, get) => {
       await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const current = get().activities.find((item) => item.id === id);
-      if (!current || (current.organizerKey !== userKey && !isCurrentUserAdmin(userKey))) {
+      const isAdmin = getTrustedUserRole() === "admin" || isCurrentUserAdmin(userKey);
+      if (!current || (current.organizerKey !== userKey && !isAdmin)) {
         throw new Error("Only organizer or admin can delete activity");
       }
 

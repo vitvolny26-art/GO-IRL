@@ -155,7 +155,9 @@ Apply it only after the `verifyTelegramInitData` Edge Function is deployed and i
    - `TELEGRAM_BOT_TOKEN`
    - `SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `GO_IRL_JWT_SECRET` (set to your Legacy JWT Secret)
+   - `GO_IRL_JWT_SECRET`
+   - optional `GO_IRL_AUTH_MAX_AGE_SECONDS`
+   - optional `GO_IRL_SESSION_TTL_SECONDS`
 3. Paste and run `supabase/migration_v4_trusted_telegram_auth.sql`.
 4. Paste and run `supabase/verify_trusted_auth.sql`.
 5. Confirm every row has `status = 'ok'`.

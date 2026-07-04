@@ -12,7 +12,7 @@ GO IRL now has a trusted Telegram authentication path implemented in code:
 - Edge Function validates `auth_date`;
 - Edge Function stores replay hashes in `telegram_auth_replay`;
 - Edge Function creates or updates `app_users`;
-- Edge Function returns a short-lived JWT signed with `SUPABASE_JWT_SECRET`;
+- Edge Function returns a short-lived JWT signed with `GO_IRL_JWT_SECRET`;
 - Supabase client sends that token through `accessToken`;
 - migration v4 moves RLS helpers to verified JWT claims.
 
@@ -87,7 +87,7 @@ Required Edge Function secrets:
 - `TELEGRAM_BOT_TOKEN`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `GO_IRL_JWT_SECRET` (set to your Legacy JWT Secret from Supabase Dashboard → Settings → JWT Keys → Reveal)
+- `GO_IRL_JWT_SECRET`
 
 Optional controls:
 
