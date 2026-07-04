@@ -280,6 +280,152 @@ Moderation:
 - moderation/audit metadata may be retained for a limited period after archive.
 - chat content is not sent to AI without explicit consent.
 
+### rli_ledger
+
+Purpose: transparent historical ledger for Real Life Index changes.
+
+Fields:
+- `id uuid primary key`
+- `user_id uuid references users(id) on delete cascade`
+- `activity_id uuid references events(id) on delete set null`
+- `delta integer not null`
+- `reason text not null`
+- `source_type text not null`
+- `confidence_level text`
+- `created_at timestamptz`
+- `created_by_system boolean`
+- `metadata jsonb`
+
+Constraints and indexes:
+- check `source_type` in `attendance_confirmation`, `organizer_confirmation`, `community_contribution`, `penalty`, `referral`, `moderation`
+- check `confidence_level` in `high`, `medium`, `low` when present
+- index `(user_id, created_at desc)`
+- index `(activity_id)`
+- index `(reason, created_at desc)`
+
+RLS:
+- user can read own ledger summary when exposed.
+- detailed fraud/moderation metadata is admin/moderator only.
+- service role writes ledger entries.
+
+### trust_events
+
+Purpose: internal Trust Score signal journal. It is hidden from public UI.
+
+Fields:
+- `id uuid primary key`
+- `user_id uuid references users(id) on delete cascade`
+- `activity_id uuid references events(id) on delete set null`
+- `event_type text not null`
+- `weight integer not null`
+- `confidence_level text`
+- `created_at timestamptz`
+- `created_by_system boolean`
+- `metadata jsonb`
+
+RLS:
+- no public read.
+- user export/audit can expose a safe summary later.
+- service/admin/moderator access only.
+
+### attendance_confirmations
+
+Purpose: store post-Activity confirmation results without storing unnecessary raw location data.
+
+Fields:
+- `id uuid primary key`
+- `activity_id uuid references events(id) on delete cascade`
+- `confirmed_user_id uuid references users(id) on delete cascade`
+- `confirmed_by_user_id uuid references users(id) on delete set null`
+- `confirmation_type text not null`
+- `result text not null`
+- `created_at timestamptz`
+- `metadata jsonb`
+
+Constraints and indexes:
+- check `confirmation_type` in `organizer`, `participant`, `geolocation`
+- check `result` in `yes`, `no`, `unknown`
+- unique `(activity_id, confirmed_user_id, confirmed_by_user_id, confirmation_type)`
+- index `(activity_id, result)`
+- index `(confirmed_user_id, created_at desc)`
+
+Privacy:
+- raw geolocation is not stored as movement history.
+- geolocation confirmation stores only result and coarse metadata needed for audit.
+
+### event_confidence
+
+Purpose: store confidence level of completed Activity participation.
+
+Fields:
+- `activity_id uuid primary key references events(id) on delete cascade`
+- `confidence_level text not null`
+- `organizer_confirmed boolean`
+- `majority_confirmed boolean`
+- `geo_confirmed_count integer`
+- `calculated_at timestamptz`
+- `metadata jsonb`
+
+Constraints:
+- check `confidence_level` in `high`, `medium`, `low`
+
+Usage:
+- low confidence Activities may give reduced RLI.
+- confidence should inform ledger writes, not public shaming.
+
+### community_contributions
+
+Purpose: record contribution to local community beyond simple attendance.
+
+Fields:
+- `id uuid primary key`
+- `user_id uuid references users(id) on delete cascade`
+- `activity_id uuid references events(id) on delete set null`
+- `contribution_type text not null`
+- `weight integer not null`
+- `created_at timestamptz`
+- `metadata jsonb`
+
+Usage:
+- ambassadors
+- moderators
+- trusted organizers
+- community builders
+
+### referral_codes
+
+Purpose: privacy-safe referral attribution.
+
+Fields:
+- `id uuid primary key`
+- `owner_user_id uuid references users(id) on delete cascade`
+- `code_hash text unique not null`
+- `status text not null`
+- `created_at timestamptz`
+- `expires_at timestamptz`
+
+Constraints:
+- check `status` in `active`, `disabled`, `expired`
+
+### referral_rewards
+
+Purpose: record referral credit only after meaningful real participation.
+
+Fields:
+- `id uuid primary key`
+- `referrer_user_id uuid references users(id) on delete cascade`
+- `referred_user_id uuid references users(id) on delete cascade`
+- `status text not null`
+- `confirmed_activity_count integer not null default 0`
+- `awarded_at timestamptz`
+- `created_at timestamptz`
+- `metadata jsonb`
+
+Rule:
+- referral reward can be awarded only after referred user completes 3 confirmed Activities.
+
+No crypto, token, or financial reward semantics are part of the MVP.
+
 ### dating_profiles
 
 Future table for the Dating vertical. It must not use the generic event join model.

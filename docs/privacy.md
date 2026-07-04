@@ -141,6 +141,25 @@ Not allowed:
 
 Users should later have opt-out from AI recommendations.
 
+## Reputation Privacy
+
+RLI, Trust Score, Community Contribution, and Life Map must follow privacy-by-default principles.
+
+Rules:
+
+- Trust Score is internal and hidden.
+- Users must not be publicly ranked by Trust Score.
+- RLI can be public or semi-public, but should expose only minimal, helpful trust context.
+- Community Contribution should recognize help without creating a social leaderboard.
+- Life Map is personal history, not a public competition.
+- Raw geolocation is never stored as movement history.
+- Geolocation confirmation is opt-in only.
+- Geolocation checks happen only in a limited time window and allowed radius.
+- Only the verification result is stored.
+- Raw coordinates are deleted immediately or never persisted.
+- Users should later be able to request reputation audit/export.
+- Abuse prevention and appeal process are required before trust penalties become significant.
+
 ## External Source Privacy
 
 Event discovery must use public and permitted sources only.

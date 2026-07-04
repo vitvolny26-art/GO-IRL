@@ -235,7 +235,81 @@ Safety requirements:
 
 Safety must be implemented before high-risk verticals such as Dating.
 
-## 16. Real Life Index
+## 16. Reputation System
+
+GO IRL needs trust, but must not become a popularity contest.
+
+Reputation exists to make real-life meetings safer and healthier. It must never become a public shame score, financial token, or social ranking.
+
+### Real Life Index (RLI)
+
+RLI is a public or semi-public signal of offline activity.
+
+It reflects:
+
+- participation;
+- organizing Activities;
+- confirmed real meetings;
+- contribution to people meeting in real life.
+
+RLI is not:
+
+- currency;
+- likes;
+- a game level;
+- a leaderboard position;
+- a financial reward promise.
+
+### Trust Score
+
+Trust Score is hidden and internal.
+
+It is used by the system for:
+
+- anti-spam;
+- moderation support;
+- confirmation weighting;
+- report weighting;
+- access to future community roles.
+
+Trust Score must not be shown publicly as a rating. Users must not be ranked or shamed by Trust Score.
+
+Before Trust Score penalties become significant, GO IRL must have auditability, appeal paths, and anti-bias review.
+
+### Community Contribution
+
+Community Contribution is separate from RLI.
+
+It reflects help given to the community, not only activity volume:
+
+- organizing quality Activities;
+- helping newcomers;
+- filling activities regularly;
+- receiving positive community feedback;
+- building healthy local groups.
+
+It can later support:
+
+- ambassadors;
+- moderators;
+- trusted organizers;
+- community builders.
+
+### Life Map
+
+Life Map is personal activity history, not a competition.
+
+It can show:
+
+- categories tried;
+- cities visited;
+- new connections;
+- active weeks;
+- organized Activities.
+
+Life Map must not become a leaderboard.
+
+## 17. Real Life Index
 
 RLI is reputation for real meetings.
 
@@ -259,7 +333,7 @@ RLI decreases for:
 - fake events
 - confirmed reports
 
-## 17. Activity Attendance Confirmation
+## 18. Activity Attendance Confirmation
 
 No QR codes at the start.
 
@@ -269,7 +343,15 @@ After an Activity:
 - participants can confirm each other
 - majority confirmation marks the Activity as completed
 
-## 18. Notification Philosophy
+Optional geolocation confirmation can be added later only when:
+
+- it is opt-in;
+- it happens in a limited time window;
+- it checks a reasonable radius around the Activity location;
+- raw coordinates are deleted immediately or never stored;
+- only the verification result is saved.
+
+## 19. Notification Philosophy
 
 The Mini App must not work in the background.
 
@@ -277,7 +359,7 @@ All background notifications go through backend/n8n.
 
 Notifications should respect working hours, quiet hours, opt-in preferences, and privacy rules.
 
-## 19. Activity Chat Philosophy
+## 20. Activity Chat Philosophy
 
 Activity Chat is optional and temporary.
 
@@ -297,7 +379,7 @@ The main goal of Activity Chat is to help people meet offline:
 
 By default, Activity Chat should be archived 24 hours after the Activity ends.
 
-## 20. Roadmap Principles
+## 21. Roadmap Principles
 
 Friends, Travel, and Dating come after foundation:
 
@@ -310,7 +392,7 @@ Friends, Travel, and Dating come after foundation:
 
 Sport remains the reference vertical until the foundation is stable.
 
-## 21. Non-Negotiables
+## 22. Non-Negotiables
 
 - No feature that does not support real-life meetings.
 - No hidden background tracking.

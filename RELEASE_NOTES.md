@@ -44,6 +44,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Sprint 2/3 architecture is prepared for implementation: RLS, admin, moderation, AI discovery, notifications, recommendation engine, event lifecycle, user lifecycle, and optional temporary Activity Chat.
 - Backend foundation SQL is ready for Supabase: `user_roles`, moderator/admin helpers, audit log, and verification SQL.
 - Security hardening SQL is ready for Supabase: DB-level text length constraints for Activity fields.
+- Reputation architecture is documented: RLI is not currency or likes, Trust Score is hidden/internal, and attendance confirmation is future planned work.
 
 ### Before Public Release
 

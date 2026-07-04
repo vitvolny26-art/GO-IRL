@@ -209,3 +209,19 @@ Client-side validation is useful for UX but can be bypassed with direct Supabase
 - participant note length.
 
 The constraints are created as `NOT VALID` to avoid breaking legacy/demo rows while still enforcing new writes and updates.
+
+## Reputation Security
+
+RLI, Trust Score, Community Contribution, and attendance confirmations are safety-sensitive systems.
+
+Rules:
+
+- Trust Score is internal only and must not be exposed as a public rating.
+- RLI changes must be written through an auditable ledger.
+- Attendance confirmations must be protected from self-confirmation abuse.
+- Reports and confirmations need abuse limits before affecting major penalties.
+- Referral rewards require anti-fraud checks and should count only after 3 confirmed Activities by the invited user.
+- Raw geolocation must not be stored as movement history.
+- Optional geolocation confirmation stores only the result needed for audit.
+- Significant penalties require auditability, moderator review where appropriate, and an appeal path.
+- No tokenization, crypto, or financial reward mechanics are part of the MVP.

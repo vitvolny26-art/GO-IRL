@@ -109,5 +109,6 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `docs/Admin.md` - admin roles, permissions, and future admin surfaces
 - `docs/Moderation.md` - report, block, moderation hold, and audit architecture
 - `docs/RecommendationEngine.md` - recommendation engine v2 architecture
+- `docs/reputation.md` - RLI, Trust Score, Community Contribution, attendance confirmation, and reputation privacy
 - `docs/EventLifecycle.md` - Activity lifecycle from creation to archive
 - `docs/UserLifecycle.md` - user lifecycle from registration to deletion

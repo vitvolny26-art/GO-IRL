@@ -44,6 +44,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Sprint 2/3 architecture documentation pack: AI, Admin, Moderation, RLS, RecommendationEngine, EventLifecycle, UserLifecycle, Database, Notifications, and Security.
 - Optional Activity Chat architecture with temporary participant-only chat, auto-archive policy, n8n cleanup, and privacy/safety rules.
 - Supabase backend foundation migration v2 with `user_roles`, role-aware RLS helpers, `audit_log`, and verification SQL.
+- Reputation architecture for RLI, hidden Trust Score, Community Contribution, attendance confirmation, event confidence, and RLI ledger.
 
 ### Changed
 

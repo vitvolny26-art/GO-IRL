@@ -80,6 +80,8 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 3 - Server-Side Notifications
 
+- Reputation data model.
+- Attendance confirmation design.
 - Activity chat MVP after database/RLS foundation is stable.
 - Participant-only chat access for organizer, confirmed participants, admin, and moderator.
 - Auto-archive Activity Chat after the Activity ends.
@@ -93,6 +95,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 4 - AI Event Discovery
 
+- RLI MVP.
+- Organizer attendance confirmation.
+- Participant attendance confirmation.
 - AI Event Discovery architecture is documented as Sources -> Parser -> AI normalization -> Duplicate detection -> Moderation -> Database -> Recommendations -> Notifications.
 - Chat notifications through n8n with quiet hours.
 - Report/block in Activity Chat.
@@ -110,6 +115,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 5 - Deferred Verticals
 
+- Trust Score internal model.
+- Community Contribution.
+- Referral anti-fraud.
 - CAL-002 Future native calendar integration.
 - CAL-003 Future Google OAuth calendar sync.
 - Activity Chat privacy review.
@@ -118,6 +126,14 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 - Friends vertical starts only after database and notification foundation is stable.
 - Travel vertical starts only after Friends and source discovery architecture are stable.
 - Dating vertical is last and must not begin until privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.
+
+## Phase 6 - Life Map and Rewards Preparation
+
+- Life Map.
+- Achievements.
+- Reward program preparation.
+- RLI ledger audit/export.
+- No crypto/tokenization unless separately reviewed and approved later.
 
 ## Maximum Privacy + User Data Security
 

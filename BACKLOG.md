@@ -117,6 +117,9 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 ## Sprint 3 - Performance and n8n Notifications
 
 - Sprint 3 future-capability architecture is complete at documentation level. Heavy runtime features remain intentionally unimplemented.
+- REP-001 Reputation data model.
+- REP-002 Attendance confirmation design.
+- REP-003 Event confidence levels design.
 - CAL-001 Save Activity to Google Calendar through a template URL without OAuth.
 - ACT-CHAT-002 Auto-delete chat after activity: archive by default 24 hours after Activity end.
 - Activity Chat MVP with participant-only access.
@@ -135,6 +138,9 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 ## Sprint 4 - AI Event Discovery
 
+- REP-004 RLI MVP.
+- REP-005 Organizer attendance confirmation.
+- REP-006 Participant attendance confirmation.
 - ACT-CHAT-003 n8n chat cleanup workflow.
 - ACT-CHAT-004 Chat notifications with quiet hours, notification opt-out, and no messages after archive.
 - Chat report/block flow.
@@ -226,9 +232,30 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 ## Sprint 5 - Privacy Review
 
+- REP-007 Trust Score internal model.
+- REP-008 Community Contribution.
+- REP-009 Referral anti-fraud.
 - Activity Chat privacy review.
 - Activity Chat retention policies.
 - Optional encrypted chat research.
+
+## Sprint 6 - Reputation and Life Map
+
+- REP-010 Life Map.
+- REP-011 Achievements.
+- REP-012 Reward program preparation.
+- REP-013 RLI ledger audit/export.
+- REP-014 Reputation appeal flow.
+- REP-015 Attendance geolocation confirmation research.
+
+Reputation non-goals for MVP:
+
+- no crypto;
+- no token;
+- no tokenomics;
+- no financial reward promise;
+- no leaderboard;
+- no public Trust Score.
 
 ## Database + AI Discovery + Evening Digest
 
@@ -262,6 +289,7 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - ARCH-008 Recommendation Engine v2 design.
 - ARCH-009 Event lifecycle.
 - ARCH-010 User lifecycle.
+- ARCH-011 Reputation system.
 
 ## Calendar
 
