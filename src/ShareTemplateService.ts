@@ -22,7 +22,6 @@ type ShareTemplateData = {
   priceLine: string;
   lowSpotsLine: string;
   joinText: string;
-  tagline: string;
   url?: string;
   includeUrl?: boolean;
 };
@@ -123,13 +122,6 @@ const joinLabel: Record<Language, string> = {
   uk: "👉 Приєднатися",
   cs: "👉 Připojit se",
   en: "👉 Join",
-};
-
-const shareTagline: Record<Language, string> = {
-  ru: "Меньше скролла. Больше жизни.",
-  uk: "Менше скролу. Більше життя.",
-  cs: "Méně scrollování. Více života.",
-  en: "Less scrolling. More life.",
 };
 
 const activityKindTerms: Record<Exclude<ActivityShareKind, "generic">, string[]> = {
@@ -248,7 +240,6 @@ const buildShareTemplateData = (activity: Activity, language: Language, options:
     priceLine: priceLine(activity, language),
     lowSpotsLine: lowSpotsLine(activity, language),
     joinText: joinLabel[language],
-    tagline: shareTagline[language],
     url: options.url,
     includeUrl: options.includePlainTextUrl,
   };
@@ -278,7 +269,6 @@ const renderShareText = (data: ShareTemplateData, language: Language, closingLin
     data.includeUrl && data.url,
     "",
     "GO IRL",
-    data.tagline,
   ].filter(Boolean).join("\n");
 
 export const ShareTemplateService = {

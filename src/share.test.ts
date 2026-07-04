@@ -40,7 +40,7 @@ describe("buildActivityShareText", () => {
     expect(text).toContain("👉 Присоединиться");
     expect(text).not.toContain("https://t.me/GOirl_bot?startapp=share-1");
     expect(text).toContain("GO IRL");
-    expect(text).toContain("Меньше скролла. Больше жизни.");
+    expect(text).not.toContain("Меньше скролла. Больше жизни.");
   });
 
   it("supports English templates through the same architecture", () => {
@@ -49,7 +49,7 @@ describe("buildActivityShareText", () => {
     expect(text).toContain("On Wednesday, we're getting together for volleyball.");
     expect(text).toContain("📍 Olomouc, Beach Arena");
     expect(text).toContain("👉 Join");
-    expect(text).toContain("Less scrolling. More life.");
+    expect(text).not.toContain("Less scrolling. More life.");
   });
 
   it("uses activity-specific human phrasing instead of one generic template", () => {
@@ -133,8 +133,8 @@ describe("buildActivityShareText", () => {
     expect(lines[0]).not.toBe(url);
     expect(lines).toContain("👉 Присоединиться:");
     expect(lines[lines.indexOf("👉 Присоединиться:") + 1]).toBe(url);
-    expect(lines.at(-2)).toBe("GO IRL");
-    expect(lines.at(-1)).toBe("Меньше скролла. Больше жизни.");
+    expect(lines.at(-1)).toBe("GO IRL");
+    expect(text).not.toContain("Меньше скролла. Больше жизни.");
   });
 
   it("localizes the plain-text CTA before the URL", () => {
