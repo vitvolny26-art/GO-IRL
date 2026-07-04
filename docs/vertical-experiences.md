@@ -4,6 +4,46 @@ GO IRL is not a single generic event list. It is a platform of vertical experien
 
 The current Sprint 1 product remains a generic event MVP. Vertical modules must be added gradually without breaking the generic fallback.
 
+## Strategic Order
+
+Vertical work must follow the platform strategy, not excitement around new product surfaces.
+
+Current priority:
+
+1. Infrastructure Hardening
+   - Supabase production readiness.
+   - Migrations.
+   - RLS.
+   - Roles.
+   - Database verification.
+   - Remove dependency on local fallback where possible.
+2. Performance
+   - Lazy loading.
+   - Code splitting.
+   - Bundle optimization.
+   - Telegram Mini App startup performance.
+3. n8n Notifications
+   - Server-side notification workflow.
+   - Evening digest.
+   - Working hours.
+   - Quiet hours.
+   - No Mini App background work.
+4. AI Event Discovery
+   - External sources.
+   - Event collection.
+   - AI normalization.
+   - Duplicate detection.
+   - Confidence scoring.
+   - Save discovered events to the database.
+5. Friends Vertical
+   - Start only after database and notification foundation is stable.
+6. Travel Vertical
+   - Start only after Friends and source discovery architecture is stable.
+7. Dating Vertical
+   - Start last because it requires privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection.
+
+Do not implement Friends, Travel, or Dating until their prerequisites are complete.
+
 ## Principle
 
 Each activity vertical can define:
@@ -135,6 +175,8 @@ This is intentionally deterministic. AI recommendations can later replace the en
 
 Dating is a separate product vertical, not a normal event category.
 
+Dating is intentionally last in the vertical roadmap. It must not start before privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are designed and implemented.
+
 It may learn from common mechanics in dating products such as swipe discovery, mutual match, anonymous chat, and safety-first identity reveal, but it must not copy brand design or proprietary flows directly.
 
 Dating profile fields:
@@ -176,6 +218,8 @@ Dating must not use the generic event join flow. Its flow is:
 ## Friends Vertical
 
 Friends / social hangouts focus on casual group meetings.
+
+Friends is deferred until database and notification foundation is stable.
 
 Examples:
 
@@ -220,6 +264,23 @@ Fields:
 
 Recommendations prioritize city, cuisine preference, budget, time, reservation confidence, and group size.
 
+Food remains a future vertical and should not take priority over infrastructure, performance, n8n notifications, or AI event discovery.
+
+## Travel Vertical
+
+Travel is a future vertical and must start only after Friends and source discovery architecture are stable.
+
+Potential examples:
+
+- day trips
+- weekend trips
+- hiking trips
+- city visits
+- shared transport
+- group travel planning
+
+Travel will likely depend on external sources, availability windows, location radius, and richer planning data. That makes it a later vertical, not an MVP priority.
+
 ## Generic Event Fallback
 
 Generic Activity/Event remains as a fallback when no vertical is implemented.
@@ -243,6 +304,7 @@ Conceptual renderers:
 - `DatingProfileCard`
 - `FriendsEventCard`
 - `FoodEventCard`
+- `TravelEventCard`
 - `GenericActivityCard`
 
 The registry selects UI by `activity.type`.
@@ -281,6 +343,7 @@ Engines:
 - `DatingMatchingEngine`
 - `FriendsRecommendationEngine`
 - `FoodRecommendationEngine`
+- `TravelRecommendationEngine`
 - `GenericRecommendationEngine`
 
 The shared recommendation layer coordinates engines but must not force identical rules on every vertical.
@@ -301,9 +364,13 @@ Mini App still does not run in the background. All notifications remain server/n
 ## Migration Path
 
 1. Keep current generic event MVP.
-2. Add `activity_type` and metadata fields to future DB model.
-3. Add renderer registry with generic fallback.
-4. Build Sport vertical first.
-5. Add Friends/Food verticals.
-6. Build Dating separately with safety and privacy architecture before launch.
-7. Normalize JSONB metadata into stable vertical tables when usage proves the shape.
+2. Keep Sport as the reference vertical.
+3. Harden Supabase production readiness, migrations, RLS, roles, and database verification.
+4. Remove dependency on local fallback where possible after production schema is verified.
+5. Improve performance through lazy loading, code splitting, bundle optimization, and Telegram Mini App startup checks.
+6. Build n8n server-side notifications, evening digest, working hours, and quiet hours.
+7. Build AI Event Discovery with public sources, event collection, AI normalization, duplicate detection, confidence scoring, and database persistence.
+8. Add Friends only after database and notification foundation is stable.
+9. Add Travel only after Friends and source discovery architecture is stable.
+10. Build Dating last with safety and privacy architecture before launch.
+11. Normalize JSONB metadata into stable vertical tables when usage proves the shape.

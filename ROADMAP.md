@@ -2,81 +2,97 @@
 
 GO IRL is being built as a platform, not a one-off Telegram Mini App. New work should stay compatible with future web, Android, and iOS clients.
 
+## Strategic Development Order
+
+The current product priority is foundation and infrastructure. Friends, Travel, and Dating are intentionally deferred until the platform layer is stable.
+
+1. Infrastructure Hardening
+   - Supabase production readiness.
+   - Safe, repeatable migrations.
+   - RLS hardening for all user and event data.
+   - Roles and permission enforcement.
+   - Database verification SQL and release checklist.
+   - Remove dependency on local fallback where possible after production migration is applied.
+2. Performance
+   - Lazy loading.
+   - Code splitting.
+   - Bundle optimization.
+   - Telegram Mini App startup performance.
+3. n8n Notifications
+   - Server-side notification workflow.
+   - Evening digest.
+   - Working hours.
+   - Quiet hours.
+   - No Mini App background work.
+4. AI Event Discovery
+   - External sources.
+   - Event collection.
+   - AI normalization.
+   - Duplicate detection.
+   - Confidence scoring.
+   - Save discovered events to the database.
+5. Friends Vertical
+   - Start only after database and notification foundation is stable.
+6. Travel Vertical
+   - Start only after Friends and source discovery architecture are stable.
+7. Dating Vertical
+   - Last, because it requires privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection.
+
 ## Phase 1 - Production Foundation
 
 - Keep build and TypeScript checks green.
 - Preserve the current generic event MVP as the fallback experience.
-- Add the Vertical Experiences architecture layer.
-- Document the Sport/Dating/Friends/Food split without launching full Dating yet.
-- Add linting with the smallest dependency set that matches the project.
-- Add focused automated tests for activity creation, join flows, and private request review.
+- Keep Sport as the current reference vertical without expanding into Friends, Travel, or Dating yet.
 - Harden Supabase RLS and document every policy.
+- Apply and verify migrations for `city_id`, `metadata`, `participant_note`, and `activity_type`.
+- Add database verification SQL to release flow.
+- Replace local fallback as the primary source of truth once production schema is verified.
 - Add Telegram `initData` validation on a trusted backend or edge function.
 - Keep Telegram Mini App lifecycle explicit: no surprise close, no background polling, user-triggered close only.
 - Privacy settings placeholder.
 - No background tracking policy.
 - User notification opt-in design.
 
-## Phase 2 - Product Quality
+## Phase 2 - Performance and Product Quality
 
-- Sport vertical MVP as the reference vertical.
-- ActivityRendererRegistry with Sport and Generic registrations.
-- Sport-specific card, details, create flow, skill level, sport type, indoor/outdoor, equipment, what to bring, requirements, organizer tips, duration, and weather placeholder.
-- SportRecommendationEngine with simple city + level + sport type matching.
-- Redesign event cards for faster scanning and a more premium 2026 feel.
-- Redesign the home screen around discovery actions and large categories.
+- Keep Sport vertical MVP as the reference vertical.
+- Maintain ActivityRendererRegistry with Sport and Generic registrations.
+- Continue improving event cards, create flow, details, profile, and organizer controls only where needed for current MVP quality.
 - Add Discover / For You screen with search, quick filters, and simple matching by city, interests, date, and free spots.
 - Add favorite activity selection to the user profile.
-- Add clearer organizer controls for editing, sharing, and reviewing requests.
 - Improve empty, loading, and error states.
 - Add city expansion for Prague, Brno, Ostrava, and future cities through configuration.
-- Real Supabase database model for users, profiles, interests, and events.
-- User interests.
-- Notification preferences.
-- Supabase RLS hardening.
-- User privacy settings.
-- Delete account flow.
+- Lazy-load heavy screens and vertical modules.
+- Optimize production chunks and keep Telegram Mini App first load fast.
 
-## Phase 3 - Growth
+## Phase 3 - Server-Side Notifications
 
-- Friends vertical with invite/request flow and group social matching.
 - Add server-side notifications for join requests and event updates through n8n.
-- Add user reputation/RLI details.
-- Add event moderation and abuse reporting.
-- Add analytics for activation, joins, shares, and completed offline events.
-- Prepare web deployment parity with Telegram Mini App behavior.
-- n8n event discovery workflow.
-- AI event normalization.
-- AI duplicate detection.
-- AI event discovery sources: public event websites, Facebook Events, Meetup, Eventbrite, city calendars, universities, Telegram, Discord, Reddit, and public calendars.
+- Build evening digest workflow through n8n.
+- Respect quiet hours and working hours; never send AI/n8n digest at night.
+- Store notification preferences in Supabase.
+- Keep all notification processing off the Mini App background lifecycle.
+- Add Telegram notification bot delivery.
+- Prevent duplicate digest sends through `notification_digest_log`.
+
+## Phase 4 - AI Event Discovery
+
+- Build n8n event discovery workflow.
+- Use public sources, RSS/API, public Telegram channels, manual moderation, and user suggestions first.
 - Facebook Groups are future-only through official API/manual review; no personal-account scraping or stored Facebook credentials.
-- MVP discovery uses public sources, RSS/API, public Telegram channels, manual moderation, and user suggestions.
-- Anonymous mode.
-- Reveal contact by mutual consent.
-- Reporting and blocking.
-- Rate limiting.
+- Add external source health tracking.
+- Add AI event normalization.
+- Add AI duplicate detection.
+- Add confidence scoring and rejection rules.
+- Save discovered events to the database before publication or digest selection.
+- Add lifecycle job for `published` -> `expired` / `completed`.
+- Add source management admin panel.
 
-## Phase 4 - Discovery and Digest
+## Phase 5 - Deferred Verticals
 
-- Dating vertical MVP with dating profile, like/pass, mutual match, anonymous chat, mutual reveal, block/report, and safety-first rules.
-- Evening personalized digest.
-- Digest matching respects user city, interests, language, price limits, quiet hours, and working hours.
-- n8n sends personalized digest through the selected notification channel and prevents duplicate event sends.
-- Digest excludes unreviewed, expired, completed, cancelled, and duplicate events.
-- Telegram notification bot.
-- Source management admin panel.
-- Anonymous chat.
-- Auto-expiring chats.
-- Admin moderation.
-- Audit logs.
-
-## Phase 5 - Privacy and Security Hardening
-
-- AI recommendations per vertical.
-- GDPR-style export/delete.
-- Security review.
-- Privacy review.
-- Abuse prevention hardening.
+- Friends vertical starts only after database and notification foundation is stable.
+- Travel vertical starts only after Friends and source discovery architecture are stable.
+- Dating vertical is last and must not begin until privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.
 
 ## Maximum Privacy + User Data Security
 
@@ -94,7 +110,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 ## Vertical Experiences
 
 - GO IRL is composed of vertical experience modules, not one universal event flow.
-- Sport, Dating, Friends, Food, Travel, Culture, Local, and Custom can own their fields, filters, cards, create forms, details screens, recommendation engines, privacy rules, safety rules, and notification rules.
-- Sport is the first real implementation. Dating/Friends/Food/Travel/Culture remain future modules until deliberately started.
-- Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.
+- Sport remains the current reference vertical.
 - Generic Activity/Event remains as fallback until a vertical-specific experience is implemented.
+- Friends, Travel, and Dating are deferred by strategy and must not be implemented before the infrastructure, performance, n8n, and AI discovery layers are stable.
+- Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.

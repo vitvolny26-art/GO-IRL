@@ -2,6 +2,40 @@
 
 Confirmed work is ordered by priority.
 
+## Strategic Priority Order
+
+1. Infrastructure Hardening
+   - Supabase production readiness.
+   - Migrations.
+   - RLS.
+   - Roles.
+   - Database verification.
+   - Remove dependency on local fallback where possible after production migration is verified.
+2. Performance
+   - Lazy loading.
+   - Code splitting.
+   - Bundle optimization.
+   - Telegram Mini App startup performance.
+3. n8n Notifications
+   - Server-side notification workflow.
+   - Evening digest.
+   - Working hours.
+   - Quiet hours.
+   - No Mini App background work.
+4. AI Event Discovery
+   - External sources.
+   - Event collection.
+   - AI normalization.
+   - Duplicate detection.
+   - Confidence scoring.
+   - Save discovered events to the database.
+5. Friends Vertical
+   - Deferred until database and notification foundation is stable.
+6. Travel Vertical
+   - Deferred until Friends and source discovery architecture are stable.
+7. Dating Vertical
+   - Deferred until privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.
+
 ## Build Blocker
 
 - None confirmed. `pnpm run build` passes as of 2026-07-03.
@@ -40,28 +74,37 @@ Confirmed work is ordered by priority.
 - Add deeper empty-state actions on the home screen when there are no upcoming events.
 - Add server-side n8n notifications for requests and event updates; do not keep the Mini App running in background for notifications.
 
-## Sprint 2 - Database and Preferences
+## Sprint 2 - Infrastructure Hardening
 
-- VERT-006 Sport vertical MVP.
-- VERT-018 ActivityRendererRegistry production wiring.
-- VERT-019 Sport Activity Card.
-- VERT-020 Sport Details screen.
-- VERT-021 Sport Create Flow.
-- VERT-022 SportRecommendationEngine.
-- VERT-007 Sport skill matching.
-- VERT-003 Vertical-specific create forms.
 - Real Supabase database.
+- Apply and verify `supabase/migration_v1.sql` in production.
+- Add release checklist for `supabase/verify_schema.sql`.
+- Supabase RLS hardening.
+- Roles and permission enforcement.
+- Server-side admin role enforcement for event deletion and moderation.
+- Replace Sprint 1 admin allowlist with server-side enforcement.
 - User interests.
 - Favorite activity persistence in Supabase.
-- Notification preferences.
 - User privacy settings.
 - Delete account flow.
-- Supabase RLS hardening.
+- Keep Sport vertical stable as the reference implementation; do not start Friends, Travel, or Dating.
 
-## Sprint 3 - AI Event Discovery
+## Sprint 3 - Performance and n8n Notifications
 
 - Rich Telegram share via bot message: send event invitations through Telegram Bot API with an inline `[Присоединиться]` button so the URL is not visible in the message text.
-- VERT-015 Friends vertical.
+- Lazy loading for heavy screens and vertical modules.
+- Code splitting for Dashboard, Discover, Create Event, Event Details, Profile, Organizer Dashboard, and Sport vertical.
+- Bundle optimization and Vite chunk review.
+- Telegram Mini App startup performance checks.
+- Add server-side n8n notifications for join requests and event updates.
+- Notification preferences.
+- Evening personalized digest.
+- Respect quiet hours and working hours; never send AI/n8n digest at night.
+- Telegram notification bot.
+- Store digest sends in `notification_digest_log`.
+
+## Sprint 4 - AI Event Discovery
+
 - Replace `SimpleRecommendationEngine` with an AI-backed implementation behind the existing `RecommendationEngine` interface.
 - n8n event discovery workflow.
 - Discovery source coverage: public event websites, Facebook Events, Meetup, Eventbrite, city sites, universities, Telegram, Discord, Reddit, and public calendars.
@@ -70,12 +113,25 @@ Confirmed work is ordered by priority.
 - AI event normalization.
 - AI duplicate detection.
 - Event lifecycle job for `published` -> `expired` / `completed`.
-- Anonymous mode.
-- Reveal contact by mutual consent.
-- Reporting / blocking.
-- Rate limiting.
+- Store discovered events in the database before digest selection.
+- Source management admin panel.
 
-## Sprint 4 - Evening Digest and Admin
+## Later - Friends Vertical
+
+- VERT-015 Friends vertical.
+- Friends invite/request flow.
+- Friends group social matching.
+- Friends notification templates.
+- Start only after database and notification foundation is stable.
+
+## Later - Travel Vertical
+
+- VERT-023 Travel vertical placeholder.
+- Travel activity model.
+- Travel source discovery integration.
+- Start only after Friends and source discovery architecture are stable.
+
+## Last - Dating Vertical
 
 - VERT-008 Dating vertical architecture.
 - VERT-009 Dating profile.
@@ -84,16 +140,15 @@ Confirmed work is ordered by priority.
 - VERT-012 Anonymous dating chat.
 - VERT-013 Mutual identity reveal.
 - VERT-014 Dating safety: report/block.
-- Evening personalized digest.
-- Respect quiet hours and working hours; never send AI/n8n digest at night.
-- Store discovered events in the database before digest selection.
-- Telegram notification bot.
-- Source management admin panel.
+- Anonymous mode.
+- Reveal contact by mutual consent.
+- Reporting / blocking.
+- Rate limiting.
 - Anonymous chat.
 - Auto-expiring chats.
 - Admin moderation.
 - Audit logs.
-- Server-side admin role enforcement for event deletion and moderation.
+- Start last, after privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.
 
 ## Maximum Privacy + User Data Security
 
@@ -164,3 +219,9 @@ Confirmed work is ordered by priority.
 - VERT-021 Sport Create Flow.
 - VERT-022 SportRecommendationEngine.
 - VERT-023 Travel vertical placeholder.
+
+Deferred vertical rule:
+
+- Friends is not started until database and notification foundation is stable.
+- Travel is not started until Friends and source discovery architecture are stable.
+- Dating is last and requires privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection first.
