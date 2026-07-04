@@ -7,7 +7,6 @@ export const categories: Category[] = [
   { id: "nature", icon: "🌿", name: { ru: "Природа", uk: "Природа", cs: "Příroda", en: "Nature" } },
   { id: "social", icon: "❤️", name: { ru: "Общение", uk: "Спілкування", cs: "Setkání", en: "Social" } },
   { id: "creativity", icon: "🎨", name: { ru: "Творчество", uk: "Творчість", cs: "Tvorba", en: "Creativity" } },
-  { id: "inline-skating", icon: "🛼", name: { ru: "Ролики", uk: "Ролики", cs: "Inline bruslení", en: "Inline skating" } },
 ];
 
 export const activityOptions: Record<string, Array<{ icon: string; name: Category["name"] }>> = {
@@ -26,6 +25,10 @@ export const activityOptions: Record<string, Array<{ icon: string; name: Categor
     { icon: "🎳", name: { ru: "Боулинг", uk: "Боулінг", cs: "Bowling", en: "Bowling" } },
     { icon: "🎲", name: { ru: "Настольные игры", uk: "Настільні ігри", cs: "Deskové hry", en: "Board games" } },
     { icon: "🎤", name: { ru: "Караоке", uk: "Караоке", cs: "Karaoke", en: "Karaoke" } },
+    { icon: "🛼", name: { ru: "Ролики", uk: "Ролики", cs: "Inline bruslení", en: "Inline skating" } },
+    { icon: "🌆", name: { ru: "Городской заезд", uk: "Міський заїзд", cs: "Městská jízda", en: "City ride" } },
+    { icon: "🛣️", name: { ru: "Маршрут на роликах", uk: "Маршрут на роликах", cs: "Trasa na bruslích", en: "Skating route" } },
+    { icon: "✨", name: { ru: "Вечерние ролики", uk: "Вечірні ролики", cs: "Večerní bruslení", en: "Evening skating" } },
   ],
   party: [
     { icon: "🍺", name: { ru: "PIVO", uk: "PIVO", cs: "PIVO", en: "Beer" } },
@@ -54,12 +57,6 @@ export const activityOptions: Record<string, Array<{ icon: string; name: Categor
     { icon: "🏺", name: { ru: "Керамика", uk: "Кераміка", cs: "Keramika", en: "Ceramics" } },
     { icon: "🎸", name: { ru: "Музыкальный джем", uk: "Музичний джем", cs: "Hudební jam", en: "Music jam" } },
     { icon: "🧶", name: { ru: "Мастерская", uk: "Майстерня", cs: "Dílna", en: "Workshop" } },
-  ],
-  "inline-skating": [
-    { icon: "🛼", name: { ru: "Ролики", uk: "Ролики", cs: "Inline bruslení", en: "Inline skating" } },
-    { icon: "🌆", name: { ru: "Городской заезд", uk: "Міський заїзд", cs: "Městská jízda", en: "City ride" } },
-    { icon: "🛣️", name: { ru: "Маршрут на роликах", uk: "Маршрут на роликах", cs: "Trasa na bruslích", en: "Skating route" } },
-    { icon: "✨", name: { ru: "Вечерние ролики", uk: "Вечірні ролики", cs: "Večerní bruslení", en: "Evening skating" } },
   ],
 };
 

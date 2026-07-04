@@ -23,13 +23,15 @@ describe("activity taxonomy", () => {
     }
   });
 
-  it("includes inline skating as a real activity category", () => {
-    const skating = categories.find((category) => category.id === "inline-skating");
-    expect(skating).toMatchObject({
-      icon: "🛼",
-      name: { ru: "Ролики", uk: "Ролики", cs: "Inline bruslení", en: "Inline skating" },
-    });
-    expect(activityOptions["inline-skating"].some((option) => option.name.ru === "Ролики")).toBe(true);
-    expect(activityOptions["inline-skating"].some((option) => option.name.en === "Inline skating")).toBe(true);
+  it("keeps inline skating inside the Activities category", () => {
+    expect(categories.some((category) => category.id === "inline-skating")).toBe(false);
+    expect(activityOptions.activities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          icon: "🛼",
+          name: { ru: "Ролики", uk: "Ролики", cs: "Inline bruslení", en: "Inline skating" },
+        }),
+      ]),
+    );
   });
 });
