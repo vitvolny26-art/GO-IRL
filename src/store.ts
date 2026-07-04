@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { categories } from "./data";
 import { supabase, getUserKey } from "./supabase";
-import { getTelegramWebApp } from "./telegram";
+import { getCurrentDisplayName, getCurrentStartParam, getCurrentUserRole as getTrustedUserRole } from "./authSession";
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
@@ -241,7 +241,7 @@ export const useAppStore = create<AppState>((set, get) => {
 
     const rows = ((activitiesResult.data || []) as DbActivity[]).filter((row) => !isDeletedActivityRow(row));
     const members = (membersResult.data || []) as DbMember[];
-    const invitedActivityId = getTelegramWebApp()?.initDataUnsafe?.start_param;
+    const invitedActivityId = getCurrentStartParam();
     const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
 
     set({
@@ -268,7 +268,7 @@ export const useAppStore = create<AppState>((set, get) => {
     selectedCategory: null,
     loading: true,
     syncError: null,
-    userRole: getCurrentUserRole(getUserKey()),
+    userRole: getTrustedUserRole() === "user" ? getCurrentUserRole(getUserKey()) : getTrustedUserRole(),
 
     initialize: async () => {
       set({ loading: true });
@@ -329,8 +329,7 @@ export const useAppStore = create<AppState>((set, get) => {
       if (activity.participants >= activity.capacity) return "full";
 
       const status: DbMember["status"] = activity.visibility === "invite" ? "pending" : "joined";
-      const telegramUser = getTelegramWebApp()?.initDataUnsafe?.user;
-      const displayName = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
+      const displayName = getCurrentDisplayName(getTranslation(get().language).guestName);
       const { error } = await supabase.from("activity_members").insert({
         activity_id: id,
         user_key: userKey,
@@ -344,8 +343,7 @@ export const useAppStore = create<AppState>((set, get) => {
 
     createActivity: async (input) => {
       const userKey = getUserKey();
-      const telegramUser = getTelegramWebApp()?.initDataUnsafe?.user;
-      const organizer = [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || getTranslation(get().language).guestName;
+      const organizer = getCurrentDisplayName(getTranslation(get().language).guestName);
       const row = {
         category_id: input.categoryId,
         activity_ru: input.activityText,

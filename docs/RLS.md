@@ -2,21 +2,23 @@
 
 RLS is the core database safety layer for GO IRL. Frontend checks improve UX, but database policies must enforce real access.
 
-## Critical Security Blocker Before Public Release
+## Trusted Identity Status
 
-The current MVP still passes identity to Supabase through a frontend-controlled request header:
+The legacy MVP passed identity to Supabase through a frontend-controlled request header:
 
 ```text
 x-go-irl-user-key
 ```
 
-That value is derived from Telegram `initDataUnsafe` or local guest storage in the browser. This is **not cryptographically trusted**. A user can forge the header through DevTools or direct REST calls and impersonate another user, organizer, or admin-like key.
+That value is derived from Telegram `initDataUnsafe` or local guest storage in the browser. It is **not cryptographically trusted**. A user can forge the header through DevTools or direct REST calls and impersonate another user, organizer, or admin-like key.
 
-Therefore:
+Current implementation phase:
 
-- the current header-based RLS model is allowed only for private demo/testing;
-- GO IRL must not be treated as public-release ready while RLS trusts `x-go-irl-user-key`;
-- public release requires trusted Telegram `initData` verification on a backend/edge function and RLS based on verified auth context.
+- `verifyTelegramInitData` Edge Function verifies Telegram HMAC.
+- frontend uses `Telegram.WebApp.initData`, not `initDataUnsafe`, for auth.
+- frontend Supabase client uses a verified JWT through `accessToken`.
+- migration v4 updates RLS helpers to read `auth.jwt()` claims.
+- `x-go-irl-user-key` is legacy demo mode only and must be disabled in public production.
 
 ## Principles
 
@@ -58,21 +60,15 @@ Therefore:
 
 Until Telegram `initData` validation is implemented on a trusted backend/edge layer, the `x-go-irl-user-key` header must still be treated as an unsafe MVP identity bridge, not final production identity.
 
-## Trusted Telegram Auth Target
-
-Recommended path for the current flat Vite + React + Supabase architecture:
+## Trusted Telegram Auth Flow
 
 1. Frontend reads raw Telegram `initData`, not `initDataUnsafe`, from `Telegram.WebApp.initData`.
 2. Frontend sends `initData` to a trusted Supabase Edge Function.
 3. Edge Function verifies Telegram HMAC using the bot token stored as a Supabase secret.
 4. Edge Function creates or finds the user record.
-5. Edge Function returns a trusted session/JWT or maps the verified Telegram user to Supabase Auth.
-6. RLS policies use `auth.uid()` or a server-issued verified claim, not browser-provided headers.
-
-Alternative paths:
-
-- Minimal backend API: same HMAC verification, then issue session/JWT.
-- Future full backend: consolidate auth, roles, admin actions, and n8n service operations behind one API layer.
+5. Edge Function stores a replay hash in `telegram_auth_replay`.
+6. Edge Function returns a trusted session/JWT.
+7. RLS policies use `auth.jwt()` claims, not browser-provided identity headers.
 
 ## RLS Redesign Target
 
@@ -82,7 +78,7 @@ Current:
 request.headers -> x-go-irl-user-key -> RLS helpers
 ```
 
-Target:
+Implemented target:
 
 ```text
 Telegram initData -> trusted verifier -> Supabase Auth/JWT -> auth.uid()/verified claims -> RLS

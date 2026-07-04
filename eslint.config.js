@@ -28,4 +28,19 @@ export default [
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
+  {
+    files: ["supabase/functions/**/*.ts"],
+    languageOptions: {
+      globals: {
+        Deno: "readonly",
+        Response: "readonly",
+        Request: "readonly",
+        URLSearchParams: "readonly",
+        TextEncoder: "readonly",
+        crypto: "readonly",
+        btoa: "readonly",
+        console: "readonly",
+      },
+    },
+  },
 ];

@@ -135,6 +135,36 @@ Apply it after migration v2:
 
 The constraints are created as `NOT VALID`, which means legacy/demo rows do not block the migration, while new inserts and updates are still checked.
 
+## Apply Trusted Telegram Auth Migration v4
+
+`supabase/migration_v4_trusted_telegram_auth.sql` prepares the database for verified Telegram sessions.
+
+It adds:
+
+- `public.app_users`
+- `public.telegram_auth_replay`
+- `go_irl_auth_user_key()`
+- JWT-claim based `go_irl_request_user_key()`
+- JWT-claim based `go_irl_request_invite_activity()`
+- authenticated-role RLS policies for `activities` and `activity_members`
+
+Apply it only after the `verifyTelegramInitData` Edge Function is deployed and its secrets are configured:
+
+1. Deploy `supabase/functions/verifyTelegramInitData`.
+2. Set Edge Function secrets:
+   - `TELEGRAM_BOT_TOKEN`
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `SUPABASE_JWT_SECRET`
+   - optional `GO_IRL_AUTH_MAX_AGE_SECONDS`
+   - optional `GO_IRL_SESSION_TTL_SECONDS`
+3. Paste and run `supabase/migration_v4_trusted_telegram_auth.sql`.
+4. Paste and run `supabase/verify_trusted_auth.sql`.
+5. Confirm every row has `status = 'ok'`.
+6. Open the Mini App inside Telegram and confirm create/join/edit/delete flows work with verified auth.
+
+Do not apply v4 to production until the Edge Function is deployed. Once v4 is applied, production must not rely on `x-go-irl-user-key`.
+
 ## 4. RLS
 
 RLS is enabled by the SQL files:
@@ -146,12 +176,12 @@ alter table public.activity_members enable row level security;
 
 Do not disable RLS in production.
 
-The app sends these headers from `src/supabase.ts`:
+Legacy demo mode can send these headers from `src/supabase.ts` only when explicitly enabled for local development:
 
 - `x-go-irl-user-key`
 - `x-go-irl-invite-activity`
 
-Policies use those headers to separate each Telegram user and support invite links.
+Production policies must use verified JWT claims from `verifyTelegramInitData`.
 
 Critical warning: this header-based identity model is unsafe for public release because the frontend controls `x-go-irl-user-key`. A user can forge it with DevTools or direct REST calls. It is allowed only for private demo/testing until trusted Telegram `initData` verification is implemented.
 
@@ -176,6 +206,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
 VITE_GO_IRL_ADMIN_KEYS=telegram:123456789,telegram_username:yourusername
+VITE_GO_IRL_LEGACY_DEMO_AUTH=false
 ```
 
 Do not set `VITE_GO_IRL_ADMIN_KEYS` to real production admin identifiers for public releases.
@@ -187,6 +218,7 @@ VITE_SUPABASE_URL
 VITE_SUPABASE_PUBLISHABLE_KEY
 VITE_TELEGRAM_BOT_USERNAME
 VITE_GO_IRL_ADMIN_KEYS
+VITE_GO_IRL_LEGACY_DEMO_AUTH=false
 ```
 
 Set them for Production, Preview, and Development if you use Vercel previews.

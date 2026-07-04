@@ -19,12 +19,12 @@ Default rule: if a security-critical item is not `Done` and has `Release Blocker
 
 | Item | Status | Release Blocker |
 | --- | --- | --- |
-| Trusted Telegram `initData` verification is implemented on a backend or edge function | Not Started | YES |
-| Telegram HMAC signature validation uses the bot token only on the server side | Not Started | YES |
-| `auth_date` is validated and stale auth payloads are rejected | Not Started | YES |
-| Replay protection exists for reused Telegram auth payloads or issued sessions | Not Started | YES |
-| Verified app session/JWT is issued after Telegram verification | Not Started | YES |
-| Supabase RLS uses `auth.uid()` or verified JWT claims, not frontend-controlled headers | Not Started | YES |
+| Trusted Telegram `initData` verification is implemented on a backend or edge function | In Progress | YES |
+| Telegram HMAC signature validation uses the bot token only on the server side | In Progress | YES |
+| `auth_date` is validated and stale auth payloads are rejected | In Progress | YES |
+| Replay protection exists for reused Telegram auth payloads or issued sessions | In Progress | YES |
+| Verified app session/JWT is issued after Telegram verification | In Progress | YES |
+| Supabase RLS uses `auth.uid()` or verified JWT claims, not frontend-controlled headers | In Progress | YES |
 
 ## 2. Authorization
 
@@ -35,7 +35,7 @@ Default rule: if a security-critical item is not `Done` and has `Release Blocker
 | Organizer permissions are enforced server-side/RLS | In Progress | YES |
 | Moderator permissions are enforced server-side/RLS | In Progress | YES |
 | Admin permissions are enforced server-side/RLS | In Progress | YES |
-| No permission decision trusts frontend-only values | Not Started | YES |
+| No permission decision trusts frontend-only values | In Progress | YES |
 
 ## 3. Secrets
 
@@ -108,7 +108,7 @@ Default rule: if a security-critical item is not `Done` and has `Release Blocker
 | --- | --- | --- |
 | Admin roles are server-side verified | In Progress | YES |
 | Admin actions are audit logged | In Progress | YES |
-| No admin permission trusts frontend-only allowlists | Not Started | YES |
+| No admin permission trusts frontend-only allowlists | In Progress | YES |
 
 ## 11. Production
 

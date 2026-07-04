@@ -1,19 +1,29 @@
 # Security Architecture
 
-This document captures implemented security foundations and remaining tasks. It is not a claim of full production security until trusted Telegram identity validation is live.
+This document captures implemented security foundations and remaining tasks. It is not a claim of full production security until the Edge Function is deployed, required secrets are configured, migration v4 is applied, and production smoke tests pass.
 
-## Critical Security Blocker Before Public Release
+## Trusted Telegram Authentication
 
-The current demo identity model is **not safe for public release**.
+GO IRL now has a trusted Telegram authentication path implemented in code:
 
-Current behavior:
+- frontend reads raw `Telegram.WebApp.initData`;
+- frontend sends it to `verifyTelegramInitData`;
+- Supabase Edge Function verifies Telegram HMAC with `TELEGRAM_BOT_TOKEN`;
+- Edge Function validates `auth_date`;
+- Edge Function stores replay hashes in `telegram_auth_replay`;
+- Edge Function creates or updates `app_users`;
+- Edge Function returns a short-lived JWT signed with `SUPABASE_JWT_SECRET`;
+- Supabase client sends that token through `accessToken`;
+- migration v4 moves RLS helpers to verified JWT claims.
+
+Legacy behavior:
 
 - frontend reads Telegram `initDataUnsafe`;
 - frontend builds `x-go-irl-user-key`;
 - Supabase RLS helpers read that header;
 - `VITE_GO_IRL_ADMIN_KEYS` can be included in the public frontend bundle for demo UI visibility.
 
-Risk:
+Legacy risk:
 
 - `initDataUnsafe` is not a cryptographic proof;
 - any user can forge `x-go-irl-user-key` in DevTools or direct REST calls;
@@ -21,7 +31,7 @@ Risk:
 
 Release rule:
 
-**Public release is blocked until trusted Telegram auth and RLS redesign are implemented.**
+**Public release is blocked until the Edge Function is deployed with secrets, migration v4 is applied, and trusted-auth smoke tests pass.**
 
 ## Supabase RLS
 
@@ -63,7 +73,7 @@ Separate:
 
 ## Token and Session Strategy
 
-Required before public release:
+Implemented target flow:
 
 1. Frontend sends raw `Telegram.WebApp.initData` to a trusted endpoint.
 2. Endpoint validates Telegram HMAC with the bot token.
@@ -72,16 +82,17 @@ Required before public release:
 5. Supabase RLS uses `auth.uid()` or verified JWT claims.
 6. Admin/moderator roles are loaded from server-side role tables.
 
-Recommended implementation path:
+Required Edge Function secrets:
 
-- Supabase Edge Function for `verifyTelegramInitData`.
-- Bot token stored only as a Supabase secret.
-- No bot token, service-role key, or HMAC secret in Vite.
+- `TELEGRAM_BOT_TOKEN`
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_JWT_SECRET`
 
-Alternative implementation paths:
+Optional controls:
 
-- Minimal backend API with the same HMAC verification.
-- Future full backend API once notification/admin workflows need stronger consolidation.
+- `GO_IRL_AUTH_MAX_AGE_SECONDS`
+- `GO_IRL_SESSION_TTL_SECONDS`
 
 ## Rate Limiting and Abuse Protection
 
@@ -109,10 +120,11 @@ Organizer status comes from the event `organizer_key`. Database role status come
 - `moderator`: can review and moderate scoped records.
 - `admin`: can manage high-risk platform actions.
 
-The legacy Sprint 1 allowlist still exists only for dev/demo UI visibility and migration compatibility:
+The legacy Sprint 1 allowlist exists only for dev/demo UI visibility and migration compatibility:
 
 - frontend: `VITE_GO_IRL_ADMIN_KEYS=telegram:<numeric_id>,telegram_username:<username>`
 - database compatibility table: `public.admin_users.user_key`
+- local compatibility switch: `VITE_GO_IRL_LEGACY_DEMO_AUTH=true`
 
 The frontend allowlist only controls visibility of admin UI. It is not production security. Real delete/moderation permission must be enforced by Supabase RLS through `public.user_roles` and must be paired with trusted Telegram `initData` validation plus server-issued claims before public release.
 

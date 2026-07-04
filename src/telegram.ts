@@ -5,6 +5,7 @@ declare global {
         ready: () => void;
         expand: () => void;
         close?: () => void;
+        initData?: string;
         initDataUnsafe?: {
           start_param?: string;
           user?: { id?: number; first_name?: string; last_name?: string; username?: string };
@@ -33,6 +34,8 @@ declare global {
 export const getTelegramWebApp = () => window.Telegram?.WebApp;
 
 export const isTelegramWebApp = () => Boolean(getTelegramWebApp()?.initDataUnsafe);
+
+export const getTelegramInitData = () => getTelegramWebApp()?.initData || "";
 
 export const readyMiniApp = () => getTelegramWebApp()?.ready();
 

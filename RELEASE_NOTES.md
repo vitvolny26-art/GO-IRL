@@ -4,12 +4,12 @@
 
 ### Public Release Blocker
 
-GO IRL is still an internal/demo Mini App until trusted Telegram auth is implemented. The current Supabase RLS model reads `x-go-irl-user-key` from frontend-controlled request headers derived from Telegram `initDataUnsafe` or guest storage. This can be forged and is not safe for public release.
+GO IRL is still an internal/demo Mini App until trusted Telegram auth is deployed and verified in production. The legacy Supabase RLS model reads `x-go-irl-user-key` from frontend-controlled request headers derived from Telegram `initDataUnsafe` or guest storage. This can be forged and is not safe for public release.
 
 Public release requires:
 
-- verified Telegram `initData` through a trusted backend/edge function;
-- RLS based on `auth.uid()` or verified JWT claims;
+- deployed `verifyTelegramInitData` Supabase Edge Function;
+- RLS based on verified JWT claims;
 - removal of `VITE_GO_IRL_ADMIN_KEYS` from the production security model;
 - production verification of security hardening migrations.
 
@@ -45,6 +45,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Backend foundation SQL is ready for Supabase: `user_roles`, moderator/admin helpers, audit log, and verification SQL.
 - Security hardening SQL is ready for Supabase: DB-level text length constraints for Activity fields.
 - Reputation architecture is documented: RLI is not currency or likes, Trust Score is hidden/internal, and attendance confirmation is future planned work.
+- Trusted Telegram auth implementation is added: HMAC validation, `auth_date` validation, replay table, app user upsert, short-lived JWT, frontend `accessToken` flow, and migration v4 for verified-claim RLS.
 
 ### Before Public Release
 
@@ -54,8 +55,9 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Confirm RLS behavior with at least two Telegram accounts.
 - Validate Telegram share links through `@GOirl_bot`.
 - Validate explicit Mini App close behavior on real Telegram clients.
-- Add trusted Telegram `initData` validation before treating identity as secure.
+- Deploy `verifyTelegramInitData` and configure required Supabase Edge Function secrets.
+- Apply and verify `supabase/migration_v4_trusted_telegram_auth.sql`.
 - Replace temporary admin allowlist with server-side role enforcement before public moderation tools launch.
 - Apply and verify `supabase/migration_v2_backend_foundation.sql` before enabling public moderation/admin tools.
 - Apply and verify `supabase/migration_v3_security_hardening.sql`.
-- Do not launch publicly until trusted Telegram auth replaces `x-go-irl-user-key`.
+- Do not launch publicly until trusted Telegram auth is deployed, v4 migration is applied, and smoke tests pass.

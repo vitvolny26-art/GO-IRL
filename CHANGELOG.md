@@ -45,6 +45,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Optional Activity Chat architecture with temporary participant-only chat, auto-archive policy, n8n cleanup, and privacy/safety rules.
 - Supabase backend foundation migration v2 with `user_roles`, role-aware RLS helpers, `audit_log`, and verification SQL.
 - Reputation architecture for RLI, hidden Trust Score, Community Contribution, attendance confirmation, event confidence, and RLI ledger.
+- Trusted Telegram auth implementation with Supabase Edge Function, HMAC validation, replay protection, app user upsert, verified JWT sessions, frontend `accessToken` integration, and RLS migration v4.
 
 ### Changed
 
@@ -56,6 +57,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Vertical architecture now treats Sport as the first production reference vertical while Dating, Friends, Food, Travel, and Culture stay future modules.
 - Production Supabase schema was updated and verified on 2026-07-04 with `city_id`, `metadata`, `participant_note`, and `activity_type` stored in the database.
 - Security documentation now treats `user_roles` as the forward-compatible role model and `admin_users` as backward compatibility.
+- Legacy `x-go-irl-user-key` auth is restricted to explicit dev/demo mode; production auth uses verified Telegram `initData`.
 
 ### Known Gaps
 

@@ -1,6 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
-import { resolveDemoIdentity, type DemoIdentityResolution, type DemoIdentitySource } from "./securityIdentity";
-import { getTelegramWebApp } from "./telegram";
+import {
+  getCurrentAuthIdentity,
+  getCurrentUserKey,
+  getCurrentStartParam,
+  getTrustedAccessToken,
+  isLegacyDemoAuthEnabled,
+} from "./authSession";
+import type { DemoIdentityResolution, DemoIdentitySource } from "./securityIdentity";
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -14,31 +20,37 @@ export type UserKeyResolutionSource = DemoIdentitySource;
 export type UserKeyResolution = DemoIdentityResolution;
 
 export function resolveUserIdentity(): UserKeyResolution {
-  return resolveDemoIdentity({
-    telegramId: getTelegramWebApp()?.initDataUnsafe?.user?.id,
-    storage: localStorage,
-    randomUUID: () => crypto.randomUUID(),
-  });
+  const identity = getCurrentAuthIdentity();
+  if (identity && "security" in identity) return identity;
+  return {
+    userKey: getCurrentUserKey(),
+    source: "guest-local-storage",
+    security: "unsafe-demo-only",
+  };
 }
 
-const resolvedIdentity = resolveUserIdentity();
-const userKey = resolvedIdentity.userKey;
-const invitedActivityId = getTelegramWebApp()?.initDataUnsafe?.start_param;
+const legacyHeaders = () => {
+  if (!isLegacyDemoAuthEnabled()) return {};
+  const identity = resolveUserIdentity();
+  const invitedActivityId = getCurrentStartParam();
+  return {
+    "x-go-irl-user-key": identity.userKey,
+    ...(invitedActivityId ? { "x-go-irl-invite-activity": invitedActivityId } : {}),
+  };
+};
 
 export const supabase = createClient(url, publishableKey, {
   auth: { persistSession: false },
+  accessToken: getTrustedAccessToken,
   global: {
-    headers: {
-      "x-go-irl-user-key": userKey,
-      ...(invitedActivityId ? { "x-go-irl-invite-activity": invitedActivityId } : {}),
-    },
+    headers: legacyHeaders(),
   },
 });
 
 export function getUserKey() {
-  return userKey;
+  return getCurrentUserKey();
 }
 
 export function getUserKeyResolution() {
-  return resolvedIdentity;
+  return getCurrentAuthIdentity();
 }

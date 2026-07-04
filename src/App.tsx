@@ -29,6 +29,7 @@ import {
 import { activityOptions, categories } from "./data";
 import { AppHeader } from "./components/AppHeader";
 import { buildGoogleCalendarUrl } from "./calendar/googleCalendar";
+import { initializeTrustedAuth } from "./authSession";
 import { cities, getCity } from "./config/cities";
 import { getTranslation, localeByLanguage } from "./i18n";
 import {
@@ -160,13 +161,19 @@ function App() {
   useEffect(() => {
     readyMiniApp();
     expandMiniApp();
-    void useAppStore.getState().initialize();
+    void (async () => {
+      await initializeTrustedAuth();
+      await useAppStore.getState().initialize();
+    })();
 
     const handleVisibility = () => {
       if (document.hidden) {
         useAppStore.getState().disposeRealtime();
       } else {
-        void useAppStore.getState().initialize();
+        void (async () => {
+          await initializeTrustedAuth();
+          await useAppStore.getState().initialize();
+        })();
       }
     };
 

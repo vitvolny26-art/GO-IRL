@@ -22,7 +22,7 @@ All major product and architecture decisions must follow the [GO IRL Constitutio
 - React, TypeScript, Vite
 - Zustand for client state
 - Supabase for activities, participants, private join requests, and realtime updates
-- Telegram WebApp bootstrap with guest fallback for local browser testing
+- Telegram WebApp bootstrap with trusted `initData` verification through Supabase Edge Functions
 - Telegram Mini App lifecycle helpers for ready, expand, back, and explicit close actions
 - Dark mobile-first UI with safe-area aware header
 - Brand assets in `public/brand/`
@@ -41,11 +41,13 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
 VITE_GO_IRL_ADMIN_KEYS=telegram:123456789,telegram_username:yourusername
+# Optional local-only compatibility mode. Never enable for public production.
+VITE_GO_IRL_LEGACY_DEMO_AUTH=false
 ```
 
 Security note: `VITE_GO_IRL_ADMIN_KEYS` is DEV/DEMO ONLY. Every `VITE_*` value is bundled into public frontend JavaScript. Do not put real production admin identifiers there.
 
-Public release blocker: the current demo identity bridge uses a frontend-controlled `x-go-irl-user-key` header. It must be replaced by trusted Telegram `initData` verification through a backend/edge function before public launch.
+Trusted auth note: production auth uses `Telegram.WebApp.initData` -> `verifyTelegramInitData` Supabase Edge Function -> verified JWT -> Supabase RLS. The old `x-go-irl-user-key` model is now legacy demo mode only and must stay disabled in public production.
 
 After starting Vite, open the local URL shown in the terminal. For Telegram testing, the deployed Mini App URL is configured in BotFather.
 
@@ -79,6 +81,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - ActivityRendererRegistry with Sport and Generic registrations for future vertical expansion
 - GO IRL brand logo, favicon, app icon, and Open Graph preview
 - Supabase schema and RLS policies in `supabase/schema.sql`
+- Supabase Edge Function `verifyTelegramInitData` for Telegram HMAC verification and trusted session issuing
 - Supabase setup guide in `supabase/README.md`
 - ESLint and Vitest quality gates
 - Netlify build configuration in `netlify.toml`
