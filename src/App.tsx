@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -40,16 +40,6 @@ import { useAppStore } from "./store";
 import { buildActivityShareText } from "./share";
 import { getUserKey } from "./supabase";
 import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
-import { resolveActivityExperience } from "./verticals/registry";
-import {
-  getSportMetadata,
-  sportEnvironmentLabel,
-  sportEnvironments,
-  sportFormatLabel,
-  sportFormats,
-  sportLevelLabel,
-  sportLevels,
-} from "./verticals/sport";
 import type { Activity, AppView, Category, Language, NewActivity, SportEnvironment, SportFormat, SportLevel, SportMetadata } from "./types";
 import {
   MAX_EVENT_ADDRESS_LENGTH,
@@ -71,6 +61,10 @@ const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
 const activityInviteUrl = (activity: Activity) =>
   `https://t.me/${BOT_USERNAME}?startapp=${encodeURIComponent(activity.id)}`;
+
+const LazySportActivityCard = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivityCard })));
+const LazySportActivitySheet = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivitySheet })));
+const LazySportCreateFields = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportCreateFields })));
 
 const dateLabel = (date: string, language: Language) =>
   new Intl.DateTimeFormat(localeByLanguage[language], {
@@ -105,7 +99,7 @@ const fallbackCategory: Category = {
 const getActivityCategory = (activity: Activity) =>
   categories.find((item) => item.id === activity.categoryId) || fallbackCategory;
 
-const isSportExperience = (activity: Activity) => resolveActivityExperience(activity).type === "sport";
+const isSportExperience = (activity: Activity) => activity.type === "sport" || activity.categoryId === "sport";
 
 const safeDate = (value: string) => {
   const date = new Date(value);
@@ -600,7 +594,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
   const t = getTranslation(language);
   const selectedCity = getCity(cityId);
   const today = new Date().toISOString().slice(0, 10);
-  const initialSport = initialActivity ? getSportMetadata(initialActivity) : {};
+  const initialSport = initialActivity?.metadata?.sport || {};
   const quickTemplates = [
     { id: "coffee", label: t.templateCoffee, icon: "☕", categoryId: "activities", activity: "☕", title: t.templateCoffee, description: t.templateCoffee, capacity: 4 },
     { id: "walk", label: t.templateWalk, icon: "🚶", categoryId: "social", activity: "🚶", title: t.templateWalk, description: t.templateWalk, capacity: 6 },
@@ -715,22 +709,9 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
         <label><span>{t.category}</span><select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>{categories.map((category) => <option key={category.id} value={category.id}>{category.icon} {category.name[language]}</option>)}</select></label>
         <label><span>{t.activity}</span><select key={`${categoryId}-${language}`} name="activityText" defaultValue={initialActivity?.categoryId === categoryId ? initialActivity.activity[language] : undefined} required>{activityOptions[categoryId].map((option) => <option key={`${option.icon}-${option.name[language]}`} value={`${option.icon} ${option.name[language]}`}>{option.icon} {option.name[language]}</option>)}</select></label>
         {categoryId === "sport" && (
-          <div className="sport-create-panel">
-            <div className="sport-panel-title">🏆 {t.sportVertical}</div>
-            <div className="form-row">
-              <label><span>{t.sportLevel}</span><select name="sportLevel" defaultValue={initialSport.level || "intermediate"}>{sportLevels.map((level) => <option key={level.id} value={level.id}>{level.label[language]}</option>)}</select></label>
-              <label><span>{t.sportFormat}</span><select name="sportFormat" defaultValue={initialSport.format || "casual"}>{sportFormats.map((format) => <option key={format.id} value={format.id}>{format.label[language]}</option>)}</select></label>
-            </div>
-            <div className="form-row">
-              <label><span>{t.sportEnvironment}</span><select name="sportEnvironment" defaultValue={initialSport.environment || "outdoor"}>{sportEnvironments.map((environment) => <option key={environment.id} value={environment.id}>{environment.label[language]}</option>)}</select></label>
-              <label><span>{t.sportDuration}</span><input name="sportDuration" type="number" min="15" max="480" step="15" defaultValue={initialSport.durationMinutes || 90} /></label>
-            </div>
-            <label className="sport-check"><input name="sportEquipmentNeeded" type="checkbox" defaultChecked={Boolean(initialSport.equipmentNeeded)} /><span>{t.sportEquipmentNeeded}</span></label>
-            <label><span>{t.sportEquipment}</span><input name="sportEquipment" defaultValue={initialSport.equipment} placeholder={t.sportEquipmentPlaceholder} /></label>
-            <label><span>{t.sportBring}</span><input name="sportBring" defaultValue={initialSport.bring} placeholder={t.sportBringPlaceholder} /></label>
-            <label><span>{t.sportRequirements}</span><input name="sportRequirements" defaultValue={initialSport.requirements} placeholder={t.sportRequirementsPlaceholder} /></label>
-            <label><span>{t.sportOrganizerTips}</span><textarea name="sportOrganizerTips" rows={3} defaultValue={initialSport.organizerTips} placeholder={t.sportOrganizerTipsPlaceholder} /></label>
-          </div>
+          <Suspense fallback={<div className="sport-create-panel">{t.loadingEvents}</div>}>
+            <LazySportCreateFields language={language} initialSport={initialSport} />
+          </Suspense>
         )}
         <label><span>{t.title}</span><input name="titleText" defaultValue={initialActivity?.title[language]} placeholder={t.titlePlaceholder} maxLength={MAX_EVENT_TITLE_LENGTH} required /></label>
         <label><span>{t.description}</span><textarea name="descriptionText" rows={4} defaultValue={initialActivity?.description[language]} maxLength={MAX_EVENT_DESCRIPTION_LENGTH} required /></label>
@@ -935,48 +916,11 @@ function ActivitySection({ title, activities, language, onOpen, onJoin, icon, ur
 }
 
 function ActivityCard(props: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
-  return isSportExperience(props.activity) ? <SportActivityCard {...props} /> : <GenericActivityCard {...props} />;
-}
-
-function SportActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
-  const { joinedIds, pendingIds } = useAppStore();
-  const t = getTranslation(language);
-  const meta = getSportMetadata(activity);
-  const free = Math.max(activity.capacity - activity.participants, 0);
-  const joined = joinedIds.includes(activity.id);
-  const pending = pendingIds.includes(activity.id);
-  const isOrganizer = activity.organizerKey === getUserKey();
-  const full = activity.participants >= activity.capacity;
-  const action = isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
-
+  if (!isSportExperience(props.activity)) return <GenericActivityCard {...props} />;
   return (
-    <article className="sport-card">
-      <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "🏆"}</div>
-        <div>
-          <div className="sport-eyebrow">🏆 {sportLevelLabel(meta.level, language)} · {sportEnvironmentLabel(meta.environment, language)}</div>
-          <h3>{activity.activity[language]}</h3>
-          <p>{activity.title[language]}</p>
-        </div>
-        <ChevronRight className="card-arrow" size={18} />
-      </button>
-      <div className="sport-chip-row">
-        <span>⚽ {meta.sportType || activity.activity[language]}</span>
-        <span>👥 {activity.participants} / {activity.capacity}</span>
-        <span>⏱ {meta.durationMinutes || 90} {t.minutesShort}</span>
-      </div>
-      <div className="activity-card-details sport-details-grid">
-        <div><MapPin /><span>{activity.address}</span></div>
-        <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
-        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
-        <div><ShieldCheck /><span>{sportFormatLabel(meta.format, language)}</span></div>
-      </div>
-      <div className="activity-card-footer">
-        <span className={free <= 1 ? "spots urgent" : "spots"}><UsersRound />{free > 0 ? `${free} ${t.left}` : t.full}</span>
-        <span className="card-status">{t.sportSkillMatch}</span>
-        <button className={joined || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{action}</button>
-      </div>
-    </article>
+    <Suspense fallback={<GenericActivityCard {...props} />}>
+      <LazySportActivityCard {...props} />
+    </Suspense>
   );
 }
 
@@ -1070,78 +1014,11 @@ type ActivitySheetProps = {
 };
 
 function ActivitySheet(props: ActivitySheetProps) {
-  return isSportExperience(props.activity) ? <SportActivitySheet {...props} /> : <GenericActivitySheet {...props} />;
-}
-
-function SportActivitySheet({
-  activity,
-  language,
-  cityName,
-  loading,
-  error,
-  onClose,
-  onJoin,
-  onShare,
-  onEdit,
-  onDelete,
-  onCloseMiniApp,
-}: ActivitySheetProps) {
-  const { joinedIds, pendingIds, userRole } = useAppStore();
-  const t = getTranslation(language);
-  const meta = getSportMetadata(activity);
-  const isOrganizer = activity.organizerKey === getUserKey();
-  const canDelete = isOrganizer || userRole === "admin";
-  const joined = joinedIds.includes(activity.id);
-  const pending = pendingIds.includes(activity.id);
-  const full = activity.participants >= activity.capacity;
-  const freeSpots = Math.max(activity.capacity - activity.participants, 0);
-  const action = isOrganizer ? t.edit : pending ? t.cancelRequest : joined ? t.leave : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
-
+  if (!isSportExperience(props.activity)) return <GenericActivitySheet {...props} />;
   return (
-    <div className="sheet-backdrop" onMouseDown={onClose}>
-      <article className="activity-sheet sport-sheet" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="sheet-handle" />
-        <button className="sheet-close" onClick={onClose} type="button" aria-label={t.close}><X /></button>
-        {loading && <EventDetailsSkeleton />}
-        {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
-        <div className="sport-sheet-hero">
-          <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || "🏆"}</div>
-          <div>
-            <div className="sport-eyebrow">🏆 {sportLevelLabel(meta.level, language)} · {sportFormatLabel(meta.format, language)}</div>
-            <h2>{activity.title[language]}</h2>
-            <p>{activity.description[language]}</p>
-          </div>
-        </div>
-        <div className="sport-chip-row sport-sheet-chips">
-          <span>⚽ {meta.sportType || activity.activity[language]}</span>
-          <span>🌤 {sportEnvironmentLabel(meta.environment, language)}</span>
-          <span>⏱ {meta.durationMinutes || 90} {t.minutesShort}</span>
-        </div>
-        <div className="detail-list sport-detail-list">
-          <div><Sparkles /><span>{t.sportLevel}</span><strong>{sportLevelLabel(meta.level, language)}</strong></div>
-          <div><ShieldCheck /><span>{t.sportFormat}</span><strong>{sportFormatLabel(meta.format, language)}</strong></div>
-          <div><MapPin /><span>{t.city}</span><strong>{cityName}</strong></div>
-          <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
-          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
-          <div><UsersRound /><span>{t.freeSpots}</span><strong>{freeSpots} / {activity.capacity}</strong></div>
-          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
-          <div><Clock3 /><span>{t.sportDuration}</span><strong>{meta.durationMinutes || 90} {t.minutesShort}</strong></div>
-          <div><ShieldCheck /><span>{t.sportEquipmentNeeded}</span><strong>{meta.equipmentNeeded ? t.yes : t.no}</strong></div>
-          {meta.equipment && <div><Sparkles /><span>{t.sportEquipment}</span><strong>{meta.equipment}</strong></div>}
-          {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
-          {meta.requirements && <div><ShieldCheck /><span>{t.sportRequirements}</span><strong>{meta.requirements}</strong></div>}
-          {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
-          <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
-        </div>
-        <div className="sheet-actions">
-          <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
-          <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
-          <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
-        </div>
-        {canDelete && <button className="danger-action" onClick={() => onDelete(activity)} type="button"><Trash2 size={18} />{t.delete}</button>}
-        <button className="telegram-close-button compact" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
-      </article>
-    </div>
+    <Suspense fallback={<GenericActivitySheet {...props} />}>
+      <LazySportActivitySheet {...props} />
+    </Suspense>
   );
 }
 

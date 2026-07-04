@@ -6,9 +6,23 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        entryFileNames: "assets/go-irl-v0-[hash].js",
-        chunkFileNames: "assets/go-irl-v0-[hash].js",
+        entryFileNames: "assets/[name]-go-irl-v0-[hash].js",
+        chunkFileNames: "assets/[name]-go-irl-v0-[hash].js",
         assetFileNames: "assets/go-irl-v0-[hash][extname]",
+        manualChunks(id) {
+          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom") || id.includes("node_modules/@tanstack")) {
+            return "vendor-react";
+          }
+          if (id.includes("node_modules/@supabase") || id.includes("node_modules/zustand")) {
+            return "vendor-data";
+          }
+          if (id.includes("node_modules/lucide-react")) {
+            return "vendor-icons";
+          }
+          if (id.includes("/src/verticals/SportVertical") || id.includes("\\src\\verticals\\SportVertical")) {
+            return "vertical-sport";
+          }
+        },
       },
     },
   },
