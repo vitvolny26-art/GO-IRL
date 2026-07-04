@@ -2,6 +2,27 @@
 
 This document captures implemented security foundations and remaining tasks. It is not a claim of full production security until trusted Telegram identity validation is live.
 
+## Critical Security Blocker Before Public Release
+
+The current demo identity model is **not safe for public release**.
+
+Current behavior:
+
+- frontend reads Telegram `initDataUnsafe`;
+- frontend builds `x-go-irl-user-key`;
+- Supabase RLS helpers read that header;
+- `VITE_GO_IRL_ADMIN_KEYS` can be included in the public frontend bundle for demo UI visibility.
+
+Risk:
+
+- `initDataUnsafe` is not a cryptographic proof;
+- any user can forge `x-go-irl-user-key` in DevTools or direct REST calls;
+- a forged key can impersonate another user/organizer and can attempt admin-like flows if real admin keys are exposed.
+
+Release rule:
+
+**Public release is blocked until trusted Telegram auth and RLS redesign are implemented.**
+
 ## Supabase RLS
 
 Every user-facing table must have RLS enabled.
@@ -20,7 +41,9 @@ Rules:
 - Frontend uses only anon/publishable key.
 - Service role key never ships to browser.
 - n8n stores service credentials outside Git.
-- Sprint 1 admin UI uses `VITE_GO_IRL_ADMIN_KEYS` only to reveal owner controls.
+- Sprint 1 admin UI uses `VITE_GO_IRL_ADMIN_KEYS` only to reveal owner controls in dev/demo.
+- `VITE_GO_IRL_ADMIN_KEYS` is public because every `VITE_*` value is bundled into frontend JavaScript.
+- Do not put real production Telegram IDs, usernames, or privileged identifiers in `VITE_GO_IRL_ADMIN_KEYS`.
 - Supabase also requires a trusted database role entry for elevated permissions.
 - `public.user_roles` is the forward-compatible role table after `migration_v2_backend_foundation.sql`.
 - `public.admin_users` remains only as backward compatibility and migration seed input.
@@ -40,12 +63,25 @@ Separate:
 
 ## Token and Session Strategy
 
-Future:
+Required before public release:
 
-- validate Telegram initData on trusted backend
-- short-lived app session token
-- logout/session revocation
-- refresh strategy outside Mini App localStorage
+1. Frontend sends raw `Telegram.WebApp.initData` to a trusted endpoint.
+2. Endpoint validates Telegram HMAC with the bot token.
+3. Endpoint creates/finds the user.
+4. Endpoint returns a trusted session/JWT.
+5. Supabase RLS uses `auth.uid()` or verified JWT claims.
+6. Admin/moderator roles are loaded from server-side role tables.
+
+Recommended implementation path:
+
+- Supabase Edge Function for `verifyTelegramInitData`.
+- Bot token stored only as a Supabase secret.
+- No bot token, service-role key, or HMAC secret in Vite.
+
+Alternative implementation paths:
+
+- Minimal backend API with the same HMAC verification.
+- Future full backend API once notification/admin workflows need stronger consolidation.
 
 ## Rate Limiting and Abuse Protection
 
@@ -73,12 +109,23 @@ Organizer status comes from the event `organizer_key`. Database role status come
 - `moderator`: can review and moderate scoped records.
 - `admin`: can manage high-risk platform actions.
 
-The legacy Sprint 1 allowlist still exists for UI visibility and migration compatibility:
+The legacy Sprint 1 allowlist still exists only for dev/demo UI visibility and migration compatibility:
 
 - frontend: `VITE_GO_IRL_ADMIN_KEYS=telegram:<numeric_id>,telegram_username:<username>`
 - database compatibility table: `public.admin_users.user_key`
 
-The frontend allowlist only controls visibility of admin UI. Real delete/moderation permission must be enforced by Supabase RLS through `public.user_roles`. This model must still be paired with trusted Telegram `initData` validation plus server-issued claims before public release.
+The frontend allowlist only controls visibility of admin UI. It is not production security. Real delete/moderation permission must be enforced by Supabase RLS through `public.user_roles` and must be paired with trusted Telegram `initData` validation plus server-issued claims before public release.
+
+## Admin Allowlist Policy
+
+`VITE_GO_IRL_ADMIN_KEYS`:
+
+- DEV/DEMO ONLY.
+- Must not contain real production privileged identifiers.
+- Must be removed from the production security model before public release.
+- Must be replaced by server-side verified roles.
+
+Backlog owner: `SEC-ADMIN-001 Remove public admin allowlist from frontend bundle`.
 
 ## Reporting and Blocking
 
@@ -149,3 +196,16 @@ Log:
 Do not log excessive personal data.
 
 `supabase/migration_v2_backend_foundation.sql` creates `public.audit_log` and database triggers for `activities` and `activity_members`. The metadata is intentionally minimal: activity id, visibility, city, activity type, member key, and member status.
+
+## Data Integrity
+
+Client-side validation is useful for UX but can be bypassed with direct Supabase REST calls. `supabase/migration_v3_security_hardening.sql` adds database constraints for:
+
+- activity text length;
+- title length;
+- description length;
+- address length;
+- location URL length;
+- participant note length.
+
+The constraints are created as `NOT VALID` to avoid breaking legacy/demo rows while still enforcing new writes and updates.

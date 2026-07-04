@@ -6,7 +6,9 @@ const configuredAdminKeys = (import.meta.env.VITE_GO_IRL_ADMIN_KEYS || "")
   .map((item: string) => item.trim())
   .filter(Boolean);
 
-// Sprint 1 temporary allowlist. Production admin permissions must move to Supabase Auth/RLS.
+// DEV/DEMO ONLY: VITE_* values are embedded into the public frontend bundle.
+// Do not store real production admin Telegram IDs here. Public release must use
+// trusted Telegram initData verification plus server-side roles/RLS.
 export const sprintOneAdminAllowlist = new Set<string>(configuredAdminKeys);
 
 export function getCurrentUserRole(userKey: string): UserRole {

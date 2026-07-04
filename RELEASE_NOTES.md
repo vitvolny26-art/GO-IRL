@@ -2,6 +2,17 @@
 
 ## 0.1.0 - Internal Telegram Mini App MVP
 
+### Public Release Blocker
+
+GO IRL is still an internal/demo Mini App until trusted Telegram auth is implemented. The current Supabase RLS model reads `x-go-irl-user-key` from frontend-controlled request headers derived from Telegram `initDataUnsafe` or guest storage. This can be forged and is not safe for public release.
+
+Public release requires:
+
+- verified Telegram `initData` through a trusted backend/edge function;
+- RLS based on `auth.uid()` or verified JWT claims;
+- removal of `VITE_GO_IRL_ADMIN_KEYS` from the production security model;
+- production verification of security hardening migrations.
+
 GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 
 ### Included
@@ -32,6 +43,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - GO IRL Constitution is now the source of truth for product and architecture decisions.
 - Sprint 2/3 architecture is prepared for implementation: RLS, admin, moderation, AI discovery, notifications, recommendation engine, event lifecycle, user lifecycle, and optional temporary Activity Chat.
 - Backend foundation SQL is ready for Supabase: `user_roles`, moderator/admin helpers, audit log, and verification SQL.
+- Security hardening SQL is ready for Supabase: DB-level text length constraints for Activity fields.
 
 ### Before Public Release
 
@@ -44,3 +56,5 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Add trusted Telegram `initData` validation before treating identity as secure.
 - Replace temporary admin allowlist with server-side role enforcement before public moderation tools launch.
 - Apply and verify `supabase/migration_v2_backend_foundation.sql` before enabling public moderation/admin tools.
+- Apply and verify `supabase/migration_v3_security_hardening.sql`.
+- Do not launch publicly until trusted Telegram auth replaces `x-go-irl-user-key`.

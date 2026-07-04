@@ -64,8 +64,14 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 ## Security Issue
 
+- CRITICAL SECURITY BLOCKER BEFORE PUBLIC RELEASE: current `x-go-irl-user-key` RLS model is frontend-controlled and unsafe. Public release is blocked until trusted Telegram `initData` verification and RLS redesign are implemented.
 - Telegram `initData` is not validated by a trusted backend yet.
+- `initDataUnsafe` must not be trusted for identity or permissions.
+- SEC-AUTH-001 Implement Supabase Edge Function `verifyTelegramInitData`.
+- SEC-AUTH-002 Replace `x-go-irl-user-key` RLS helpers with verified `auth.uid()` / JWT claim based policies.
+- SEC-ADMIN-001 Remove public admin allowlist from frontend bundle.
 - Apply and verify `supabase/migration_v2_backend_foundation.sql` in production Supabase.
+- Apply and verify `supabase/migration_v3_security_hardening.sql` in production Supabase.
 - Review the latest Supabase RLS policies in the production dashboard after applying backend foundation migration v2.
 - Replace Sprint 1 frontend admin allowlist with server-side enforcement backed by trusted Telegram `initData`, Supabase Auth claims, or backend-issued roles.
 
@@ -73,6 +79,7 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 - Production `supabase/migration_v1.sql` was applied and verified on 2026-07-04; `city_id`, `metadata`, `participant_note`, and `activity_type` are now stored in Supabase as the source of truth.
 - Backend foundation migration v2 exists for `user_roles`, role-aware RLS helpers, and `audit_log`; production application still needs manual verification.
+- Local fallback for missing optional activity columns is temporary backward compatibility only. Do not treat fallback as a permanent data source after production schema stability.
 - Keep local event-field fallback only as backward compatibility for older/preview databases.
 - Remove local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` after a stable production period.
 - No confirmed unfinished-code markers remain in `src/`, `docs/`, or top-level project planning docs as of 2026-07-04.
@@ -89,7 +96,10 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - Add release checklist for `supabase/verify_schema.sql`.
 - Supabase RLS hardening.
 - Roles and permission enforcement.
+- Trusted Telegram auth design using Supabase Edge Function.
+- Remove unsafe header-based identity before public release.
 - Apply and verify `supabase/migration_v2_backend_foundation.sql`.
+- Apply and verify `supabase/migration_v3_security_hardening.sql`.
 - Add `supabase/verify_backend_foundation.sql` to the release checklist.
 - Audit log for activity create/update/delete and membership create/update/delete.
 - ACT-CHAT-001 Optional activity chat architecture: organizer can enable chat per Activity with `chat_enabled`, `chat_auto_delete_enabled`, and `chat_auto_delete_after_hours`.

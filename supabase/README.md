@@ -119,6 +119,22 @@ Apply it after `migration_v1.sql`:
 
 This migration is safe to run again. It does not delete existing activity data.
 
+## Apply Security Hardening Migration v3
+
+`supabase/migration_v3_security_hardening.sql` adds database-level length constraints for Activity text fields. This protects the database from direct REST writes that bypass frontend validation.
+
+Apply it after migration v2:
+
+1. Open Supabase Dashboard.
+2. Open the GO IRL project.
+3. Go to SQL Editor.
+4. Paste the full contents of `supabase/migration_v3_security_hardening.sql`.
+5. Run the SQL.
+6. Paste and run the full contents of `supabase/verify_security_hardening.sql`.
+7. Confirm every row has `status = 'ok'`.
+
+The constraints are created as `NOT VALID`, which means legacy/demo rows do not block the migration, while new inserts and updates are still checked.
+
 ## 4. RLS
 
 RLS is enabled by the SQL files:
@@ -137,6 +153,8 @@ The app sends these headers from `src/supabase.ts`:
 
 Policies use those headers to separate each Telegram user and support invite links.
 
+Critical warning: this header-based identity model is unsafe for public release because the frontend controls `x-go-irl-user-key`. A user can forge it with DevTools or direct REST calls. It is allowed only for private demo/testing until trusted Telegram `initData` verification is implemented.
+
 Admin delete permissions are checked by `public.admin_users` through `go_irl_request_is_admin()`. Add only trusted owner keys:
 
 ```sql
@@ -145,7 +163,7 @@ values ('telegram:123456789', 'project owner')
 on conflict (user_key) do update set note = excluded.note;
 ```
 
-For Sprint 1 the frontend also needs the same key in `VITE_GO_IRL_ADMIN_KEYS` so it can show admin-only UI. This is temporary. Production admin enforcement must move to trusted Telegram `initData` validation, Supabase Auth claims, or backend/RLS rules that cannot be spoofed from the browser.
+For Sprint 1 the frontend also needs the same key in `VITE_GO_IRL_ADMIN_KEYS` so it can show admin-only UI. This is DEV/DEMO ONLY. `VITE_GO_IRL_ADMIN_KEYS` is bundled into public frontend JavaScript and must not contain real production admin identifiers. Production admin enforcement must move to trusted Telegram `initData` validation, Supabase Auth claims, or backend/RLS rules that cannot be spoofed from the browser.
 
 After `migration_v2_backend_foundation.sql`, use `public.user_roles` as the forward-compatible role table. `public.admin_users` remains as backward compatibility for older policies and migration safety.
 
@@ -159,6 +177,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
 VITE_GO_IRL_ADMIN_KEYS=telegram:123456789,telegram_username:yourusername
 ```
+
+Do not set `VITE_GO_IRL_ADMIN_KEYS` to real production admin identifiers for public releases.
 
 Vercel project environment variables:
 

@@ -43,6 +43,10 @@ VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
 VITE_GO_IRL_ADMIN_KEYS=telegram:123456789,telegram_username:yourusername
 ```
 
+Security note: `VITE_GO_IRL_ADMIN_KEYS` is DEV/DEMO ONLY. Every `VITE_*` value is bundled into public frontend JavaScript. Do not put real production admin identifiers there.
+
+Public release blocker: the current demo identity bridge uses a frontend-controlled `x-go-irl-user-key` header. It must be replaced by trusted Telegram `initData` verification through a backend/edge function before public launch.
+
 After starting Vite, open the local URL shown in the terminal. For Telegram testing, the deployed Mini App URL is configured in BotFather.
 
 ## Verification

@@ -42,12 +42,17 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 1 - Production Foundation
 
+- CRITICAL SECURITY BLOCKER BEFORE PUBLIC RELEASE: replace the frontend-controlled `x-go-irl-user-key` RLS model with trusted Telegram auth.
 - Keep build and TypeScript checks green.
 - Preserve the current generic event MVP as the fallback experience.
 - Sprint 2 architecture docs are prepared: Constitution, Database, RLS, Admin, Security, Notifications, AI, EventLifecycle, UserLifecycle, RecommendationEngine, Moderation.
 - Keep Sport as the current reference vertical without expanding into Friends, Travel, or Dating yet.
 - Harden Supabase RLS and document every policy.
 - Apply backend foundation migration v2 for `user_roles`, moderator/admin helpers, audit log, and verification SQL.
+- Apply security hardening migration v3 for DB-level text length constraints.
+- Implement Supabase Edge Function for Telegram `initData` HMAC verification.
+- Move RLS from request headers to verified auth context.
+- Remove public frontend admin allowlist from production security model.
 - Chat data model for optional, temporary Activity Chat.
 - Chat RLS design with participant-only access.
 - Chat toggle in Activity settings as an architecture item, not runtime UI yet.

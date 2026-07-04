@@ -2,10 +2,26 @@
 
 RLS is the core database safety layer for GO IRL. Frontend checks improve UX, but database policies must enforce real access.
 
+## Critical Security Blocker Before Public Release
+
+The current MVP still passes identity to Supabase through a frontend-controlled request header:
+
+```text
+x-go-irl-user-key
+```
+
+That value is derived from Telegram `initDataUnsafe` or local guest storage in the browser. This is **not cryptographically trusted**. A user can forge the header through DevTools or direct REST calls and impersonate another user, organizer, or admin-like key.
+
+Therefore:
+
+- the current header-based RLS model is allowed only for private demo/testing;
+- GO IRL must not be treated as public-release ready while RLS trusts `x-go-irl-user-key`;
+- public release requires trusted Telegram `initData` verification on a backend/edge function and RLS based on verified auth context.
+
 ## Principles
 
 - RLS on every user-facing table.
-- Frontend uses anon/publishable key only.
+- Frontend uses anon/publishable key only, but anon requests must not be trusted for identity until verified auth is implemented.
 - Service role stays on backend/n8n.
 - Users read/write only their own private data.
 - Public Activities are readable by all.
@@ -40,7 +56,48 @@ RLS is the core database safety layer for GO IRL. Frontend checks improve UX, bu
 - Activity edit/delete and participant approve/reject are enforced by RLS, not only frontend checks.
 - `audit_log` records critical Activity and membership changes through database triggers.
 
-Until Telegram `initData` validation is implemented on a trusted backend/edge layer, the `x-go-irl-user-key` header must still be treated as an MVP identity bridge, not final production identity.
+Until Telegram `initData` validation is implemented on a trusted backend/edge layer, the `x-go-irl-user-key` header must still be treated as an unsafe MVP identity bridge, not final production identity.
+
+## Trusted Telegram Auth Target
+
+Recommended path for the current flat Vite + React + Supabase architecture:
+
+1. Frontend reads raw Telegram `initData`, not `initDataUnsafe`, from `Telegram.WebApp.initData`.
+2. Frontend sends `initData` to a trusted Supabase Edge Function.
+3. Edge Function verifies Telegram HMAC using the bot token stored as a Supabase secret.
+4. Edge Function creates or finds the user record.
+5. Edge Function returns a trusted session/JWT or maps the verified Telegram user to Supabase Auth.
+6. RLS policies use `auth.uid()` or a server-issued verified claim, not browser-provided headers.
+
+Alternative paths:
+
+- Minimal backend API: same HMAC verification, then issue session/JWT.
+- Future full backend: consolidate auth, roles, admin actions, and n8n service operations behind one API layer.
+
+## RLS Redesign Target
+
+Current:
+
+```text
+request.headers -> x-go-irl-user-key -> RLS helpers
+```
+
+Target:
+
+```text
+Telegram initData -> trusted verifier -> Supabase Auth/JWT -> auth.uid()/verified claims -> RLS
+```
+
+Future policies:
+
+- public events readable by everyone;
+- private/invite events readable only by organizer, approved participant, invite token scope, moderator, or admin;
+- organizer edits only own events;
+- delete only organizer or verified admin;
+- approve/reject only organizer or verified moderator/admin;
+- user profile private fields readable/writable only by the verified owner;
+- pending users do not see private chat;
+- moderator/admin role comes from server-side verified roles, never public frontend env.
 
 ## Activity Chat RLS
 
