@@ -65,12 +65,14 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 ## Security Issue
 
 - Telegram `initData` is not validated by a trusted backend yet.
-- Review the latest Supabase RLS policies in the production dashboard after applying `supabase/schema.sql`.
-- Replace Sprint 1 admin allowlist with server-side enforcement backed by trusted Telegram `initData`, Supabase Auth claims, or backend-issued roles.
+- Apply and verify `supabase/migration_v2_backend_foundation.sql` in production Supabase.
+- Review the latest Supabase RLS policies in the production dashboard after applying backend foundation migration v2.
+- Replace Sprint 1 frontend admin allowlist with server-side enforcement backed by trusted Telegram `initData`, Supabase Auth claims, or backend-issued roles.
 
 ## Technical Debt
 
 - Production `supabase/migration_v1.sql` was applied and verified on 2026-07-04; `city_id`, `metadata`, `participant_note`, and `activity_type` are now stored in Supabase as the source of truth.
+- Backend foundation migration v2 exists for `user_roles`, role-aware RLS helpers, and `audit_log`; production application still needs manual verification.
 - Keep local event-field fallback only as backward compatibility for older/preview databases.
 - Remove local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` after a stable production period.
 - No confirmed unfinished-code markers remain in `src/`, `docs/`, or top-level project planning docs as of 2026-07-04.
@@ -87,6 +89,9 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - Add release checklist for `supabase/verify_schema.sql`.
 - Supabase RLS hardening.
 - Roles and permission enforcement.
+- Apply and verify `supabase/migration_v2_backend_foundation.sql`.
+- Add `supabase/verify_backend_foundation.sql` to the release checklist.
+- Audit log for activity create/update/delete and membership create/update/delete.
 - ACT-CHAT-001 Optional activity chat architecture: organizer can enable chat per Activity with `chat_enabled`, `chat_auto_delete_enabled`, and `chat_auto_delete_after_hours`.
 - Chat data model for `activity_chats`, `activity_chat_messages`, and `activity_chat_members`.
 - Chat RLS design: only organizer, confirmed participants, admin, and moderator can read chat; guests, pending users, rejected users, and blocked users cannot.

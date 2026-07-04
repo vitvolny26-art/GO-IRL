@@ -43,6 +43,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Google Calendar save action for activities using a template link without Google OAuth.
 - Sprint 2/3 architecture documentation pack: AI, Admin, Moderation, RLS, RecommendationEngine, EventLifecycle, UserLifecycle, Database, Notifications, and Security.
 - Optional Activity Chat architecture with temporary participant-only chat, auto-archive policy, n8n cleanup, and privacy/safety rules.
+- Supabase backend foundation migration v2 with `user_roles`, role-aware RLS helpers, `audit_log`, and verification SQL.
 
 ### Changed
 
@@ -53,6 +54,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Roadmap now tracks AI event discovery sources and evening n8n digest constraints.
 - Vertical architecture now treats Sport as the first production reference vertical while Dating, Friends, Food, Travel, and Culture stay future modules.
 - Production Supabase schema was updated and verified on 2026-07-04 with `city_id`, `metadata`, `participant_note`, and `activity_type` stored in the database.
+- Security documentation now treats `user_roles` as the forward-compatible role model and `admin_users` as backward compatibility.
 
 ### Known Gaps
 

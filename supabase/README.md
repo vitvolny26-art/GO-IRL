@@ -88,6 +88,37 @@ Use this checklist when a new Supabase project or preview database may have an o
 
 The app currently keeps a local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` so older databases do not lose edits. In production, Supabase is now the source of truth for those fields. The fallback remains only as temporary backward compatibility and can be removed after a stable production period.
 
+## Apply Backend Foundation Migration v2
+
+`supabase/migration_v2_backend_foundation.sql` prepares the database for production backend enforcement.
+
+It adds:
+
+- `public.user_roles` with roles: `user`, `organizer`, `moderator`, `admin`
+- role-aware helpers:
+  - `go_irl_request_role()`
+  - `go_irl_request_has_role(text[])`
+  - `go_irl_request_is_admin()`
+  - `go_irl_request_can_moderate()`
+- `public.audit_log`
+- audit triggers for `activities` and `activity_members`
+- moderator/admin-aware RLS policies for event and participant moderation
+
+Apply it after `migration_v1.sql`:
+
+1. Open Supabase Dashboard.
+2. Open the GO IRL project.
+3. Go to SQL Editor.
+4. Paste the full contents of `supabase/migration_v2_backend_foundation.sql`.
+5. Run the SQL.
+6. Paste and run the full contents of `supabase/verify_backend_foundation.sql`.
+7. Confirm every row in the verification result has `status = 'ok'`.
+8. Confirm existing admin keys were copied from `admin_users` into `user_roles` as `admin`.
+9. Create, edit, join, approve/reject, and delete one test activity with two test users.
+10. Check `audit_log` has entries for activity and member changes.
+
+This migration is safe to run again. It does not delete existing activity data.
+
 ## 4. RLS
 
 RLS is enabled by the SQL files:
@@ -115,6 +146,8 @@ on conflict (user_key) do update set note = excluded.note;
 ```
 
 For Sprint 1 the frontend also needs the same key in `VITE_GO_IRL_ADMIN_KEYS` so it can show admin-only UI. This is temporary. Production admin enforcement must move to trusted Telegram `initData` validation, Supabase Auth claims, or backend/RLS rules that cannot be spoofed from the browser.
+
+After `migration_v2_backend_foundation.sql`, use `public.user_roles` as the forward-compatible role table. `public.admin_users` remains as backward compatibility for older policies and migration safety.
 
 ## 5. Environment Variables
 

@@ -31,6 +31,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Activities can be saved to Google Calendar through a template link. No Google OAuth or calendar sync is used in this MVP.
 - GO IRL Constitution is now the source of truth for product and architecture decisions.
 - Sprint 2/3 architecture is prepared for implementation: RLS, admin, moderation, AI discovery, notifications, recommendation engine, event lifecycle, user lifecycle, and optional temporary Activity Chat.
+- Backend foundation SQL is ready for Supabase: `user_roles`, moderator/admin helpers, audit log, and verification SQL.
 
 ### Before Public Release
 
@@ -42,3 +43,4 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Validate explicit Mini App close behavior on real Telegram clients.
 - Add trusted Telegram `initData` validation before treating identity as secure.
 - Replace temporary admin allowlist with server-side role enforcement before public moderation tools launch.
+- Apply and verify `supabase/migration_v2_backend_foundation.sql` before enabling public moderation/admin tools.

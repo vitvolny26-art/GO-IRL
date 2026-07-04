@@ -1,6 +1,6 @@
 # Security Architecture
 
-This document captures security tasks for future implementation. It is a plan, not a complete implementation.
+This document captures implemented security foundations and remaining tasks. It is not a claim of full production security until trusted Telegram identity validation is live.
 
 ## Supabase RLS
 
@@ -12,7 +12,8 @@ Rules:
 - Public events are readable by all.
 - Private/invite events require organizer, participant, invite token, or approved access.
 - Service role is used only by backend/n8n.
-- Event deletion is allowed only for the organizer or a server-side admin allowlist entry.
+- Event deletion is allowed only for the organizer or an admin role.
+- Moderator/admin review access is separated from regular user access.
 
 ## Least Privilege API
 
@@ -20,7 +21,9 @@ Rules:
 - Service role key never ships to browser.
 - n8n stores service credentials outside Git.
 - Sprint 1 admin UI uses `VITE_GO_IRL_ADMIN_KEYS` only to reveal owner controls.
-- Supabase also requires the same trusted `user_key` in `public.admin_users` for delete permission.
+- Supabase also requires a trusted database role entry for elevated permissions.
+- `public.user_roles` is the forward-compatible role table after `migration_v2_backend_foundation.sql`.
+- `public.admin_users` remains only as backward compatibility and migration seed input.
 - This is temporary: production admin must not rely only on client-side env/localStorage.
 - Admin moderation uses separate permissions later.
 
@@ -54,20 +57,28 @@ Planned limits:
 - messages when chat exists
 - source/admin actions
 
-## Sprint 1 Admin Role
+## Backend Roles
 
 Current roles:
 
 - `user`
 - `organizer`
+- `moderator`
 - `admin`
 
-Organizer status comes from the event `organizer_key`. Admin status is a temporary allowlist:
+Organizer status comes from the event `organizer_key`. Database role status comes from `public.user_roles`:
+
+- `user`: normal participant.
+- `organizer`: reserved explicit role for future organizer capabilities; current ownership still comes from `activities.organizer_key`.
+- `moderator`: can review and moderate scoped records.
+- `admin`: can manage high-risk platform actions.
+
+The legacy Sprint 1 allowlist still exists for UI visibility and migration compatibility:
 
 - frontend: `VITE_GO_IRL_ADMIN_KEYS=telegram:<numeric_id>,telegram_username:<username>`
-- database: `public.admin_users.user_key`
+- database compatibility table: `public.admin_users.user_key`
 
-The frontend allowlist only controls visibility of admin UI. Real delete permission must be enforced by Supabase RLS through `public.admin_users`. This model must be replaced by trusted Telegram `initData` validation plus server-issued claims before public release.
+The frontend allowlist only controls visibility of admin UI. Real delete/moderation permission must be enforced by Supabase RLS through `public.user_roles`. This model must still be paired with trusted Telegram `initData` validation plus server-issued claims before public release.
 
 ## Reporting and Blocking
 
@@ -127,6 +138,8 @@ Retention:
 
 Log:
 
+- activity create/update/delete
+- activity membership create/update/delete
 - reports
 - blocks
 - privacy setting changes
@@ -134,3 +147,5 @@ Log:
 - admin moderation actions
 
 Do not log excessive personal data.
+
+`supabase/migration_v2_backend_foundation.sql` creates `public.audit_log` and database triggers for `activities` and `activity_members`. The metadata is intentionally minimal: activity id, visibility, city, activity type, member key, and member status.
