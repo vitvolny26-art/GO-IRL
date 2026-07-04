@@ -136,7 +136,20 @@ on public.activities for delete to anon using (
   or public.go_irl_request_is_admin()
 );
 
+drop policy if exists "public members delete" on public.activity_members;
+create policy "public members delete"
+on public.activity_members for delete to anon using (
+  user_key = public.go_irl_request_user_key()
+  or public.go_irl_request_is_admin()
+  or exists (
+    select 1 from public.activities
+    where activities.id = activity_members.activity_id
+      and activities.organizer_key = public.go_irl_request_user_key()
+  )
+);
+
 grant delete on public.activities to anon;
+grant delete on public.activity_members to anon;
 
 alter table public.activities enable row level security;
 alter table public.activity_members enable row level security;

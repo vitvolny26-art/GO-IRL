@@ -345,8 +345,18 @@ export const useAppStore = create<AppState>((set, get) => {
         throw new Error("Only organizer or admin can delete activity");
       }
 
-      const { error } = await supabase.from("activities").delete().eq("id", id);
+      const membersResult = await supabase.from("activity_members").delete().eq("activity_id", id);
+      if (membersResult.error) throw membersResult.error;
+
+      const { error, count } = await supabase.from("activities").delete({ count: "exact" }).eq("id", id);
       if (error) throw error;
+      if (count === 0) throw new Error("Activity was not deleted");
+      set((state) => ({
+        activities: state.activities.filter((activity) => activity.id !== id),
+        joinedIds: state.joinedIds.filter((activityId) => activityId !== id),
+        waitingIds: state.waitingIds.filter((activityId) => activityId !== id),
+        pendingIds: state.pendingIds.filter((activityId) => activityId !== id),
+      }));
       await reload();
       set({ view: "home" });
     },
