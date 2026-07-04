@@ -87,7 +87,7 @@ Required Edge Function secrets:
 - `TELEGRAM_BOT_TOKEN`
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_JWT_SECRET`
+- `GO_IRL_JWT_SECRET` (set to your Legacy JWT Secret from Supabase Dashboard → Settings → JWT Keys → Reveal)
 
 Optional controls:
 

@@ -69,7 +69,7 @@ Deno.serve(async (request) => {
     const supabaseUrl = requiredEnv("SUPABASE_URL");
     const serviceRoleKey = requiredEnv("SUPABASE_SERVICE_ROLE_KEY");
     const telegramBotToken = requiredEnv("TELEGRAM_BOT_TOKEN");
-    const jwtSecret = requiredEnv("SUPABASE_JWT_SECRET");
+    const jwtSecret = requiredEnv("GO_IRL_JWT_SECRET");
     const authMaxAgeSeconds = Number(Deno.env.get("GO_IRL_AUTH_MAX_AGE_SECONDS") || 86400);
     const sessionTtlSeconds = Number(Deno.env.get("GO_IRL_SESSION_TTL_SECONDS") || 3600);
 

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { categories } from "./data";
 import { supabase, getUserKey } from "./supabase";
-import { getCurrentDisplayName, getCurrentStartParam, getCurrentUserRole as getTrustedUserRole } from "./authSession";
+import { getCurrentDisplayName, getCurrentStartParam, getCurrentUserRole as getTrustedUserRole, initializeTrustedAuth, isTrustedAuthReady } from "./authSession";
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
@@ -68,6 +68,23 @@ type AppState = {
 };
 
 let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+
+class AuthNotReadyError extends Error {
+  constructor() {
+    super("Authentication is not ready yet");
+    this.name = "AuthNotReadyError";
+  }
+}
+
+const ensureTrustedAuthForWrite = async () => {
+  if (isTrustedAuthReady()) return;
+
+  const session = await initializeTrustedAuth();
+
+  if (!session || !("source" in session) || session.source !== "trusted-telegram") {
+    throw new AuthNotReadyError();
+  }
+};
 
 const localizedDbText = (ru: string, cs: string) => ({
   ru,
@@ -313,6 +330,7 @@ export const useAppStore = create<AppState>((set, get) => {
     setCategory: (selectedCategory) => set({ selectedCategory, view: "explore" }),
 
     toggleJoin: async (id) => {
+      await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const { joinedIds, waitingIds, pendingIds, activities } = get();
 
@@ -342,6 +360,7 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     createActivity: async (input) => {
+      await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const organizer = getCurrentDisplayName(getTranslation(get().language).guestName);
       const row = {
@@ -400,6 +419,7 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     updateActivity: async (id, input) => {
+      await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const current = get().activities.find((item) => item.id === id);
       if (!current || current.organizerKey !== userKey) throw new Error("Only organizer can edit activity");
@@ -452,6 +472,7 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     deleteActivity: async (id) => {
+      await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const current = get().activities.find((item) => item.id === id);
       if (!current || (current.organizerKey !== userKey && !isCurrentUserAdmin(userKey))) {
@@ -491,6 +512,7 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     reviewRequest: async (activityId, memberKey, approved) => {
+      await ensureTrustedAuthForWrite();
       const activity = get().activities.find((item) => item.id === activityId);
       if (!activity || activity.organizerKey !== getUserKey()) throw new Error("Only organizer can review requests");
 

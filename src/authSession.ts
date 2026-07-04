@@ -116,8 +116,19 @@ export const getTrustedAccessToken = async () => {
   if (trustedSession && trustedSession.expiresAt > Math.floor(Date.now() / 1000) + 60) {
     return trustedSession.accessToken;
   }
+
+  const session = await initializeTrustedAuth();
+
+  if (session && "source" in session && session.source === "trusted-telegram") {
+    return session.accessToken;
+  }
+
   return null;
 };
+
+export function isTrustedAuthReady() {
+  return Boolean(trustedSession && trustedSession.expiresAt > Math.floor(Date.now() / 1000) + 60);
+}
 
 export function getCurrentAuthSession() {
   return trustedSession;
