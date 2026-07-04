@@ -10,6 +10,9 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - Harden Supabase RLS and document every policy.
 - Add Telegram `initData` validation on a trusted backend or edge function.
 - Keep Telegram Mini App lifecycle explicit: no surprise close, no background polling, user-triggered close only.
+- Privacy settings placeholder.
+- No background tracking policy.
+- User notification opt-in design.
 
 ## Phase 2 - Product Quality
 
@@ -18,6 +21,12 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - Add clearer organizer controls for editing, sharing, and reviewing requests.
 - Improve empty, loading, and error states.
 - Add city expansion for Prague, Brno, Ostrava, and future cities through configuration.
+- Real Supabase database model for users, profiles, interests, and events.
+- User interests.
+- Notification preferences.
+- Supabase RLS hardening.
+- User privacy settings.
+- Delete account flow.
 
 ## Phase 3 - Growth
 
@@ -26,3 +35,40 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - Add event moderation and abuse reporting.
 - Add analytics for activation, joins, shares, and completed offline events.
 - Prepare web deployment parity with Telegram Mini App behavior.
+- n8n event discovery workflow.
+- AI event normalization.
+- AI duplicate detection.
+- Anonymous mode.
+- Reveal contact by mutual consent.
+- Reporting and blocking.
+- Rate limiting.
+
+## Phase 4 - Discovery and Digest
+
+- Evening personalized digest.
+- Telegram notification bot.
+- Source management admin panel.
+- Anonymous chat.
+- Auto-expiring chats.
+- Admin moderation.
+- Audit logs.
+
+## Phase 5 - Privacy and Security Hardening
+
+- GDPR-style export/delete.
+- Security review.
+- Privacy review.
+- Abuse prevention hardening.
+
+## Maximum Privacy + User Data Security
+
+- Data minimization: store only data needed for events, interests, safety, and notifications.
+- Privacy by default: public profile surfaces reveal minimal data.
+- User control: edit profile, opt out of notifications, delete account, delete history, export data.
+- No background tracking: Mini App never tracks users in the background.
+- Server-side notifications: n8n/backend handles notifications and digest delivery.
+- Anonymous mode: allow pseudonyms and avoid exposing Telegram username without consent.
+- Mutual reveal: contacts are shown only after both sides consent.
+- Masked profiles: hide Telegram ID, phone, email, exact address, and internal IDs.
+- Event privacy: private and invite-only events can hide location/details until approved.
+- AI privacy: AI uses public external event data and anonymized interests only.

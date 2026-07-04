@@ -1,0 +1,330 @@
+# Database Architecture
+
+This document describes the target database model for GO IRL after Sprint 1. It is an architecture plan, not a mandatory migration for the current MVP tables.
+
+## Principles
+
+- Keep current Sprint 1 tables stable.
+- Separate public profile data, private notification data, event data, external-source data, and AI review logs.
+- Use RLS on every user-facing table.
+- Use service-role access only for n8n/server jobs.
+- Store only data required for event discovery, matching, notifications, safety, and account control.
+
+## Target Tables
+
+### users
+
+Purpose: stable application identity mapped from Telegram or future auth providers.
+
+Fields:
+- `id uuid primary key`
+- `auth_provider text`
+- `provider_user_id_hash text`
+- `default_city_id text`
+- `language text`
+- `status text`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints and indexes:
+- unique `(auth_provider, provider_user_id_hash)`
+- check language in supported languages
+- check status in `active`, `blocked`, `deleted`
+- index `(default_city_id, status)`
+
+RLS:
+- user can select/update own row.
+- n8n/server can read active users for digest with service role.
+
+### user_profiles
+
+Purpose: public and private profile split.
+
+Fields:
+- `user_id uuid primary key references users(id) on delete cascade`
+- `display_name text`
+- `public_bio text`
+- `avatar_code text`
+- `is_public boolean`
+- `anonymous_mode boolean`
+- `public_city_id text`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints and indexes:
+- check display name length
+- index `(public_city_id, is_public)`
+
+RLS:
+- public profiles are readable when `is_public = true`.
+- owner can read/update full profile.
+
+### interests
+
+Purpose: canonical interest taxonomy.
+
+Fields:
+- `id uuid primary key`
+- `slug text unique`
+- `category_slug text`
+- `name_ru text`
+- `name_cs text`
+- `name_en text`
+- `emoji text`
+- `is_active boolean`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Indexes:
+- unique `slug`
+- index `(category_slug, is_active)`
+
+RLS:
+- readable by all app users.
+- writable only by service/admin.
+
+### user_interests
+
+Purpose: user preference matrix for discovery and digest.
+
+Fields:
+- `user_id uuid references users(id) on delete cascade`
+- `interest_id uuid references interests(id) on delete cascade`
+- `weight smallint default 3`
+- `created_at timestamptz`
+- primary key `(user_id, interest_id)`
+
+Constraints:
+- check weight between 1 and 5
+
+RLS:
+- owner can read/write own interests.
+- service role can read for digest matching.
+
+### event_categories
+
+Purpose: database-level event categories aligned with frontend taxonomy.
+
+Fields:
+- `id uuid primary key`
+- `slug text unique`
+- `name_ru text`
+- `name_cs text`
+- `name_en text`
+- `emoji text`
+- `is_active boolean`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+RLS:
+- readable by all.
+- writable only by service/admin.
+
+### events
+
+Purpose: canonical user-created and validated external events. This is the future replacement/extension of `activities`.
+
+Fields:
+- `id uuid primary key`
+- `category_id uuid references event_categories(id)`
+- `organizer_user_id uuid references users(id)`
+- `source_type text`
+- `title text`
+- `description text`
+- `city_id text`
+- `location_name text`
+- `address text`
+- `location_url text`
+- `starts_at timestamptz`
+- `ends_at timestamptz`
+- `price integer`
+- `capacity integer`
+- `visibility text`
+- `status text`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints and indexes:
+- check price between 0 and 100000
+- check capacity between 2 and 1000 when present
+- check visibility in `public`, `invite`, `private`
+- check status in `draft`, `published`, `cancelled`, `archived`
+- index `(city_id, starts_at)`
+- index `(category_id, starts_at)`
+- index `(organizer_user_id, starts_at)`
+
+RLS:
+- public published events are readable by all.
+- invite/private events require organizer, participant, invite token, or approved access.
+- owner can insert/update own events.
+- service role can insert validated discovered events.
+
+### event_sources
+
+Purpose: connect canonical events to origin records.
+
+Fields:
+- `event_id uuid references events(id) on delete cascade`
+- `external_source_id uuid references external_sources(id)`
+- `source_url text`
+- `source_record_id text`
+- `created_at timestamptz`
+- primary key `(event_id, external_source_id)`
+
+Indexes:
+- unique `(external_source_id, source_record_id)` when source_record_id is not null
+
+RLS:
+- readable with event access.
+- writable only by service/admin.
+
+### external_sources
+
+Purpose: configured sources for n8n discovery.
+
+Fields:
+- `id uuid primary key`
+- `source_type text`
+- `name text`
+- `base_url text`
+- `city_id text`
+- `category_hint text`
+- `crawl_frequency text`
+- `is_active boolean`
+- `last_checked_at timestamptz`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints and indexes:
+- check source_type in `website`, `facebook_group`, `telegram_channel`, `city_board`, `sports_site`, `other`
+- index `(city_id, is_active)`
+
+RLS:
+- public read can be disabled initially.
+- service/admin writes.
+
+### discovered_events
+
+Purpose: AI-normalized raw external event candidates.
+
+Fields:
+- `id uuid primary key`
+- `external_source_id uuid references external_sources(id)`
+- `source_url text`
+- `source_record_id text`
+- `raw_payload jsonb`
+- `normalized_payload jsonb`
+- `title text`
+- `description text`
+- `category_id uuid references event_categories(id)`
+- `city_id text`
+- `location_name text`
+- `address text`
+- `starts_at timestamptz`
+- `ends_at timestamptz`
+- `price integer`
+- `confidence_score numeric(4,3)`
+- `duplicate_of uuid references discovered_events(id)`
+- `review_status text`
+- `rejection_reason text`
+- `promoted_event_id uuid references events(id)`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints and indexes:
+- check confidence between 0 and 1
+- check review_status in `new`, `auto_approved`, `needs_review`, `rejected`, `promoted`, `duplicate`
+- unique `(external_source_id, source_record_id)` when present
+- index `(city_id, starts_at, review_status)`
+- index `(duplicate_of)`
+
+RLS:
+- not readable by normal users initially.
+- service/admin only, because raw payloads can contain noisy third-party data.
+
+### ai_event_review_log
+
+Purpose: auditable AI decisions without user PII.
+
+Fields:
+- `id uuid primary key`
+- `discovered_event_id uuid references discovered_events(id) on delete cascade`
+- `model_name text`
+- `decision text`
+- `confidence_score numeric(4,3)`
+- `reason text`
+- `input_hash text`
+- `output_summary jsonb`
+- `created_at timestamptz`
+
+Constraints and indexes:
+- check decision in `accept`, `reject`, `duplicate`, `needs_review`
+- index `(discovered_event_id, created_at)`
+
+RLS:
+- service/admin only.
+- do not store Telegram ID, email, phone, or full private user profile.
+
+### notification_preferences
+
+Purpose: notification and digest preferences.
+
+Fields:
+- `user_id uuid primary key references users(id) on delete cascade`
+- `evening_digest_enabled boolean`
+- `notification_channel text`
+- `email_hash text`
+- `telegram_chat_id_encrypted text`
+- `preferred_days smallint[]`
+- `preferred_time_start time`
+- `preferred_time_end time`
+- `quiet_hours_start time`
+- `quiet_hours_end time`
+- `max_price integer`
+- `radius_km integer`
+- `district text`
+- `ai_recommendations_enabled boolean`
+- `created_at timestamptz`
+- `updated_at timestamptz`
+
+Constraints and indexes:
+- check channel in `telegram`, `email`, `viber`, `whatsapp`
+- check max_price between 0 and 100000
+- check radius between 1 and 100
+- index `(evening_digest_enabled, notification_channel)`
+
+RLS:
+- owner can read/update own preferences.
+- service role can read enabled preferences for digest.
+
+### notification_digest_log
+
+Purpose: prevent duplicate sends and support delivery audit.
+
+Fields:
+- `id uuid primary key`
+- `user_id uuid references users(id) on delete cascade`
+- `digest_date date`
+- `channel text`
+- `event_ids uuid[]`
+- `status text`
+- `error_message text`
+- `sent_at timestamptz`
+- `created_at timestamptz`
+
+Constraints and indexes:
+- unique `(user_id, digest_date, channel)`
+- check status in `queued`, `sent`, `failed`, `skipped`
+- index `(digest_date, status)`
+
+RLS:
+- owner can read own digest history if exposed.
+- service role writes.
+
+## Migration Strategy
+
+1. Keep `activities` and `activity_members` running for Sprint 1.
+2. Add next-generation tables in `schema_next.sql`.
+3. Build write path for `users`, `user_profiles`, `notification_preferences`.
+4. Introduce `events` as canonical table in Sprint 2/3.
+5. Migrate or map `activities` to `events` only after UI and RLS tests are ready.

@@ -37,3 +37,72 @@ Confirmed work is ordered by priority.
 - Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
 - Add deeper empty-state actions on the home screen when there are no upcoming events.
 - Add server-side n8n notifications for requests and event updates; do not keep the Mini App running in background for notifications.
+
+## Sprint 2 - Database and Preferences
+
+- Real Supabase database.
+- User interests.
+- Notification preferences.
+- User privacy settings.
+- Delete account flow.
+- Supabase RLS hardening.
+
+## Sprint 3 - AI Event Discovery
+
+- n8n event discovery workflow.
+- AI event normalization.
+- AI duplicate detection.
+- Anonymous mode.
+- Reveal contact by mutual consent.
+- Reporting / blocking.
+- Rate limiting.
+
+## Sprint 4 - Evening Digest and Admin
+
+- Evening personalized digest.
+- Telegram notification bot.
+- Source management admin panel.
+- Anonymous chat.
+- Auto-expiring chats.
+- Admin moderation.
+- Audit logs.
+
+## Maximum Privacy + User Data Security
+
+- PRIV-001 Data minimization policy.
+- PRIV-002 Anonymous profile mode.
+- PRIV-003 Mutual contact reveal.
+- PRIV-004 Delete account.
+- PRIV-005 Export user data.
+- PRIV-006 Notification opt-in.
+- PRIV-007 Quiet hours.
+- PRIV-008 Supabase RLS hardening.
+- PRIV-009 Public/private profile separation.
+- PRIV-010 Anonymous chat.
+- PRIV-011 Chat auto-delete.
+- PRIV-012 Report user.
+- PRIV-013 Block user.
+- PRIV-014 Admin moderation.
+- PRIV-015 AI privacy guardrails.
+- PRIV-016 n8n notification privacy.
+- SEC-001 Rate limiting.
+- SEC-002 Abuse protection.
+- SEC-003 Audit logs.
+- SEC-004 Token/session hardening.
+- SEC-005 Secrets management.
+
+## Database + AI Discovery + Evening Digest
+
+- DB-001 Add `users` and `user_profiles`.
+- DB-002 Add `interests`, `event_categories`, and `user_interests`.
+- DB-003 Add canonical `events` table.
+- DB-004 Add external source tracking.
+- DB-005 Add `discovered_events` and source linkage.
+- AI-001 Build n8n discovery schedule, 3 runs per day.
+- AI-002 Add AI normalization prompt and parser.
+- AI-003 Add confidence scoring and rejection rules.
+- AI-004 Add duplicate detection.
+- DIGEST-001 Add digest preference UI.
+- DIGEST-002 Build evening digest selection.
+- DIGEST-003 Add `notification_digest_log` duplicate-send guard.
+- DIGEST-004 Add Telegram delivery through server/n8n.
