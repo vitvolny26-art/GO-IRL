@@ -266,8 +266,7 @@ export const useAppStore = create<AppState>((set, get) => {
     const members = (membersResult.data || []) as DbMember[];
     const invitedActivityId = getCurrentStartParam();
     const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
-    const visibleActivityIds = new Set(visibleRows.map((row) => row.id));
-    const visibleMembers = members.filter((member) => visibleActivityIds.has(member.activity_id));
+    const visibleMembers = members;
 
     set({
       activities: visibleRows.map((row) => mapActivity(row, visibleMembers)),
