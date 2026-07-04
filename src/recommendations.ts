@@ -148,10 +148,13 @@ export class SimpleRecommendationEngine implements RecommendationEngine {
   }
 }
 
+export class GenericRecommendationEngine extends SimpleRecommendationEngine {}
+
 export class AIRecommendationEngine implements RecommendationEngine {
   recommend(activities: Activity[], context: RecommendationContext) {
-    return new SimpleRecommendationEngine().recommend(activities, context);
+    return new GenericRecommendationEngine().recommend(activities, context);
   }
 }
 
 export const simpleRecommendationEngine = new SimpleRecommendationEngine();
+export const genericRecommendationEngine = new GenericRecommendationEngine();

@@ -38,6 +38,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Production-ready Create Event flow with quick templates, city selection, participant notes, URL/date validation, and post-create actions.
 - Discover / For You screen with instant search, quick filters, horizontal recommendation sections, and profile-based favorite activities.
 - Recommendation engine interface with a simple city/interests/date/free-spots matching implementation ready for future AI replacement.
+- Sprint 2 Sport Vertical MVP with ActivityRendererRegistry, SportActivityCard, Sport details, Sport create fields, sport demo data, and SportRecommendationEngine.
 
 ### Changed
 
@@ -46,6 +47,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Package versions are pinned to explicit semver ranges instead of `latest`.
 - Event cards now show clearer activity, date, time, location, participants, price, organizer RLI placeholder, and direct join/request action.
 - Roadmap now tracks AI event discovery sources and evening n8n digest constraints.
+- Vertical architecture now treats Sport as the first production reference vertical while Dating, Friends, Food, Travel, and Culture stay future modules.
 
 ### Known Gaps
 

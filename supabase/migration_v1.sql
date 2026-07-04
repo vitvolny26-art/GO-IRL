@@ -12,6 +12,22 @@ add column if not exists city_id text not null default 'olomouc';
 alter table public.activities
 add column if not exists participant_note text;
 
+alter table public.activities
+add column if not exists activity_type text not null default 'custom';
+
+update public.activities
+set activity_type = 'sport'
+where category_id = 'sport';
+
+alter table public.activities
+drop constraint if exists activities_activity_type_check;
+
+alter table public.activities
+add constraint activities_activity_type_check check (activity_type in ('sport', 'dating', 'friends', 'food', 'travel', 'culture', 'local', 'custom'));
+
+alter table public.activities
+add column if not exists metadata jsonb not null default '{}'::jsonb;
+
 update public.activities
 set price = 0
 where price < 0;
@@ -40,6 +56,9 @@ on public.activities(visibility, event_date, event_time);
 
 create index if not exists activities_city_date_idx
 on public.activities(city_id, event_date, event_time);
+
+create index if not exists activities_type_city_date_idx
+on public.activities(activity_type, city_id, event_date, event_time);
 
 create index if not exists activity_members_user_status_idx
 on public.activity_members(user_key, status, activity_id);

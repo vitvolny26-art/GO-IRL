@@ -5,7 +5,7 @@ import { getTelegramWebApp } from "./telegram";
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
-import type { Activity, AppView, Language, NewActivity, UserRole } from "./types";
+import type { Activity, ActivityMetadata, ActivityType, AppView, Language, NewActivity, UserRole } from "./types";
 
 type JoinResult = "joined" | "pending" | "left" | "full" | "private";
 
@@ -24,6 +24,8 @@ type DbActivity = {
   address: string;
   location_url: string | null;
   participant_note?: string | null;
+  activity_type?: ActivityType | null;
+  metadata?: ActivityMetadata | null;
   price: number;
   capacity: number;
   organizer: string;
@@ -79,8 +81,12 @@ const normalizeCategoryId = (categoryId: string) => {
   return categories.some((category) => category.id === categoryId) ? categoryId : "activities";
 };
 
+const inferActivityType = (categoryId: string, explicitType?: ActivityType | null): ActivityType =>
+  explicitType || (normalizeCategoryId(categoryId) === "sport" ? "sport" : "custom");
+
 const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   id: row.id,
+  type: inferActivityType(row.category_id, row.activity_type),
   categoryId: normalizeCategoryId(row.category_id),
   activity: localizedDbText(row.activity_ru, row.activity_cs),
   title: localizedDbText(row.title_ru, row.title_cs),
@@ -102,15 +108,18 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   visibility: row.visibility,
   urgent: row.urgent,
   popular: row.popular,
+  metadata: row.metadata || undefined,
 });
 
 const isMissingOptionalColumnError = (error: { message?: string } | null) =>
-  Boolean(error?.message?.includes("city_id") || error?.message?.includes("participant_note"));
+  Boolean(error?.message?.includes("city_id") || error?.message?.includes("participant_note") || error?.message?.includes("activity_type") || error?.message?.includes("metadata"));
 
-const toLegacyActivityRow = <T extends { city_id?: string; participant_note?: string | null }>(row: T) => {
+const toLegacyActivityRow = <T extends { city_id?: string; participant_note?: string | null; activity_type?: ActivityType; metadata?: ActivityMetadata | null }>(row: T) => {
   const legacyRow = { ...row };
   delete legacyRow.city_id;
   delete legacyRow.participant_note;
+  delete legacyRow.activity_type;
+  delete legacyRow.metadata;
   return legacyRow;
 };
 
@@ -247,6 +256,8 @@ export const useAppStore = create<AppState>((set, get) => {
         address: input.address,
         location_url: input.locationUrl || null,
         participant_note: input.participantNote || null,
+        activity_type: input.type || inferActivityType(input.categoryId),
+        metadata: input.metadata || null,
         price: input.price,
         capacity: input.capacity,
         organizer,
@@ -295,6 +306,8 @@ export const useAppStore = create<AppState>((set, get) => {
         address: input.address,
         location_url: input.locationUrl || null,
         participant_note: input.participantNote || null,
+        activity_type: input.type || inferActivityType(input.categoryId),
+        metadata: input.metadata || null,
         price: input.price,
         capacity: input.capacity,
         visibility: input.visibility,

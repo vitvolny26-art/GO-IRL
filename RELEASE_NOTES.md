@@ -26,6 +26,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Discover / For You helps users find events through instant filters, search, and horizontal personalized sections.
 - Profile now stores favorite activities locally for recommendation matching.
 - Recommendation matching is isolated behind an engine interface so a future AI engine can replace the simple algorithm without rewriting UI.
+- Sport Vertical MVP is live with sport-specific cards, details, create fields, skill level, indoor/outdoor, equipment, duration, demo examples, and a dedicated SportRecommendationEngine.
 
 ### Before Public Release
 

@@ -1,13 +1,30 @@
 export type Language = "ru" | "uk" | "cs" | "en";
 export type AppView = "home" | "discover" | "explore" | "create" | "profile";
 export type UserRole = "user" | "organizer" | "admin";
-export type ActivityType = "sport" | "dating" | "friends" | "food" | "culture" | "local" | "custom";
+export type ActivityType = "sport" | "dating" | "friends" | "food" | "travel" | "culture" | "local" | "custom";
+export type SportLevel = "beginner" | "intermediate" | "advanced";
+export type SportFormat = "casual" | "training" | "competition";
+export type SportEnvironment = "indoor" | "outdoor";
+
+export type SportMetadata = {
+  sportType?: string;
+  level?: SportLevel;
+  format?: SportFormat;
+  environment?: SportEnvironment;
+  equipmentNeeded?: boolean;
+  equipment?: string;
+  bring?: string;
+  requirements?: string;
+  organizerTips?: string;
+  durationMinutes?: number;
+};
 
 export type ActivityMetadata = {
-  sport?: Record<string, unknown>;
+  sport?: SportMetadata;
   dating?: Record<string, unknown>;
   friends?: Record<string, unknown>;
   food?: Record<string, unknown>;
+  travel?: Record<string, unknown>;
   custom?: Record<string, unknown>;
 };
 

@@ -42,6 +42,11 @@ Confirmed work is ordered by priority.
 ## Sprint 2 - Database and Preferences
 
 - VERT-006 Sport vertical MVP.
+- VERT-018 ActivityRendererRegistry production wiring.
+- VERT-019 Sport Activity Card.
+- VERT-020 Sport Details screen.
+- VERT-021 Sport Create Flow.
+- VERT-022 SportRecommendationEngine.
 - VERT-007 Sport skill matching.
 - VERT-003 Vertical-specific create forms.
 - Real Supabase database.
@@ -151,3 +156,9 @@ Confirmed work is ordered by priority.
 - VERT-015 Friends vertical.
 - VERT-016 Food vertical.
 - VERT-017 AI recommendations per vertical.
+- VERT-018 ActivityRendererRegistry production wiring.
+- VERT-019 Sport Activity Card.
+- VERT-020 Sport Details screen.
+- VERT-021 Sport Create Flow.
+- VERT-022 SportRecommendationEngine.
+- VERT-023 Travel vertical placeholder.

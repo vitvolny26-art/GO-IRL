@@ -19,8 +19,10 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 ## Phase 2 - Product Quality
 
-- Sport vertical MVP.
-- Sport-specific filters, skill level, format, equipment, and create flow.
+- Sport vertical MVP as the reference vertical.
+- ActivityRendererRegistry with Sport and Generic registrations.
+- Sport-specific card, details, create flow, skill level, sport type, indoor/outdoor, equipment, what to bring, requirements, organizer tips, duration, and weather placeholder.
+- SportRecommendationEngine with simple city + level + sport type matching.
 - Redesign event cards for faster scanning and a more premium 2026 feel.
 - Redesign the home screen around discovery actions and large categories.
 - Add Discover / For You screen with search, quick filters, and simple matching by city, interests, date, and free spots.
@@ -92,6 +94,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 ## Vertical Experiences
 
 - GO IRL is composed of vertical experience modules, not one universal event flow.
-- Sport, Dating, Friends, Food, Culture, Local, and Custom can own their fields, filters, cards, create forms, details screens, recommendation engines, privacy rules, safety rules, and notification rules.
+- Sport, Dating, Friends, Food, Travel, Culture, Local, and Custom can own their fields, filters, cards, create forms, details screens, recommendation engines, privacy rules, safety rules, and notification rules.
+- Sport is the first real implementation. Dating/Friends/Food/Travel/Culture remain future modules until deliberately started.
 - Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.
 - Generic Activity/Event remains as fallback until a vertical-specific experience is implemented.

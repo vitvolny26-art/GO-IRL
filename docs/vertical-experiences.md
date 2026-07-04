@@ -42,6 +42,7 @@ Target `activity_type` values:
 - `dating`
 - `friends`
 - `food`
+- `travel`
 - `culture`
 - `local`
 - `custom`
@@ -74,7 +75,7 @@ JSONB metadata is acceptable for early iterations, but mature verticals should b
 
 ## Sport Vertical
 
-Sport is not just a category. It needs sport-specific logic.
+Sport is the first Sprint 2 vertical MVP and the reference implementation for future verticals. It is not just a category. It owns sport-specific metadata, cards, details, create fields, and recommendations while the generic flow remains the fallback.
 
 Fields:
 
@@ -82,7 +83,12 @@ Fields:
 - skill level: `beginner`, `intermediate`, `advanced`
 - format: `casual`, `training`, `competition`
 - participants / team size
-- equipment
+- indoor/outdoor environment
+- equipment needed
+- what to bring
+- requirements
+- organizer tips
+- duration in minutes
 - place
 - price
 - weather dependency, if needed
@@ -107,6 +113,23 @@ Flow:
 5. Matching prioritizes city, sport type, skill level, free spots, and time.
 
 Sport can use the event join/request model, but the create form, filters, card, and recommendations should be sport-specific.
+
+Current Sprint 2 implementation:
+
+- `ActivityRendererRegistry` routes sport activities to `SportActivityCard` and `SportActivitySheet`.
+- `GenericActivityCard` and `GenericActivitySheet` remain the fallback for all non-sport activities.
+- `SportRecommendationEngine` runs separately from `GenericRecommendationEngine`.
+- Sport create flow stores vertical-specific fields in `metadata.sport`.
+- Supabase stores early vertical data in `activities.activity_type` and `activities.metadata`.
+
+Sport matching rules for MVP:
+
+1. Same city gets the strongest boost.
+2. Matching sport type gets an additional boost.
+3. Matching user skill level gets an additional boost.
+4. Events with free places rank above full events.
+
+This is intentionally deterministic. AI recommendations can later replace the engine behind the same interface without rewriting UI.
 
 ## Dating Vertical
 
@@ -241,6 +264,7 @@ type ActivityRendererRegistry = {
   dating: DatingExperienceModule;
   friends: FriendsExperienceModule;
   food: FoodExperienceModule;
+  travel: GenericExperienceModule;
   culture: GenericExperienceModule;
   local: GenericExperienceModule;
   custom: GenericExperienceModule;

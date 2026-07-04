@@ -57,6 +57,8 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Sprint 1 temporary admin allowlist for organizer/admin event deletion
 - Safe-area aware fixed header for Telegram Mini App
 - Explicit "Done" / "Back to Telegram" UX; the Mini App closes only after a user action
+- Sport Vertical MVP with sport-specific card, details, create fields, and matching engine
+- ActivityRendererRegistry with Sport and Generic registrations for future vertical expansion
 - GO IRL brand logo, favicon, app icon, and Open Graph preview
 - Supabase schema and RLS policies in `supabase/schema.sql`
 - Supabase setup guide in `supabase/README.md`
