@@ -60,6 +60,8 @@ export type SportRecommendationContext = RecommendationContext & {
 const normalized = (value: string) => value.toLocaleLowerCase();
 
 export class SportRecommendationEngine implements RecommendationEngine {
+  readonly id = "sport" as const;
+
   recommend(activities: Activity[], context: SportRecommendationContext) {
     const today = (context.now || new Date()).toISOString().slice(0, 10);
     return [...activities]

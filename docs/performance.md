@@ -65,3 +65,16 @@ Preferred targets:
 - No single production JS chunk above 500 kB raw.
 
 If a chunk exceeds the target, first check whether it is a real user-facing path. Split rarely used admin, vertical, and discovery code before adding dependencies.
+
+## Current Status
+
+Last checked with `pnpm run build` on 2026-07-04:
+
+- `index`: 1.61 kB raw / 0.80 kB gzip.
+- `App`: 52.49 kB raw / 14.13 kB gzip.
+- `vertical-sport`: 69.03 kB raw / 21.47 kB gzip.
+- `vendor-react`: 206.55 kB raw / 64.27 kB gzip.
+- `vendor-data`: 210.68 kB raw / 54.78 kB gzip.
+- `vendor-icons`: 7.26 kB raw / 3.07 kB gzip.
+
+No production JS chunk is currently above the 500 kB raw warning threshold. The app shell and Sport vertical are already split safely; deeper screen-level splitting can wait until Discover/Profile/Create grow enough to justify separate chunks.

@@ -23,7 +23,10 @@ export type RecommendationContext = {
   now?: Date;
 };
 
+export type RecommendationEngineId = "generic" | "sport" | "friends" | "dating" | "ai";
+
 export interface RecommendationEngine {
+  readonly id: RecommendationEngineId;
   recommend(activities: Activity[], context: RecommendationContext): Activity[];
 }
 
@@ -126,6 +129,8 @@ export const applyDiscoverFilters = (activities: Activity[], filters: DiscoverFi
 };
 
 export class SimpleRecommendationEngine implements RecommendationEngine {
+  readonly id: RecommendationEngineId = "generic";
+
   recommend(activities: Activity[], context: RecommendationContext) {
     const nowKey = todayKey(context.now || new Date());
     return [...activities]
@@ -151,6 +156,8 @@ export class SimpleRecommendationEngine implements RecommendationEngine {
 export class GenericRecommendationEngine extends SimpleRecommendationEngine {}
 
 export class AIRecommendationEngine implements RecommendationEngine {
+  readonly id: RecommendationEngineId = "ai";
+
   recommend(activities: Activity[], context: RecommendationContext) {
     return new GenericRecommendationEngine().recommend(activities, context);
   }
@@ -158,3 +165,5 @@ export class AIRecommendationEngine implements RecommendationEngine {
 
 export const simpleRecommendationEngine = new SimpleRecommendationEngine();
 export const genericRecommendationEngine = new GenericRecommendationEngine();
+
+export const plannedRecommendationEngines: RecommendationEngineId[] = ["friends", "dating", "ai"];

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ShareTemplateService, buildActivityShareText } from "./share";
+import { formatShareLocation } from "./share/share-model-builder";
 import type { Activity } from "./types";
 
 const activity: Activity = {
@@ -84,6 +85,18 @@ describe("buildActivityShareText", () => {
 
     expect(text).toContain("📍 Прага");
     expect(text).not.toContain("Оломоуц, Прага");
+  });
+
+  it("formats share location safely for city-only, place-only, and city-place cases", () => {
+    expect(formatShareLocation("praha", "", "ru")).toBe("Прага");
+    expect(formatShareLocation("", "парк Летна", "ru")).toBe("парк Летна");
+    expect(formatShareLocation("praha", "парк Летна", "ru")).toBe("Прага, парк Летна");
+  });
+
+  it("does not duplicate the same city or merge conflicting cities", () => {
+    expect(formatShareLocation("praha", "Прага, парк Летна", "ru")).toBe("Прага, парк Летна");
+    expect(formatShareLocation("olomouc", "Прага", "ru")).toBe("Прага");
+    expect(formatShareLocation("brno", "Praha", "en")).toBe("Praha");
   });
 
   it("combines city and place only when they belong together", () => {

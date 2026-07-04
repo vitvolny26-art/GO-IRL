@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyDiscoverFilters, searchActivities, simpleRecommendationEngine } from "./recommendations";
+import { applyDiscoverFilters, genericRecommendationEngine, plannedRecommendationEngines, searchActivities, simpleRecommendationEngine } from "./recommendations";
 import type { Activity } from "./types";
 
 const makeActivity = (overrides: Partial<Activity>): Activity => ({
@@ -23,6 +23,11 @@ const makeActivity = (overrides: Partial<Activity>): Activity => ({
 });
 
 describe("SimpleRecommendationEngine", () => {
+  it("keeps a stable generic engine contract for future vertical and AI engines", () => {
+    expect(genericRecommendationEngine.id).toBe("generic");
+    expect(plannedRecommendationEngines).toEqual(expect.arrayContaining(["friends", "dating", "ai"]));
+  });
+
   it("prioritizes user city, interests, date, and free spots", () => {
     const cityInterest = makeActivity({ id: "match", cityId: "olomouc", date: "2026-07-05", participants: 1 });
     const otherCity = makeActivity({ id: "other-city", cityId: "praha", date: "2026-07-05", participants: 1 });

@@ -1,1 +1,1 @@
-export { ShareTemplateService, buildActivityShareText } from "./ShareTemplateService";
+export { ShareTemplateService, buildActivityShareText } from "./share/share-template-service";

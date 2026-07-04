@@ -44,6 +44,10 @@ describe("ActivityRendererRegistry", () => {
 });
 
 describe("SportRecommendationEngine", () => {
+  it("exposes a sport-specific recommendation engine id", () => {
+    expect(sportRecommendationEngine.id).toBe("sport");
+  });
+
   it("prioritizes city, sport type, skill level, and free places", () => {
     const best = makeSport({ id: "best", participants: 1 });
     const otherSport = makeSport({
