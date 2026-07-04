@@ -298,7 +298,7 @@ function App() {
         )}
         {store.view === "discover" && <DiscoverView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
         {store.view === "explore" && <ExploreView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
-        {store.view === "create" && <CreateView language={store.language} initialActivity={editingActivity} onCancel={() => {
+        {store.view === "create" && <CreateView key={editingActivity?.id || "new-event"} language={store.language} initialActivity={editingActivity} onCancel={() => {
           setEditingActivity(null);
           store.setView("home");
         }} onCreated={(id) => {

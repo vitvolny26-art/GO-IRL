@@ -114,13 +114,20 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
 const isMissingOptionalColumnError = (error: { message?: string } | null) =>
   Boolean(error?.message?.includes("city_id") || error?.message?.includes("participant_note") || error?.message?.includes("activity_type") || error?.message?.includes("metadata"));
 
-const toLegacyActivityRow = <T extends { city_id?: string; participant_note?: string | null; activity_type?: ActivityType; metadata?: ActivityMetadata | null }>(row: T) => {
-  const legacyRow = { ...row };
-  delete legacyRow.city_id;
-  delete legacyRow.participant_note;
-  delete legacyRow.activity_type;
-  delete legacyRow.metadata;
-  return legacyRow;
+const optionalActivityColumns = ["city_id", "participant_note", "activity_type", "metadata"] as const;
+type OptionalActivityColumn = (typeof optionalActivityColumns)[number];
+
+const withoutMissingOptionalColumn = <T extends Partial<Record<OptionalActivityColumn, unknown>>>(row: T, error: { message?: string } | null) => {
+  const message = error?.message || "";
+  const nextRow = { ...row };
+  const missingColumns = optionalActivityColumns.filter((column) => message.includes(column));
+  const columnsToRemove = missingColumns.length ? missingColumns : optionalActivityColumns;
+
+  for (const column of columnsToRemove) {
+    delete nextRow[column];
+  }
+
+  return nextRow;
 };
 
 export const useAppStore = create<AppState>((set, get) => {
@@ -265,11 +272,15 @@ export const useAppStore = create<AppState>((set, get) => {
         visibility: input.visibility,
       };
 
-      let { data, error } = await supabase.from("activities").insert(row).select("id").single();
-      if (isMissingOptionalColumnError(error)) {
-        const legacyResult = await supabase.from("activities").insert(toLegacyActivityRow(row)).select("id").single();
-        data = legacyResult.data;
-        error = legacyResult.error;
+      let insertRow = row;
+      let data = null as { id: string } | null;
+      let error = null as { message?: string } | null;
+      for (let attempt = 0; attempt <= optionalActivityColumns.length; attempt += 1) {
+        const result = await supabase.from("activities").insert(insertRow).select("id").single();
+        data = result.data;
+        error = result.error;
+        if (!isMissingOptionalColumnError(error)) break;
+        insertRow = withoutMissingOptionalColumn(insertRow, error);
       }
       if (error) throw error;
       if (!data) throw new Error("Activity was not created");
@@ -313,10 +324,13 @@ export const useAppStore = create<AppState>((set, get) => {
         visibility: input.visibility,
       };
 
-      let { error } = await supabase.from("activities").update(row).eq("id", id);
-      if (isMissingOptionalColumnError(error)) {
-        const legacyResult = await supabase.from("activities").update(toLegacyActivityRow(row)).eq("id", id);
-        error = legacyResult.error;
+      let updateRow = row;
+      let error = null as { message?: string } | null;
+      for (let attempt = 0; attempt <= optionalActivityColumns.length; attempt += 1) {
+        const result = await supabase.from("activities").update(updateRow).eq("id", id);
+        error = result.error;
+        if (!isMissingOptionalColumnError(error)) break;
+        updateRow = withoutMissingOptionalColumn(updateRow, error);
       }
       if (error) throw error;
       await reload();
