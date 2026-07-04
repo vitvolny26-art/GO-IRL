@@ -266,9 +266,11 @@ export const useAppStore = create<AppState>((set, get) => {
     const members = (membersResult.data || []) as DbMember[];
     const invitedActivityId = getCurrentStartParam();
     const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
+    const visibleActivityIds = new Set(visibleRows.map((row) => row.id));
+    const visibleMembers = members.filter((member) => visibleActivityIds.has(member.activity_id));
 
     set({
-      activities: visibleRows.map((row) => mapActivity(row, members)),
+      activities: visibleRows.map((row) => mapActivity(row, visibleMembers)),
       joinedIds: members.filter((member) => member.user_key === userKey && member.status === "joined").map((member) => member.activity_id),
       waitingIds: members.filter((member) => member.user_key === userKey && member.status === "waiting").map((member) => member.activity_id),
       pendingIds: members.filter((member) => member.user_key === userKey && member.status === "pending").map((member) => member.activity_id),
