@@ -18,6 +18,8 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 - Redesign event cards for faster scanning and a more premium 2026 feel.
 - Redesign the home screen around discovery actions and large categories.
+- Add Discover / For You screen with search, quick filters, and simple matching by city, interests, date, and free spots.
+- Add favorite activity selection to the user profile.
 - Add clearer organizer controls for editing, sharing, and reviewing requests.
 - Improve empty, loading, and error states.
 - Add city expansion for Prague, Brno, Ostrava, and future cities through configuration.
@@ -38,6 +40,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - n8n event discovery workflow.
 - AI event normalization.
 - AI duplicate detection.
+- AI event discovery sources: public event websites, Facebook Events, Meetup, Eventbrite, city calendars, universities, Telegram, Discord, Reddit, and public calendars.
 - Anonymous mode.
 - Reveal contact by mutual consent.
 - Reporting and blocking.
@@ -46,6 +49,8 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 ## Phase 4 - Discovery and Digest
 
 - Evening personalized digest.
+- Digest matching respects user city, interests, language, price limits, quiet hours, and working hours.
+- n8n sends personalized digest through the selected notification channel and prevents duplicate event sends.
 - Telegram notification bot.
 - Source management admin panel.
 - Anonymous chat.

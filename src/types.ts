@@ -1,5 +1,5 @@
 export type Language = "ru" | "uk" | "cs" | "en";
-export type AppView = "home" | "explore" | "create" | "profile";
+export type AppView = "home" | "discover" | "explore" | "create" | "profile";
 export type UserRole = "user" | "organizer" | "admin";
 
 export type Category = {

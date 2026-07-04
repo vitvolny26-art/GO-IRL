@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -13,6 +13,7 @@ import {
   MapPin,
   Pencil,
   Plus,
+  Search,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -28,6 +29,13 @@ import { activityOptions, categories } from "./data";
 import { AppHeader } from "./components/AppHeader";
 import { cities, getCity } from "./config/cities";
 import { getTranslation, localeByLanguage } from "./i18n";
+import {
+  applyDiscoverFilters,
+  matchesActivityInterest,
+  searchActivities,
+  simpleRecommendationEngine,
+  type DiscoverFilter,
+} from "./recommendations";
 import { useAppStore } from "./store";
 import { getUserKey } from "./supabase";
 import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
@@ -75,6 +83,31 @@ const compactDateLabel = (date: string, language: Language) => {
     day: "numeric",
     month: "short",
   }).format(eventDate);
+};
+
+const favoriteActivityOptions = (language: Language) => {
+  const t = getTranslation(language);
+  return [
+    { id: "coffee", label: t.templateCoffee },
+    { id: "walks", label: t.templateWalk },
+    { id: "skating", label: t.templateSkating },
+    { id: "cycling", label: t.favoriteCycling },
+    { id: "running", label: t.favoriteRunning },
+    { id: "hiking", label: t.favoriteHiking },
+    { id: "board-games", label: t.templateBoardGames },
+    { id: "football", label: t.favoriteFootball },
+    { id: "tennis", label: t.favoriteTennis },
+    { id: "volleyball", label: t.favoriteVolleyball },
+    { id: "basketball", label: t.favoriteBasketball },
+    { id: "swimming", label: t.favoriteSwimming },
+    { id: "yoga", label: t.favoriteYoga },
+    { id: "fitness", label: t.favoriteFitness },
+    { id: "concerts", label: t.favoriteConcerts },
+    { id: "cinema", label: t.favoriteCinema },
+    { id: "food", label: t.templateFood },
+    { id: "language-exchange", label: t.favoriteLanguageExchange },
+    { id: "other", label: t.templateOther },
+  ];
 };
 
 function App() {
@@ -229,6 +262,7 @@ function App() {
             onCreate={() => store.setView("create")}
           />
         )}
+        {store.view === "discover" && <DiscoverView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
         {store.view === "explore" && <ExploreView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
         {store.view === "create" && <CreateView language={store.language} initialActivity={editingActivity} onCancel={() => {
           setEditingActivity(null);
@@ -332,6 +366,159 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
       {urgent.length > 0 && <ActivitySection title={t.urgent} icon={<Zap size={18} />} activities={urgent} language={language} onOpen={onOpen} onJoin={onJoin} urgent />}
       <ActivitySection title={t.popular} activities={popular} language={language} onOpen={onOpen} onJoin={onJoin} />
     </>
+  );
+}
+
+function DiscoverView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { activities, loading, selectedCityId } = useAppStore();
+  const t = getTranslation(language);
+  const [query, setQuery] = useState("");
+  const [activeFilters, setActiveFilters] = useState<DiscoverFilter[]>([]);
+  const [locationState, setLocationState] = useState<"idle" | "ready" | "blocked">("idle");
+  const profile = useMemo(() => loadProfile(t.guestName, selectedCityId), [selectedCityId, t.guestName]);
+  const favoriteTerms = profile.favoriteActivities;
+  const now = useMemo(() => new Date(), []);
+  const city = getCity(profile.cityId || selectedCityId);
+  const recommended = simpleRecommendationEngine.recommend(activities, {
+    cityId: profile.cityId || selectedCityId,
+    favoriteActivities: favoriteTerms,
+    language,
+    now,
+  });
+  const filteredActivities = applyDiscoverFilters(searchActivities(recommended, query, language), activeFilters, language, now);
+  const today = now.toISOString().slice(0, 10);
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const tomorrowDate = tomorrow.toISOString().slice(0, 10);
+  const weekLimit = new Date(now);
+  weekLimit.setDate(now.getDate() + 7);
+  const weekLimitDate = weekLimit.toISOString().slice(0, 10);
+  const nearby = recommended.filter((activity) => activity.cityId === city.id).slice(0, 8);
+  const interestMatches = favoriteTerms.length
+    ? recommended.filter((activity) => matchesActivityInterest(activity, favoriteTerms, language)).slice(0, 8)
+    : recommended.slice(0, 4);
+  const filterOptions: Array<{ id: DiscoverFilter; label: string }> = [
+    { id: "today", label: t.today },
+    { id: "tomorrow", label: t.tomorrow },
+    { id: "weekend", label: t.weekend },
+    { id: "free", label: t.free },
+    { id: "up-to-200", label: t.upTo200 },
+    { id: "sport", label: t.templateSport },
+    { id: "board-games", label: t.templateBoardGames },
+    { id: "skating", label: t.templateSkating },
+    { id: "walks", label: t.templateWalk },
+    { id: "coffee", label: t.templateCoffee },
+    { id: "beginners", label: t.beginners },
+    { id: "public-only", label: t.publicOnly },
+  ];
+
+  const toggleFilter = (filter: DiscoverFilter) => {
+    setActiveFilters((current) => current.includes(filter) ? current.filter((item) => item !== filter) : [...current, filter]);
+  };
+
+  const enableLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationState("blocked");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => setLocationState("ready"),
+      () => setLocationState("blocked"),
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 5000 },
+    );
+  };
+
+  return (
+    <section className="page-section discover-page">
+      <div className="page-title"><Sparkles /><div><h1>{t.forYou}</h1><p>{t.discoverSubtitle}</p></div></div>
+      <label className="discover-search">
+        <Search />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.searchPlaceholder} />
+      </label>
+      <div className="discover-filter-block">
+        <span>{t.quickFilters}</span>
+        <div className="filter-row discover-filters">
+          {filterOptions.map((filter) => (
+            <button className={activeFilters.includes(filter.id) ? "filter active" : "filter"} key={filter.id} onClick={() => toggleFilter(filter.id)} type="button">
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {(query || activeFilters.length > 0) && (
+        <ActivitySection title={t.matchedForYou} activities={filteredActivities} language={language} onOpen={onOpen} onJoin={onJoin} />
+      )}
+
+      {loading ? (
+        <EventListSkeleton />
+      ) : (
+        <>
+          <DiscoverSection title={t.byInterestsSection} activities={interestMatches} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.nearestEvents} activities={recommended.slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.popularEvents} activities={recommended.filter((activity) => activity.popular).slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.newEvents} activities={[...recommended].reverse().slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.todaySection} activities={recommended.filter((activity) => activity.date === today)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.tomorrowSection} activities={recommended.filter((activity) => activity.date === tomorrowDate)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.thisWeekSection} activities={recommended.filter((activity) => activity.date >= today && activity.date <= weekLimitDate).slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <section className="discover-section">
+            <div className="section-title discover-section-title">
+              <MapPin />
+              <h2>{t.nearMeSection}</h2>
+              {locationState === "idle" && <button onClick={enableLocation} type="button">{t.enableLocation}</button>}
+            </div>
+            {locationState === "blocked" && <div className="nearby-note">{t.nearMeUnavailable}</div>}
+            <div className="horizontal-events">
+              {nearby.length ? nearby.map((activity) => <DiscoverActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />) : <EmptyState text={t.noEvents} />}
+            </div>
+          </section>
+        </>
+      )}
+    </section>
+  );
+}
+
+function DiscoverSection({ title, activities, language, onOpen, onJoin }: { title: string; activities: Activity[]; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  if (!activities.length) return null;
+  return (
+    <section className="discover-section">
+      <SectionHeader title={title} />
+      <div className="horizontal-events">
+        {activities.map((activity) => <DiscoverActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />)}
+      </div>
+    </section>
+  );
+}
+
+function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { joinedIds, pendingIds } = useAppStore();
+  const t = getTranslation(language);
+  const category = categories.find((item) => item.id === activity.categoryId)!;
+  const joined = joinedIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const freeSpots = Math.max(activity.capacity - activity.participants, 0);
+  const isOrganizer = activity.organizerKey === getUserKey();
+
+  return (
+    <article className="discover-card">
+      <button className="discover-card-main" onClick={() => onOpen(activity)} type="button">
+        <div className={`category-icon category-${activity.categoryId}`}>{category.icon}</div>
+        <div>
+          <span>{category.name[language]}</span>
+          <h3>{activity.activity[language]}</h3>
+          <p>{activity.title[language]}</p>
+        </div>
+      </button>
+      <div className="discover-card-meta">
+        <span><CalendarDays />{compactDateLabel(activity.date, language)}</span>
+        <span><Clock3 />{activity.time}</span>
+        <span><MapPin />{getCity(activity.cityId).name[language]}</span>
+        <span><UsersRound />{freeSpots} {t.left}</span>
+      </div>
+      <button className={joined || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button">
+        {isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : activity.visibility === "invite" ? t.request : t.join}
+      </button>
+    </article>
   );
 }
 
@@ -519,6 +706,7 @@ type LocalProfile = {
   cityId: string;
   avatar: string;
   registeredAt: string;
+  favoriteActivities: string[];
 };
 
 const avatarOptions = ["GI", "GO", "IRL", "🏐", "🎉", "🌿"];
@@ -527,7 +715,7 @@ const loadProfile = (fallbackName: string, fallbackCityId: string): LocalProfile
   const stored = localStorage.getItem("go-irl-profile");
   const registeredAt = localStorage.getItem("go-irl-registered-at") || new Date().toISOString();
   localStorage.setItem("go-irl-registered-at", registeredAt);
-  if (!stored) return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt };
+  if (!stored) return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt, favoriteActivities: [] };
 
   try {
     const parsed = JSON.parse(stored) as Partial<LocalProfile>;
@@ -537,9 +725,10 @@ const loadProfile = (fallbackName: string, fallbackCityId: string): LocalProfile
       cityId: parsed.cityId || fallbackCityId,
       avatar: parsed.avatar || "GI",
       registeredAt: parsed.registeredAt || registeredAt,
+      favoriteActivities: Array.isArray(parsed.favoriteActivities) ? parsed.favoriteActivities : [],
     };
   } catch {
-    return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt };
+    return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt, favoriteActivities: [] };
   }
 };
 
@@ -559,6 +748,8 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
   const activeEvents = activities.filter((item) => item.date >= today && (item.organizerKey === userKey || joinedIds.includes(item.id) || pendingIds.includes(item.id)));
   const joinedCount = activities.filter((item) => joinedIds.includes(item.id)).length;
   const registeredLabel = new Intl.DateTimeFormat(localeByLanguage[language], { day: "numeric", month: "short", year: "numeric" }).format(new Date(profile.registeredAt));
+  const favoriteOptions = favoriteActivityOptions(language);
+  const selectedFavorites = favoriteOptions.filter((option) => profile.favoriteActivities.includes(option.id));
 
   const saveProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -569,6 +760,7 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
       cityId: String(data.get("profileCity") || selectedCityId),
       avatar: String(data.get("profileAvatar") || "GI"),
       registeredAt: profile.registeredAt,
+      favoriteActivities: data.getAll("favoriteActivities").map(String),
     };
     localStorage.setItem("go-irl-profile", JSON.stringify(nextProfile));
     setProfile(nextProfile);
@@ -597,6 +789,18 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
           <label><span>{t.name}</span><input name="profileName" defaultValue={profile.name} required /></label>
           <label><span>{t.shortBio}</span><textarea name="profileBio" rows={3} defaultValue={profile.bio} placeholder={t.profileBioPlaceholder} /></label>
           <label><span>{t.city}</span><select name="profileCity" defaultValue={profile.cityId}>{cities.map((item) => <option key={item.id} value={item.id}>{item.name[language]}</option>)}</select></label>
+          <div className="interest-picker">
+            <span>{t.favoriteActivities}</span>
+            <p>{t.favoriteActivitiesHint}</p>
+            <div>
+              {favoriteOptions.map((option) => (
+                <label key={option.id}>
+                  <input name="favoriteActivities" type="checkbox" value={option.id} defaultChecked={profile.favoriteActivities.includes(option.id)} />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
           <div className="avatar-picker" role="radiogroup" aria-label={t.avatar}>
             {avatarOptions.map((avatar) => (
               <label key={avatar}>
@@ -607,6 +811,15 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
           </div>
           <button className="publish-button" type="submit"><Pencil size={18} />{t.save}</button>
         </form>
+      )}
+
+      <SectionHeader title={t.favoriteActivities} />
+      {selectedFavorites.length ? (
+        <div className="profile-interest-list">
+          {selectedFavorites.map((option) => <span key={option.id}>{option.label}</span>)}
+        </div>
+      ) : (
+        <EmptyState text={t.noFavoriteActivities} />
       )}
 
       <SectionHeader title={t.profileStats} />
@@ -937,6 +1150,7 @@ function BottomNav({ view, setView, language }: { view: AppView; setView: (view:
   const t = getTranslation(language);
   const items: Array<{ id: AppView; label: string; icon: React.ReactNode }> = [
     { id: "home", label: t.navHome, icon: <Home /> },
+    { id: "discover", label: t.navDiscover, icon: <Sparkles /> },
     { id: "explore", label: t.navExplore, icon: <Compass /> },
     { id: "create", label: t.navCreate, icon: <Plus /> },
     { id: "profile", label: t.navProfile, icon: <CircleUserRound /> },

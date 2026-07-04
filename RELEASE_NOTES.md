@@ -23,6 +23,9 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - GO IRL logo is used in the header, home hero, favicon, app icon, and Open Graph preview.
 - Create Event now validates required text, length limits, capacity, and price before publishing.
 - Create Event includes quick templates, event city, participant note, URL/date validation, and post-create open/share/close actions.
+- Discover / For You helps users find events through instant filters, search, and horizontal personalized sections.
+- Profile now stores favorite activities locally for recommendation matching.
+- Recommendation matching is isolated behind an engine interface so a future AI engine can replace the simple algorithm without rewriting UI.
 
 ### Before Public Release
 

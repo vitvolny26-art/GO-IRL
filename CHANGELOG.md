@@ -36,6 +36,8 @@ All notable confirmed changes to GO IRL are tracked here.
 - GO IRL brand logo assets, favicon, and Open Graph preview.
 - Create Event validation for required text, length limits, capacity, and price.
 - Production-ready Create Event flow with quick templates, city selection, participant notes, URL/date validation, and post-create actions.
+- Discover / For You screen with instant search, quick filters, horizontal recommendation sections, and profile-based favorite activities.
+- Recommendation engine interface with a simple city/interests/date/free-spots matching implementation ready for future AI replacement.
 
 ### Changed
 
@@ -43,6 +45,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Invite activity id from Telegram `startapp` is sent to Supabase as a scoped request header.
 - Package versions are pinned to explicit semver ranges instead of `latest`.
 - Event cards now show clearer activity, date, time, location, participants, price, organizer RLI placeholder, and direct join/request action.
+- Roadmap now tracks AI event discovery sources and evening n8n digest constraints.
 
 ### Known Gaps
 

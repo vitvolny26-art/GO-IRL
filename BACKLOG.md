@@ -43,6 +43,7 @@ Confirmed work is ordered by priority.
 
 - Real Supabase database.
 - User interests.
+- Favorite activity persistence in Supabase.
 - Notification preferences.
 - User privacy settings.
 - Delete account flow.
@@ -50,7 +51,9 @@ Confirmed work is ordered by priority.
 
 ## Sprint 3 - AI Event Discovery
 
+- Replace `SimpleRecommendationEngine` with an AI-backed implementation behind the existing `RecommendationEngine` interface.
 - n8n event discovery workflow.
+- Discovery source coverage: public event websites, Facebook Events, Meetup, Eventbrite, city sites, universities, Telegram, Discord, Reddit, and public calendars.
 - AI event normalization.
 - AI duplicate detection.
 - Anonymous mode.
@@ -61,6 +64,8 @@ Confirmed work is ordered by priority.
 ## Sprint 4 - Evening Digest and Admin
 
 - Evening personalized digest.
+- Respect quiet hours and working hours; never send AI/n8n digest at night.
+- Store discovered events in the database before digest selection.
 - Telegram notification bot.
 - Source management admin panel.
 - Anonymous chat.
