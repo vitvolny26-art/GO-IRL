@@ -27,12 +27,13 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Profile now stores favorite activities locally for recommendation matching.
 - Recommendation matching is isolated behind an engine interface so a future AI engine can replace the simple algorithm without rewriting UI.
 - Sport Vertical MVP is live with sport-specific cards, details, create fields, skill level, indoor/outdoor, equipment, duration, demo examples, and a dedicated SportRecommendationEngine.
+- Production Supabase now persists `city_id`, `metadata`, `participant_note`, and `activity_type` for events as primary database fields.
 
 ### Before Public Release
 
 - Configure production environment variables on Vercel.
-- Apply `supabase/schema.sql` to the production Supabase project.
-- Re-check private activity visibility with an unrelated account after schema deployment.
+- Production Supabase schema was applied and verified on 2026-07-04.
+- Re-check private activity visibility with an unrelated account before public launch.
 - Confirm RLS behavior with at least two Telegram accounts.
 - Validate Telegram share links through `@GOirl_bot`.
 - Validate explicit Mini App close behavior on real Telegram clients.

@@ -48,6 +48,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Event cards now show clearer activity, date, time, location, participants, price, organizer RLI placeholder, and direct join/request action.
 - Roadmap now tracks AI event discovery sources and evening n8n digest constraints.
 - Vertical architecture now treats Sport as the first production reference vertical while Dating, Friends, Food, Travel, and Culture stay future modules.
+- Production Supabase schema was updated and verified on 2026-07-04 with `city_id`, `metadata`, `participant_note`, and `activity_type` stored in the database.
 
 ### Known Gaps
 

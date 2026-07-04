@@ -68,7 +68,9 @@ Confirmed work is ordered by priority.
 
 ## Technical Debt
 
-- Apply `supabase/migration_v1.sql` in production and verify `city_id`, `metadata`, `participant_note`, and `activity_type`; local event-field fallback must remain only as backward compatibility, not the source of truth.
+- Production `supabase/migration_v1.sql` was applied and verified on 2026-07-04; `city_id`, `metadata`, `participant_note`, and `activity_type` are now stored in Supabase as the source of truth.
+- Keep local event-field fallback only as backward compatibility for older/preview databases.
+- Remove local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` after a stable production period.
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
 - Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
 - Add deeper empty-state actions on the home screen when there are no upcoming events.
@@ -77,7 +79,7 @@ Confirmed work is ordered by priority.
 ## Sprint 2 - Infrastructure Hardening
 
 - Real Supabase database.
-- Apply and verify `supabase/migration_v1.sql` in production.
+- Production `supabase/migration_v1.sql` applied and verified on 2026-07-04.
 - Add release checklist for `supabase/verify_schema.sql`.
 - Supabase RLS hardening.
 - Roles and permission enforcement.

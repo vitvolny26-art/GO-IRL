@@ -30,6 +30,17 @@ This creates:
 
 ## 3. Apply Migration v1
 
+Production status: `supabase/migration_v1.sql` was applied manually to the production Supabase database on 2026-07-04 and verified successfully.
+
+Verified `public.activities` columns are available in production:
+
+- `city_id`
+- `metadata`
+- `participant_note`
+- `activity_type`
+
+Supabase is now the primary source of truth for these fields. The app still keeps a local fallback only as backward compatibility for older or preview databases.
+
 After the base schema, paste and run:
 
 ```sql
@@ -52,7 +63,7 @@ This migration is safe to run again. It adds or fixes:
 
 ## Apply Migrations
 
-Use this checklist when production Supabase may already have an older schema.
+Use this checklist when a new Supabase project or preview database may have an older schema. The production database has already completed this checklist on 2026-07-04.
 
 1. Open Supabase Dashboard.
 2. Open your GO IRL project.
@@ -75,7 +86,7 @@ Use this checklist when production Supabase may already have an older schema.
 12. Refresh the page.
 13. Confirm city, activity type, sport metadata, and participant note persist after reload.
 
-The app currently keeps a local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` so older databases do not lose edits. That fallback is temporary backward compatibility. After this migration is applied, Supabase should be the source of truth for those fields.
+The app currently keeps a local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` so older databases do not lose edits. In production, Supabase is now the source of truth for those fields. The fallback remains only as temporary backward compatibility and can be removed after a stable production period.
 
 ## 4. RLS
 
