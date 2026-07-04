@@ -80,11 +80,18 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `RELEASE_NOTES.md` - release-ready notes for deployment
 - `DEPLOYMENT.md` - production deployment and smoke-test checklist
 - `supabase/README.md` - Supabase setup, migration, RLS, env, and verification guide
-- `docs/database.md` - target database architecture for users, interests, discovery, and digest
+- `docs/Database.md` - target database architecture for users, interests, discovery, digest, and optional activity chat
 - `docs/vertical-experiences.md` - vertical modules architecture for sport, dating, friends, food, and generic fallback
 - `docs/performance.md` - code splitting, bundle strategy, and vertical loading rules
+- `docs/AI.md` - AI platform, discovery, normalization, duplicate detection, and privacy guardrails
 - `docs/ai-event-discovery.md` - AI event discovery pipeline plan
-- `docs/notifications.md` - notification preferences and evening digest plan
+- `docs/Notifications.md` - notification preferences, evening digest, and chat notification rules
 - `docs/n8n-workflows.md` - future n8n workflow architecture
 - `docs/privacy.md` - privacy-first product architecture
-- `docs/security.md` - RLS, permissions, token, abuse, and audit strategy
+- `docs/Security.md` - RLS, permissions, token, abuse, and audit strategy
+- `docs/RLS.md` - table-by-table Supabase RLS design
+- `docs/Admin.md` - admin roles, permissions, and future admin surfaces
+- `docs/Moderation.md` - report, block, moderation hold, and audit architecture
+- `docs/RecommendationEngine.md` - recommendation engine v2 architecture
+- `docs/EventLifecycle.md` - Activity lifecycle from creation to archive
+- `docs/UserLifecycle.md` - user lifecycle from registration to deletion

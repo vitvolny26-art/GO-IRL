@@ -44,6 +44,7 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 - Keep build and TypeScript checks green.
 - Preserve the current generic event MVP as the fallback experience.
+- Sprint 2 architecture docs are prepared: Constitution, Database, RLS, Admin, Security, Notifications, AI, EventLifecycle, UserLifecycle, RecommendationEngine, Moderation.
 - Keep Sport as the current reference vertical without expanding into Friends, Travel, or Dating yet.
 - Harden Supabase RLS and document every policy.
 - Chat data model for optional, temporary Activity Chat.
@@ -86,6 +87,7 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 4 - AI Event Discovery
 
+- AI Event Discovery architecture is documented as Sources -> Parser -> AI normalization -> Duplicate detection -> Moderation -> Database -> Recommendations -> Notifications.
 - Chat notifications through n8n with quiet hours.
 - Report/block in Activity Chat.
 - Moderation hold for chats under investigation.

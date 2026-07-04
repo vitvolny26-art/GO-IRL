@@ -30,6 +30,7 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Production Supabase now persists `city_id`, `metadata`, `participant_note`, and `activity_type` for events as primary database fields.
 - Activities can be saved to Google Calendar through a template link. No Google OAuth or calendar sync is used in this MVP.
 - GO IRL Constitution is now the source of truth for product and architecture decisions.
+- Sprint 2/3 architecture is prepared for implementation: RLS, admin, moderation, AI discovery, notifications, recommendation engine, event lifecycle, user lifecycle, and optional temporary Activity Chat.
 
 ### Before Public Release
 

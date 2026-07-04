@@ -73,6 +73,7 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - Production `supabase/migration_v1.sql` was applied and verified on 2026-07-04; `city_id`, `metadata`, `participant_note`, and `activity_type` are now stored in Supabase as the source of truth.
 - Keep local event-field fallback only as backward compatibility for older/preview databases.
 - Remove local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` after a stable production period.
+- No confirmed unfinished-code markers remain in `src/`, `docs/`, or top-level project planning docs as of 2026-07-04.
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
 - Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
 - Add deeper empty-state actions on the home screen when there are no upcoming events.
@@ -80,6 +81,7 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 ## Sprint 2 - Infrastructure Hardening
 
+- Sprint 2 architecture preparation is complete at documentation level. Runtime implementation tasks remain below.
 - Real Supabase database.
 - Production `supabase/migration_v1.sql` applied and verified on 2026-07-04.
 - Add release checklist for `supabase/verify_schema.sql`.
@@ -99,6 +101,7 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 ## Sprint 3 - Performance and n8n Notifications
 
+- Sprint 3 future-capability architecture is complete at documentation level. Heavy runtime features remain intentionally unimplemented.
 - CAL-001 Save Activity to Google Calendar through a template URL without OAuth.
 - ACT-CHAT-002 Auto-delete chat after activity: archive by default 24 hours after Activity end.
 - Activity Chat MVP with participant-only access.
@@ -231,6 +234,19 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - SRC-002 Add user-submitted event suggestions.
 - SRC-003 Add manual moderation queue for `pending_review`.
 - SRC-004 Document and enforce no Facebook credential storage.
+
+## Architecture Documentation
+
+- ARCH-001 GO IRL Constitution.
+- ARCH-002 Database architecture.
+- ARCH-003 RLS design.
+- ARCH-004 Admin architecture.
+- ARCH-005 Moderation architecture.
+- ARCH-006 Notification platform architecture.
+- ARCH-007 AI platform and event discovery architecture.
+- ARCH-008 Recommendation Engine v2 design.
+- ARCH-009 Event lifecycle.
+- ARCH-010 User lifecycle.
 
 ## Calendar
 

@@ -2,6 +2,19 @@
 
 GO IRL notifications must be server-side. The Telegram Mini App must not stay alive in the background for notifications.
 
+## Notification Platform
+
+All notification channels are backend/n8n driven.
+
+Supported/planned channels:
+
+- Telegram: primary MVP channel.
+- Email: later transactional/digest channel.
+- WhatsApp: future channel, only after compliance and opt-in review.
+- Push: future Android/iOS/web channel, not part of the current Mini App.
+
+The frontend must not hold service credentials or run background notification workers.
+
 ## User Preferences
 
 Preferences live in `notification_preferences`:
@@ -18,6 +31,7 @@ Preferences live in `notification_preferences`:
 - notification channel:
   - Telegram
   - email
+  - later: push
   - later: Viber
   - later: WhatsApp
 
