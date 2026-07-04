@@ -86,7 +86,7 @@ const inferActivityType = (categoryId: string, explicitType?: ActivityType | nul
 
 const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   id: row.id,
-  type: inferActivityType(row.category_id, row.activity_type),
+  type: activityOverride(row.id).type || inferActivityType(row.category_id, row.activity_type),
   categoryId: normalizeCategoryId(row.category_id),
   activity: localizedDbText(row.activity_ru, row.activity_cs),
   title: localizedDbText(row.title_ru, row.title_cs),
@@ -96,7 +96,7 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   cityId: activityCityId(row),
   address: row.address,
   locationUrl: row.location_url || undefined,
-  participantNote: row.participant_note || undefined,
+  participantNote: row.participant_note || activityOverride(row.id).participantNote || undefined,
   price: row.price,
   capacity: row.capacity,
   participants: members.filter((member) => member.activity_id === row.id && member.status === "joined").length,
@@ -108,7 +108,7 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   visibility: row.visibility,
   urgent: row.urgent,
   popular: row.popular,
-  metadata: row.metadata || undefined,
+  metadata: row.metadata || activityOverride(row.id).metadata || undefined,
 });
 
 const isMissingOptionalColumnError = (error: { message?: string } | null) =>
@@ -119,29 +119,46 @@ type OptionalActivityColumn = (typeof optionalActivityColumns)[number];
 
 const deletedActivityMarker = "__go_irl_deleted__";
 const missingActivityColumns = new Set<OptionalActivityColumn>();
-const cityOverrideStorageKey = "go-irl-activity-city-overrides";
+const activityOverrideStorageKey = "go-irl-activity-overrides";
+const legacyCityOverrideStorageKey = "go-irl-activity-city-overrides";
 
-const readCityOverrides = (): Record<string, string> => {
+type ActivityOverride = {
+  cityId?: string;
+  participantNote?: string;
+  type?: ActivityType;
+  metadata?: ActivityMetadata;
+};
+
+const readActivityOverrides = (): Record<string, ActivityOverride> => {
   try {
-    return JSON.parse(localStorage.getItem(cityOverrideStorageKey) || "{}") as Record<string, string>;
+    return JSON.parse(localStorage.getItem(activityOverrideStorageKey) || "{}") as Record<string, ActivityOverride>;
   } catch {
     return {};
   }
 };
 
-const writeCityOverride = (activityId: string, cityId: string) => {
-  const overrides = readCityOverrides();
-  overrides[activityId] = cityId;
-  localStorage.setItem(cityOverrideStorageKey, JSON.stringify(overrides));
+const readLegacyCityOverrides = (): Record<string, string> => {
+  try {
+    return JSON.parse(localStorage.getItem(legacyCityOverrideStorageKey) || "{}") as Record<string, string>;
+  } catch {
+    return {};
+  }
 };
 
-const removeCityOverride = (activityId: string) => {
-  const overrides = readCityOverrides();
+const writeActivityOverride = (activityId: string, override: ActivityOverride) => {
+  const overrides = readActivityOverrides();
+  overrides[activityId] = { ...overrides[activityId], ...override };
+  localStorage.setItem(activityOverrideStorageKey, JSON.stringify(overrides));
+};
+
+const removeActivityOverride = (activityId: string) => {
+  const overrides = readActivityOverrides();
   delete overrides[activityId];
-  localStorage.setItem(cityOverrideStorageKey, JSON.stringify(overrides));
+  localStorage.setItem(activityOverrideStorageKey, JSON.stringify(overrides));
 };
 
-const activityCityId = (row: DbActivity) => row.city_id || readCityOverrides()[row.id] || defaultCityId;
+const activityOverride = (activityId: string) => readActivityOverrides()[activityId] || {};
+const activityCityId = (row: DbActivity) => row.city_id || activityOverride(row.id).cityId || readLegacyCityOverrides()[row.id] || defaultCityId;
 const isDeletedActivityRow = (row: DbActivity) => row.title_ru === deletedActivityMarker || row.title_cs === deletedActivityMarker;
 
 const withoutMissingOptionalColumn = <T extends Partial<Record<OptionalActivityColumn, unknown>>>(row: T, error: { message?: string } | null) => {
@@ -157,6 +174,17 @@ const withoutMissingOptionalColumn = <T extends Partial<Record<OptionalActivityC
 
   return nextRow;
 };
+
+const optionalOverrideFromInput = (input: NewActivity): ActivityOverride => {
+  const override: ActivityOverride = {};
+  if (missingActivityColumns.has("city_id")) override.cityId = input.cityId;
+  if (missingActivityColumns.has("participant_note")) override.participantNote = input.participantNote;
+  if (missingActivityColumns.has("activity_type")) override.type = input.type || inferActivityType(input.categoryId);
+  if (missingActivityColumns.has("metadata")) override.metadata = input.metadata;
+  return override;
+};
+
+const hasActivityOverride = (override: ActivityOverride) => Object.values(override).some((value) => value !== undefined);
 
 const activityFromInput = (id: string, input: NewActivity, current: Activity): Activity => {
   const localizedText = {
@@ -353,10 +381,11 @@ export const useAppStore = create<AppState>((set, get) => {
       }
       if (error) throw error;
       if (!data) throw new Error("Activity was not created");
-      if (missingActivityColumns.has("city_id")) {
-        writeCityOverride(data.id, input.cityId);
+      const override = optionalOverrideFromInput(input);
+      if (hasActivityOverride(override)) {
+        writeActivityOverride(data.id, override);
       } else {
-        removeCityOverride(data.id);
+        removeActivityOverride(data.id);
       }
 
       const { error: memberError } = await supabase.from("activity_members").insert({
@@ -410,10 +439,11 @@ export const useAppStore = create<AppState>((set, get) => {
       }
       if (error) throw error;
       if (count === 0) throw new Error("Activity was not updated");
-      if (missingActivityColumns.has("city_id")) {
-        writeCityOverride(id, input.cityId);
+      const override = optionalOverrideFromInput(input);
+      if (hasActivityOverride(override)) {
+        writeActivityOverride(id, override);
       } else {
-        removeCityOverride(id);
+        removeActivityOverride(id);
       }
       set((state) => ({
         activities: state.activities.map((activity) => (activity.id === id ? activityFromInput(id, input, current) : activity)),
@@ -451,7 +481,7 @@ export const useAppStore = create<AppState>((set, get) => {
         if (fallback.error) throw fallback.error;
         if ((fallback.count ?? 0) === 0) throw new Error("Activity was not deleted");
       }
-      removeCityOverride(id);
+      removeActivityOverride(id);
       set((state) => ({
         activities: state.activities.filter((activity) => activity.id !== id),
         joinedIds: state.joinedIds.filter((activityId) => activityId !== id),
