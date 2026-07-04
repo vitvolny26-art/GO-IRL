@@ -34,6 +34,7 @@ Confirmed work is ordered by priority.
 
 ## Technical Debt
 
+- Apply `supabase/migration_v1.sql` in production and verify `city_id`, `metadata`, `participant_note`, and `activity_type`; local event-field fallback must remain only as backward compatibility, not the source of truth.
 - Root app and `apps/telegram-miniapp` configuration should be consolidated or documented as an intentional monorepo direction.
 - Replace temporary organizer RLI placeholder in event cards with real RLI data after the profile/reputation model is implemented.
 - Add deeper empty-state actions on the home screen when there are no upcoming events.

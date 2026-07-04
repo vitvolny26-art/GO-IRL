@@ -50,6 +50,33 @@ This migration is safe to run again. It adds or fixes:
 - invite join policy alignment: `invite` creates `pending`, `public` creates `joined`
 - organizer/admin delete policy for activities
 
+## Apply Migrations
+
+Use this checklist when production Supabase may already have an older schema.
+
+1. Open Supabase Dashboard.
+2. Open your GO IRL project.
+3. Go to SQL Editor.
+4. Paste the full contents of `supabase/migration_v1.sql`.
+5. Run the SQL.
+6. Paste and run the full contents of `supabase/verify_schema.sql`.
+7. Confirm every row in the verification result has `status = 'ok'`.
+8. Confirm these `public.activities` columns exist:
+   - `city_id`
+   - `metadata`
+   - `participant_note`
+   - `activity_type`
+9. Open production or restart the local app.
+10. Create a test event.
+11. Edit the event and change:
+    - city
+    - activity type / sport fields
+    - participant note
+12. Refresh the page.
+13. Confirm city, activity type, sport metadata, and participant note persist after reload.
+
+The app currently keeps a local fallback for `city_id`, `metadata`, `participant_note`, and `activity_type` so older databases do not lose edits. That fallback is temporary backward compatibility. After this migration is applied, Supabase should be the source of truth for those fields.
+
 ## 4. RLS
 
 RLS is enabled by the SQL files:

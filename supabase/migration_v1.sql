@@ -6,8 +6,24 @@ create extension if not exists pgcrypto;
 alter table public.activities
 add column if not exists updated_at timestamptz not null default now();
 
+update public.activities
+set updated_at = now()
+where updated_at is null;
+
+alter table public.activities
+alter column updated_at set default now(),
+alter column updated_at set not null;
+
 alter table public.activities
 add column if not exists city_id text not null default 'olomouc';
+
+update public.activities
+set city_id = 'olomouc'
+where city_id is null or btrim(city_id) = '';
+
+alter table public.activities
+alter column city_id set default 'olomouc',
+alter column city_id set not null;
 
 alter table public.activities
 add column if not exists participant_note text;
@@ -19,6 +35,14 @@ update public.activities
 set activity_type = 'sport'
 where category_id = 'sport';
 
+update public.activities
+set activity_type = 'custom'
+where activity_type is null or activity_type not in ('sport', 'dating', 'friends', 'food', 'travel', 'culture', 'local', 'custom');
+
+alter table public.activities
+alter column activity_type set default 'custom',
+alter column activity_type set not null;
+
 alter table public.activities
 drop constraint if exists activities_activity_type_check;
 
@@ -27,6 +51,14 @@ add constraint activities_activity_type_check check (activity_type in ('sport', 
 
 alter table public.activities
 add column if not exists metadata jsonb not null default '{}'::jsonb;
+
+update public.activities
+set metadata = '{}'::jsonb
+where metadata is null;
+
+alter table public.activities
+alter column metadata set default '{}'::jsonb,
+alter column metadata set not null;
 
 update public.activities
 set price = 0
@@ -165,3 +197,6 @@ grant delete on public.activity_members to anon;
 
 alter table public.activities enable row level security;
 alter table public.activity_members enable row level security;
+
+-- Ask Supabase PostgREST to refresh its schema cache after adding columns.
+notify pgrst, 'reload schema';
