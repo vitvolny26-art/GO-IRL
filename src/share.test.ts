@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildActivityShareText } from "./share";
+import { ShareTemplateService, buildActivityShareText } from "./share";
 import type { Activity } from "./types";
 
 const activity: Activity = {
@@ -32,7 +32,7 @@ describe("buildActivityShareText", () => {
     const text = buildActivityShareText(activity, "ru", 0);
 
     expect(text).toContain("👋 Привет!");
-    expect(text).toContain("играем в Волейбол");
+    expect(text).toContain("В среду собираемся поиграть в волейбол.");
     expect(text).toContain("📍 Оломоуц, Beach Arena");
     expect(text).toContain("🕕 18:00-19:30");
     expect(text).toContain("💰 120 Kč");
@@ -46,11 +46,37 @@ describe("buildActivityShareText", () => {
   it("supports English templates through the same architecture", () => {
     const text = buildActivityShareText(activity, "en", 1);
 
-    expect(text).toContain("We are meeting on");
-    expect(text).toContain("Volleyball");
+    expect(text).toContain("On Wednesday, we're getting together for volleyball.");
     expect(text).toContain("📍 Olomouc, Beach Arena");
     expect(text).toContain("👉 Join");
     expect(text).toContain("Less scrolling. More life.");
+  });
+
+  it("uses activity-specific human phrasing instead of one generic template", () => {
+    const variants: Array<[Activity["activity"], string]> = [
+      [{ ru: "🛼 Ролики", uk: "🛼 Ролики", cs: "🛼 Inline bruslení", en: "🛼 Inline skating" }, "едем кататься на роликах"],
+      [{ ru: "☕ Кофе", uk: "☕ Кава", cs: "☕ Káva", en: "☕ Coffee" }, "собираемся выпить кофе"],
+      [{ ru: "🥾 Поход", uk: "🥾 Похід", cs: "🥾 Výlet", en: "🥾 Hiking" }, "идём в небольшой поход"],
+      [{ ru: "🚴 Велосипед", uk: "🚴 Велосипед", cs: "🚴 Kolo", en: "🚴 Cycling" }, "едем кататься на велосипедах"],
+      [{ ru: "🎲 Настолки", uk: "🎲 Настільні ігри", cs: "🎲 Deskové hry", en: "🎲 Board games" }, "собираемся поиграть в настольные игры"],
+      [{ ru: "🎾 Теннис", uk: "🎾 Теніс", cs: "🎾 Tenis", en: "🎾 Tennis" }, "играем в теннис"],
+      [{ ru: "🏃 Бег", uk: "🏃 Біг", cs: "🏃 Běh", en: "🏃 Running" }, "идём на совместную пробежку"],
+    ];
+
+    for (const [activityName, expected] of variants) {
+      expect(
+        buildActivityShareText(
+          {
+            ...activity,
+            activity: activityName,
+            title: activityName,
+            description: { ru: "Описание", uk: "Опис", cs: "Popis", en: "Description" },
+          },
+          "ru",
+          0,
+        ),
+      ).toContain(expected);
+    }
   });
 
   it("does not combine two different cities in the location line", () => {
@@ -81,7 +107,10 @@ describe("buildActivityShareText", () => {
       "без бесконечного скролла",
       "Не пропусти",
       "Лучшее событие",
+      "Самое крутое",
       "Уникальная возможность",
+      "Зарядись эмоциями",
+      "Незабываемый вечер",
       "endless scrolling",
       "Plan unlocked",
     ];
@@ -94,5 +123,15 @@ describe("buildActivityShareText", () => {
         expect(text).not.toContain(phrase);
       }
     }
+  });
+
+  it("can append a fallback URL only after the GO IRL signature", () => {
+    const url = "https://t.me/GOirl_bot?startapp=share-1";
+    const text = ShareTemplateService.build(activity, "ru", { templateIndex: 0, url, includeUrl: true });
+    const lines = text.split("\n");
+
+    expect(lines.at(-3)).toBe("GO IRL");
+    expect(lines.at(-2)).toBe("Меньше скролла. Больше жизни.");
+    expect(lines.at(-1)).toBe(url);
   });
 });
