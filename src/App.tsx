@@ -37,6 +37,7 @@ import {
   type DiscoverFilter,
 } from "./recommendations";
 import { useAppStore } from "./store";
+import { buildActivityShareText } from "./share";
 import { getUserKey } from "./supabase";
 import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
 import { resolveActivityExperience } from "./verticals/registry";
@@ -261,7 +262,7 @@ function App() {
 
   const shareActivity = async (activity: Activity) => {
     const url = activityInviteUrl(activity);
-    const text = `${activity.title[store.language]} — ${dateLabel(activity.date, store.language)}, ${activity.time}. ${activity.address}`;
+    const text = buildActivityShareText(activity, store.language);
     const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
 
     const webApp = getTelegramWebApp();
