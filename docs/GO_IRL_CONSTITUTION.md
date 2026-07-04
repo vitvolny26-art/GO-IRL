@@ -1,5 +1,12 @@
 # GO IRL Constitution
 
+Before reading the Constitution, read:
+
+[docs/PRODUCT_PHILOSOPHY.md](PRODUCT_PHILOSOPHY.md)
+
+The Product Philosophy explains why GO IRL exists.
+The Constitution explains how GO IRL must be built.
+
 This document is the product and architecture source of truth for GO IRL. All major product, design, technical, and roadmap decisions must follow it.
 
 ## 1. Vision

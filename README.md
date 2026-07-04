@@ -2,6 +2,17 @@
 
 ![GO IRL logo](public/brand/logo-wide.png)
 
+Before contributing or implementing new features, read:
+
+1. [docs/PRODUCT_PHILOSOPHY.md](docs/PRODUCT_PHILOSOPHY.md)
+2. [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md)
+
+Every major product or architecture decision must support the mission:
+
+**Less scrolling. More living.**
+
+If a feature increases screen time but does not increase real-life meetings, it should be reconsidered.
+
 GO IRL (Go In Real Life) is a Telegram Mini App for creating and joining offline activities, starting with Olomouc.
 
 All major product and architecture decisions must follow the [GO IRL Constitution](docs/GO_IRL_CONSTITUTION.md).
@@ -71,6 +82,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 
 ## Project Documents
 
+- `docs/PRODUCT_PHILOSOPHY.md` - product manifesto and mission
 - `docs/GO_IRL_CONSTITUTION.md` - product and architecture source of truth
 - `CHANGELOG.md` - shipped changes
 - `ROADMAP.md` - product and engineering direction
