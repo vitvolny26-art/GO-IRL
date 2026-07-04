@@ -6,6 +6,12 @@ create extension if not exists pgcrypto;
 alter table public.activities
 add column if not exists updated_at timestamptz not null default now();
 
+alter table public.activities
+add column if not exists city_id text not null default 'olomouc';
+
+alter table public.activities
+add column if not exists participant_note text;
+
 update public.activities
 set price = 0
 where price < 0;
@@ -31,6 +37,9 @@ on public.activities(organizer_key, event_date);
 
 create index if not exists activities_visibility_date_idx
 on public.activities(visibility, event_date, event_time);
+
+create index if not exists activities_city_date_idx
+on public.activities(city_id, event_date, event_time);
 
 create index if not exists activity_members_user_status_idx
 on public.activity_members(user_key, status, activity_id);

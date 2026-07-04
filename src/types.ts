@@ -22,8 +22,10 @@ export type Activity = {
   description: Record<Language, string>;
   date: string;
   time: string;
+  cityId: string;
   address: string;
   locationUrl?: string;
+  participantNote?: string;
   price: number;
   capacity: number;
   participants: number;

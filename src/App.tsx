@@ -36,12 +36,15 @@ import {
   MAX_EVENT_ADDRESS_LENGTH,
   MAX_EVENT_CAPACITY,
   MAX_EVENT_DESCRIPTION_LENGTH,
+  MAX_EVENT_NOTE_LENGTH,
   MAX_EVENT_PRICE,
   MAX_EVENT_TITLE_LENGTH,
   MIN_EVENT_CAPACITY,
   validateEventCapacity,
+  validateEventDate,
   validateEventPrice,
   validateMaxLength,
+  validateOptionalUrl,
   validateRequiredText,
 } from "./validation";
 
@@ -79,6 +82,7 @@ function App() {
   const [selected, setSelected] = useState<Activity | null>(null);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [completion, setCompletion] = useState("");
+  const [completionActivityId, setCompletionActivityId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const invitationHandled = useRef(false);
   const toastTimer = useRef<number | null>(null);
@@ -232,7 +236,7 @@ function App() {
         }} onCreated={(id) => {
           flash(editingActivity ? t.updatedSuccess : t.createdSuccess);
           setEditingActivity(null);
-          setSelected(useAppStore.getState().activities.find((item) => item.id === id) || null);
+          setCompletionActivityId(id);
           setCompletion(editingActivity ? t.updatedSuccess : t.createdSuccess);
         }} />}
         {store.view === "profile" && <ProfileView language={store.language} onOpen={setSelected} onJoin={handleJoin} onCloseMiniApp={requestCloseMiniApp} />}
@@ -244,7 +248,7 @@ function App() {
         <ActivitySheet
           activity={store.activities.find((item) => item.id === selected.id) || selected}
           language={store.language}
-          cityName={getCity(store.selectedCityId).name[store.language]}
+          cityName={getCity((store.activities.find((item) => item.id === selected.id) || selected).cityId).name[store.language]}
           loading={store.loading}
           error={store.syncError}
           onClose={() => setSelected(null)}
@@ -259,7 +263,25 @@ function App() {
           onCloseMiniApp={requestCloseMiniApp}
         />
       )}
-      {completion && <CompletionBar message={completion} language={store.language} onDismiss={() => setCompletion("")} onCloseMiniApp={requestCloseMiniApp} />}
+      {completion && (
+        <CompletionBar
+          message={completion}
+          language={store.language}
+          onDismiss={() => {
+            setCompletion("");
+            setCompletionActivityId(null);
+          }}
+          onOpen={() => {
+            const activity = useAppStore.getState().activities.find((item) => item.id === completionActivityId);
+            if (activity) setSelected(activity);
+          }}
+          onShare={() => {
+            const activity = useAppStore.getState().activities.find((item) => item.id === completionActivityId);
+            if (activity) void shareActivity(activity);
+          }}
+          onCloseMiniApp={requestCloseMiniApp}
+        />
+      )}
       {notice && <div className="toast">{notice}</div>}
     </div>
   );
@@ -341,13 +363,41 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
   const createActivity = useAppStore((state) => state.createActivity);
   const updateActivity = useAppStore((state) => state.updateActivity);
   const selectedCityId = useAppStore((state) => state.selectedCityId);
+  const setSelectedCity = useAppStore((state) => state.setSelectedCity);
+  const formRef = useRef<HTMLFormElement>(null);
   const [categoryId, setCategoryId] = useState(initialActivity?.categoryId || "sport");
+  const [cityId, setCityId] = useState(initialActivity?.cityId || selectedCityId);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [priceError, setPriceError] = useState("");
   const t = getTranslation(language);
-  const selectedCity = getCity(selectedCityId);
+  const selectedCity = getCity(cityId);
   const today = new Date().toISOString().slice(0, 10);
+  const quickTemplates = [
+    { id: "coffee", label: t.templateCoffee, icon: "☕", categoryId: "activities", activity: "☕", title: t.templateCoffee, description: t.templateCoffee, capacity: 4 },
+    { id: "walk", label: t.templateWalk, icon: "🚶", categoryId: "social", activity: "🚶", title: t.templateWalk, description: t.templateWalk, capacity: 6 },
+    { id: "sport", label: t.templateSport, icon: "🏐", categoryId: "sport", activity: "🏐", title: t.templateSport, description: t.templateSport, capacity: 8 },
+    { id: "skating", label: t.templateSkating, icon: "🛼", categoryId: "activities", activity: "🛼", title: t.templateSkating, description: t.templateSkating, capacity: 6 },
+    { id: "food", label: t.templateFood, icon: "🍽️", categoryId: "social", activity: "🍽️", title: t.templateFood, description: t.templateFood, capacity: 4 },
+    { id: "board-games", label: t.templateBoardGames, icon: "🎲", categoryId: "activities", activity: "🎲", title: t.templateBoardGames, description: t.templateBoardGames, capacity: 6 },
+    { id: "other", label: t.templateOther, icon: "✨", categoryId: "activities", activity: "☕", title: t.templateOther, description: t.templateOther, capacity: 4 },
+  ];
+
+  const setFieldValue = (name: string, value: string) => {
+    const field = formRef.current?.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+    if (field) field.value = value;
+  };
+
+  const applyTemplate = (template: (typeof quickTemplates)[number]) => {
+    const option = activityOptions[template.categoryId].find((item) => item.icon === template.activity) || activityOptions[template.categoryId][0];
+    setCategoryId(template.categoryId);
+    window.requestAnimationFrame(() => {
+      setFieldValue("activityText", `${option.icon} ${option.name[language]}`);
+      setFieldValue("titleText", `${template.icon} ${template.title}`);
+      setFieldValue("descriptionText", template.description);
+      setFieldValue("capacity", String(template.capacity));
+    });
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -359,16 +409,22 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
     const rawTitle = String(data.get("titleText")).trim();
     const rawDescription = String(data.get("descriptionText")).trim();
     const rawAddress = String(data.get("address")).trim();
+    const rawLocationUrl = String(data.get("locationUrl") || "").trim();
+    const rawParticipantNote = String(data.get("participantNote") || "").trim();
+    const date = String(data.get("date"));
     const price = Number(data.get("price"));
     const capacity = Number(data.get("capacity"));
     const fieldError =
       validateRequiredText(rawTitle, t)
       || validateRequiredText(rawDescription, t)
       || validateRequiredText(rawAddress, t)
+      || validateEventDate(date, t)
       || validateMaxLength(rawTitle, MAX_EVENT_TITLE_LENGTH, t.titleTooLong)
       || validateMaxLength(rawDescription, MAX_EVENT_DESCRIPTION_LENGTH, t.descriptionTooLong)
       || validateMaxLength(rawAddress, MAX_EVENT_ADDRESS_LENGTH, t.addressTooLong)
-      || validateEventCapacity(capacity, t);
+      || validateMaxLength(rawParticipantNote, MAX_EVENT_NOTE_LENGTH, t.noteTooLong)
+      || validateEventCapacity(capacity, t)
+      || validateOptionalUrl(rawLocationUrl, t);
     if (fieldError) {
       setFormError(fieldError);
       setSubmitting(false);
@@ -387,10 +443,12 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
       activityText,
       titleText: rawTitle.startsWith(activityEmoji) ? rawTitle : `${activityEmoji} ${rawTitle}`,
       descriptionText: rawDescription,
-      date: String(data.get("date")),
+      date,
       time: String(data.get("time")),
+      cityId,
       address: rawAddress,
-      locationUrl: String(data.get("locationUrl") || "").trim() || undefined,
+      locationUrl: rawLocationUrl || undefined,
+      participantNote: rawParticipantNote || undefined,
       price,
       capacity,
       visibility: String(data.get("visibility")) as NewActivity["visibility"],
@@ -399,6 +457,7 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
       const id = initialActivity
         ? await updateActivity(initialActivity.id, activity)
         : await createActivity(activity);
+      setSelectedCity(cityId);
       onCreated(id);
       if (!initialActivity) event.currentTarget.reset();
     } catch {
@@ -412,7 +471,17 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
     <section className="page-section create-page">
       <button className="back-button" onClick={onCancel} type="button"><ArrowLeft size={20} /></button>
       <div className="page-title">{initialActivity ? <Pencil /> : <Plus />}<div><h1>{initialActivity ? t.edit : t.createTitle}</h1><p>{t.createHint}</p></div></div>
-      <form className="create-form" onSubmit={submit}>
+      <form className="create-form" ref={formRef} onSubmit={submit}>
+        <div className="template-row" aria-label={t.quickTemplates}>
+          <span>{t.quickTemplates}</span>
+          <div>
+            {quickTemplates.map((template) => (
+              <button key={template.id} onClick={() => applyTemplate(template)} type="button">
+                {template.icon} {template.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <label><span>{t.category}</span><select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>{categories.map((category) => <option key={category.id} value={category.id}>{category.icon} {category.name[language]}</option>)}</select></label>
         <label><span>{t.activity}</span><select key={`${categoryId}-${language}`} name="activityText" defaultValue={initialActivity?.categoryId === categoryId ? initialActivity.activity[language] : undefined} required>{activityOptions[categoryId].map((option) => <option key={`${option.icon}-${option.name[language]}`} value={`${option.icon} ${option.name[language]}`}>{option.icon} {option.name[language]}</option>)}</select></label>
         <label><span>{t.title}</span><input name="titleText" defaultValue={initialActivity?.title[language]} placeholder={t.titlePlaceholder} maxLength={MAX_EVENT_TITLE_LENGTH} required /></label>
@@ -421,8 +490,10 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
           <label><span>{t.date}</span><input name="date" type="date" min={today} defaultValue={initialActivity?.date || today} required /></label>
           <label><span>{t.time}</span><input name="time" type="time" defaultValue={initialActivity?.time || "18:00"} required /></label>
         </div>
+        <label><span>{t.city}</span><select name="cityId" value={cityId} onChange={(event) => setCityId(event.target.value)} required>{cities.map((city) => <option key={city.id} value={city.id}>{city.name[language]}</option>)}</select></label>
         <label><span>{t.address}</span><input name="address" defaultValue={initialActivity?.address || selectedCity.name[language]} maxLength={MAX_EVENT_ADDRESS_LENGTH} required /></label>
         <label><span>{t.locationUrl}</span><input name="locationUrl" type="url" defaultValue={initialActivity?.locationUrl} placeholder={t.locationPlaceholder} /></label>
+        <label><span>{t.participantNote}</span><textarea name="participantNote" rows={3} defaultValue={initialActivity?.participantNote} maxLength={MAX_EVENT_NOTE_LENGTH} placeholder={t.participantNotePlaceholder} /></label>
         <div className="form-row">
           <label className="price-field"><span>{t.price}</span><input name="price" type="number" min="0" max={MAX_EVENT_PRICE} defaultValue={initialActivity?.price || 0} onInput={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} onChange={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} required /><small className="field-error">{priceError || t.priceTooHigh}</small></label>
           <label><span>{t.capacity}</span><input name="capacity" type="number" min={MIN_EVENT_CAPACITY} max={MAX_EVENT_CAPACITY} defaultValue={initialActivity?.capacity || 8} required /></label>
@@ -759,6 +830,7 @@ function ActivitySheet({
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
           <div><UsersRound /><span>{t.freeSpots}</span><strong>{freeSpots} / {activity.capacity}</strong></div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
+          {activity.participantNote && <div><Sparkles /><span>{t.participantNote}</span><strong>{activity.participantNote}</strong></div>}
           <div><CircleUserRound /><span>{t.organizer}</span><strong>{activity.organizer}</strong></div>
           <div><ShieldCheck /><span>{t.visibility}</span><strong>{accessLabel}</strong></div>
           <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button">
@@ -821,7 +893,21 @@ function ActivitySheet({
   );
 }
 
-function CompletionBar({ message, language, onDismiss, onCloseMiniApp }: { message: string; language: Language; onDismiss: () => void; onCloseMiniApp: () => void }) {
+function CompletionBar({
+  message,
+  language,
+  onDismiss,
+  onOpen,
+  onShare,
+  onCloseMiniApp,
+}: {
+  message: string;
+  language: Language;
+  onDismiss: () => void;
+  onOpen: () => void;
+  onShare: () => void;
+  onCloseMiniApp: () => void;
+}) {
   const t = getTranslation(language);
   return (
     <div className="completion-bar">
@@ -829,6 +915,8 @@ function CompletionBar({ message, language, onDismiss, onCloseMiniApp }: { messa
         <strong>{message}</strong>
         <span>{t.closeAfterDoneHint}</span>
       </div>
+      <button onClick={onOpen} type="button">{t.openCreatedEvent}</button>
+      <button onClick={onShare} type="button">{t.share}</button>
       <button onClick={onCloseMiniApp} type="button">{t.done}</button>
       <button className="secondary" onClick={onDismiss} type="button">{t.close}</button>
     </div>

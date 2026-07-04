@@ -35,6 +35,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Organizer/admin event delete flow with confirmation and Supabase RLS planning.
 - GO IRL brand logo assets, favicon, and Open Graph preview.
 - Create Event validation for required text, length limits, capacity, and price.
+- Production-ready Create Event flow with quick templates, city selection, participant notes, URL/date validation, and post-create actions.
 
 ### Changed
 

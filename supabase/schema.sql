@@ -11,8 +11,10 @@ create table if not exists public.activities (
   description_cs text not null default '',
   event_date date not null,
   event_time time not null,
+  city_id text not null default 'olomouc',
   address text not null,
   location_url text,
+  participant_note text,
   price integer not null default 0 check (price between 0 and 100000),
   capacity integer not null check (capacity between 2 and 100),
   organizer text not null,
@@ -26,6 +28,12 @@ create table if not exists public.activities (
 
 alter table public.activities
 add column if not exists location_url text;
+
+alter table public.activities
+add column if not exists city_id text not null default 'olomouc';
+
+alter table public.activities
+add column if not exists participant_note text;
 
 alter table public.activities
 add column if not exists updated_at timestamptz not null default now();
@@ -57,6 +65,7 @@ add constraint activity_members_status_check check (status in ('joined', 'waitin
 
 create index if not exists activities_date_idx on public.activities(event_date, event_time);
 create index if not exists activities_organizer_idx on public.activities(organizer_key, event_date);
+create index if not exists activities_city_date_idx on public.activities(city_id, event_date, event_time);
 create index if not exists activities_visibility_date_idx on public.activities(visibility, event_date, event_time);
 create index if not exists activity_members_status_idx on public.activity_members(activity_id, status, created_at);
 create index if not exists activity_members_user_status_idx on public.activity_members(user_key, status, activity_id);

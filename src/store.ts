@@ -19,8 +19,10 @@ type DbActivity = {
   description_cs: string;
   event_date: string;
   event_time: string;
+  city_id?: string | null;
   address: string;
   location_url: string | null;
+  participant_note?: string | null;
   price: number;
   capacity: number;
   organizer: string;
@@ -79,8 +81,10 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   description: localizedDbText(row.description_ru, row.description_cs),
   date: row.event_date,
   time: row.event_time.slice(0, 5),
+  cityId: row.city_id || defaultCityId,
   address: row.address,
   locationUrl: row.location_url || undefined,
+  participantNote: row.participant_note || undefined,
   price: row.price,
   capacity: row.capacity,
   participants: members.filter((member) => member.activity_id === row.id && member.status === "joined").length,
@@ -93,6 +97,16 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   urgent: row.urgent,
   popular: row.popular,
 });
+
+const isMissingOptionalColumnError = (error: { message?: string } | null) =>
+  Boolean(error?.message?.includes("city_id") || error?.message?.includes("participant_note"));
+
+const toLegacyActivityRow = <T extends { city_id?: string; participant_note?: string | null }>(row: T) => {
+  const legacyRow = { ...row };
+  delete legacyRow.city_id;
+  delete legacyRow.participant_note;
+  return legacyRow;
+};
 
 export const useAppStore = create<AppState>((set, get) => {
   const reload = async () => {
@@ -223,8 +237,10 @@ export const useAppStore = create<AppState>((set, get) => {
         description_cs: input.descriptionText,
         event_date: input.date,
         event_time: input.time,
+        city_id: input.cityId,
         address: input.address,
         location_url: input.locationUrl || null,
+        participant_note: input.participantNote || null,
         price: input.price,
         capacity: input.capacity,
         organizer,
@@ -232,8 +248,14 @@ export const useAppStore = create<AppState>((set, get) => {
         visibility: input.visibility,
       };
 
-      const { data, error } = await supabase.from("activities").insert(row).select("id").single();
+      let { data, error } = await supabase.from("activities").insert(row).select("id").single();
+      if (isMissingOptionalColumnError(error)) {
+        const legacyResult = await supabase.from("activities").insert(toLegacyActivityRow(row)).select("id").single();
+        data = legacyResult.data;
+        error = legacyResult.error;
+      }
       if (error) throw error;
+      if (!data) throw new Error("Activity was not created");
 
       const { error: memberError } = await supabase.from("activity_members").insert({
         activity_id: data.id,
@@ -263,14 +285,20 @@ export const useAppStore = create<AppState>((set, get) => {
         description_cs: input.descriptionText,
         event_date: input.date,
         event_time: input.time,
+        city_id: input.cityId,
         address: input.address,
         location_url: input.locationUrl || null,
+        participant_note: input.participantNote || null,
         price: input.price,
         capacity: input.capacity,
         visibility: input.visibility,
       };
 
-      const { error } = await supabase.from("activities").update(row).eq("id", id);
+      let { error } = await supabase.from("activities").update(row).eq("id", id);
+      if (isMissingOptionalColumnError(error)) {
+        const legacyResult = await supabase.from("activities").update(toLegacyActivityRow(row)).eq("id", id);
+        error = legacyResult.error;
+      }
       if (error) throw error;
       await reload();
       set({ view: "home" });

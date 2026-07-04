@@ -4,12 +4,15 @@ import {
   MAX_EVENT_ADDRESS_LENGTH,
   MAX_EVENT_CAPACITY,
   MAX_EVENT_DESCRIPTION_LENGTH,
+  MAX_EVENT_NOTE_LENGTH,
   MAX_EVENT_PRICE,
   MAX_EVENT_TITLE_LENGTH,
   MIN_EVENT_CAPACITY,
   validateEventCapacity,
+  validateEventDate,
   validateEventPrice,
   validateMaxLength,
+  validateOptionalUrl,
   validateRequiredText,
 } from "./validation";
 
@@ -37,6 +40,7 @@ describe("event price validation", () => {
     expect(validateMaxLength("x".repeat(MAX_EVENT_TITLE_LENGTH + 1), MAX_EVENT_TITLE_LENGTH, t.titleTooLong)).toBe(t.titleTooLong);
     expect(validateMaxLength("x".repeat(MAX_EVENT_DESCRIPTION_LENGTH + 1), MAX_EVENT_DESCRIPTION_LENGTH, t.descriptionTooLong)).toBe(t.descriptionTooLong);
     expect(validateMaxLength("x".repeat(MAX_EVENT_ADDRESS_LENGTH + 1), MAX_EVENT_ADDRESS_LENGTH, t.addressTooLong)).toBe(t.addressTooLong);
+    expect(validateMaxLength("x".repeat(MAX_EVENT_NOTE_LENGTH + 1), MAX_EVENT_NOTE_LENGTH, t.noteTooLong)).toBe(t.noteTooLong);
   });
 
   it("validates participant capacity range", () => {
@@ -44,5 +48,16 @@ describe("event price validation", () => {
     expect(validateEventCapacity(MAX_EVENT_CAPACITY, t)).toBe("");
     expect(validateEventCapacity(MIN_EVENT_CAPACITY - 1, t)).toBe(t.capacityInvalid);
     expect(validateEventCapacity(MAX_EVENT_CAPACITY + 1, t)).toBe(t.capacityInvalid);
+  });
+
+  it("rejects past dates", () => {
+    expect(validateEventDate("2000-01-01", t)).toBe(t.dateInPast);
+  });
+
+  it("accepts http urls and rejects invalid place links", () => {
+    expect(validateOptionalUrl("", t)).toBe("");
+    expect(validateOptionalUrl("https://maps.google.com/example", t)).toBe("");
+    expect(validateOptionalUrl("not a url", t)).toBe(t.urlInvalid);
+    expect(validateOptionalUrl("ftp://example.com", t)).toBe(t.urlInvalid);
   });
 });
