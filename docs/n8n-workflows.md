@@ -4,24 +4,35 @@ This document defines future n8n workflow responsibilities. It does not include 
 
 ## Workflow 1: Event Discovery
 
-Schedule: three times per day.
+Schedule: three times per day per city/timezone.
 
 Steps:
 
 1. Read active rows from `external_sources`.
-2. Fetch public source pages/posts.
-3. Extract candidate event text and URLs.
-4. Send public candidate data to AI normalization.
-5. Save AI decisions in `ai_event_review_log`.
-6. Save normalized candidates in `discovered_events`.
-7. Mark duplicates.
-8. Optionally promote high-confidence candidates to `events` later.
+2. Skip sources that are disabled, broken, or outside retry windows.
+3. Fetch only allowed public sources:
+   - RSS
+   - official APIs
+   - public websites
+   - public Telegram channels
+   - public calendars
+   - manual/user-submitted sources
+4. Do not log in to personal Facebook accounts.
+5. Extract candidate event text, date/time, location, price, and source URL.
+6. Save raw candidate fields and payload hash to `discovered_events`.
+7. Send public candidate content to AI normalization.
+8. Save AI decisions in `ai_event_review_log`.
+9. Mark duplicates using source URL, record ID, normalized title, city, venue, date/time, and similarity.
+10. Move candidates to `pending_review`, `rejected`, or later `approved`.
+11. Promote approved candidates to `events`.
 
 Credentials:
 
-- Service role Supabase key in n8n only.
+- Supabase service role key in n8n only.
 - Source API credentials in n8n only.
 - AI API key in n8n only.
+- No Facebook passwords.
+- No frontend exposure.
 
 ## Workflow 2: Evening Digest
 
@@ -30,14 +41,31 @@ Schedule: evening, per target city/timezone.
 Steps:
 
 1. Read `notification_preferences` where digest is enabled.
-2. Skip users in quiet hours.
-3. Read interests and matching events.
-4. Exclude already sent events from `notification_digest_log`.
-5. Build localized digest.
-6. Send via Telegram/email/later channels.
-7. Write delivery status to `notification_digest_log`.
+2. Skip users inside quiet hours.
+3. Respect user working hours and do not send late-night digests.
+4. Load city, language, interests, preferred days/time, and price limit.
+5. Select matching published events.
+6. Exclude expired/completed/cancelled events.
+7. Exclude already sent events from `notification_digest_log`.
+8. Rank by city, interests, freshness, free spots, source trust, and relevance.
+9. Render localized digest.
+10. Send through selected channel.
+11. Write delivery result to `notification_digest_log`.
 
-## Workflow 3: Source Health
+The digest uses user preferences but does not send private identifiers to AI.
+
+## Workflow 3: Event Lifecycle
+
+Schedule: hourly or daily.
+
+Steps:
+
+1. Find published events whose end time has passed.
+2. Mark them `expired`.
+3. Later, if attendance/completion confirmation exists, mark them `completed`.
+4. Keep cancelled events excluded from digest and recommendation flows.
+
+## Workflow 4: Source Health
 
 Schedule: daily.
 
@@ -45,7 +73,27 @@ Steps:
 
 1. Check source fetch success/failure.
 2. Update `external_sources.last_checked_at`.
-3. Flag broken sources for admin review.
+3. Update `external_sources.last_success_at` after successful fetch.
+4. Store summarized `last_error`.
+5. Disable or flag sources after repeated failures.
+6. Send source health report to moderators later.
+
+## Facebook Policy
+
+Facebook is not an MVP automated source.
+
+Allowed later:
+
+- official Facebook API integration if approved and compliant
+- manual moderator-added Facebook event URLs when allowed
+- user-submitted Facebook event links for manual review
+
+Not allowed:
+
+- personal account browser automation
+- storing Facebook login/password
+- scraping closed/private groups
+- bypassing Facebook access controls
 
 ## Operational Rules
 
@@ -54,6 +102,7 @@ Steps:
 - AI receives public event data only.
 - Personal identifiers stay out of AI prompts.
 - n8n logs must avoid raw private user data.
+- Failed workflow logs should store summarized errors, not full private payloads.
 
 ## Future Workflow JSON
 
@@ -63,3 +112,4 @@ Workflow JSON should be committed only after:
 - secrets are configured outside Git.
 - a test n8n instance exists.
 - manual dry-run has been completed.
+- data retention rules are decided.

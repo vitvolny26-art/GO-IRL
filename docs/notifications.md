@@ -28,13 +28,15 @@ Quiet hours should be enabled by default when notification preferences are creat
 1. n8n runs in the evening.
 2. Select users with `evening_digest_enabled = true`.
 3. Respect quiet hours.
-4. Load user city, language, interests, price limit, preferred days/time.
-5. Select matching `events`.
-6. Exclude events already sent using `notification_digest_log`.
-7. Rank events by relevance and freshness.
-8. Render a short digest in the user's language.
-9. Send through the selected channel.
-10. Save result in `notification_digest_log`.
+4. Respect working hours and never send late-night digest batches.
+5. Load user city, language, interests, price limit, preferred days/time.
+6. Select matching published `events`.
+7. Exclude expired, completed, cancelled, private, and already sent events.
+8. Exclude events already sent using `notification_digest_log`.
+9. Rank events by relevance, freshness, source trust, free spots, and interest match.
+10. Render a short digest in the user's language.
+11. Send through the selected channel.
+12. Save result in `notification_digest_log`.
 
 ## Duplicate Send Prevention
 
@@ -54,6 +56,20 @@ Do not send the same event repeatedly to the same user in the same digest window
 - Delivery logs should be retained for a limited period.
 - Disable all notifications with one preference update.
 - No sensitive event participant data in notification content.
+- AI digest ranking uses anonymized interests, not Telegram IDs, emails, phones, or private profiles.
+- n8n should store only delivery status and event IDs needed to prevent duplicate sends.
+- The Mini App is not a background notification worker.
+
+## Source Safety
+
+Digest content comes from published events only.
+
+Do not include events from:
+
+- unreviewed `discovered_events`
+- private/restricted sources
+- unsafe Facebook scraping
+- personal-account browser automation
 
 ## Not Implemented Now
 

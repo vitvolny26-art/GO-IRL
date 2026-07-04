@@ -196,7 +196,8 @@ Fields:
 - `updated_at timestamptz`
 
 Constraints and indexes:
-- check source_type in `website`, `facebook_group`, `telegram_channel`, `city_board`, `sports_site`, `other`
+- check source_type in `rss`, `api`, `website`, `telegram_channel`, `public_calendar`, `manual`, `user_suggestion`, `facebook_future`, `other`
+- `facebook_future` is reserved for official API/manual-review integrations only; do not store Facebook credentials or rely on personal-account automation
 - index `(city_id, is_active)`
 
 RLS:

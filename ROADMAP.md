@@ -41,6 +41,8 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - AI event normalization.
 - AI duplicate detection.
 - AI event discovery sources: public event websites, Facebook Events, Meetup, Eventbrite, city calendars, universities, Telegram, Discord, Reddit, and public calendars.
+- Facebook Groups are future-only through official API/manual review; no personal-account scraping or stored Facebook credentials.
+- MVP discovery uses public sources, RSS/API, public Telegram channels, manual moderation, and user suggestions.
 - Anonymous mode.
 - Reveal contact by mutual consent.
 - Reporting and blocking.
@@ -51,6 +53,7 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 - Evening personalized digest.
 - Digest matching respects user city, interests, language, price limits, quiet hours, and working hours.
 - n8n sends personalized digest through the selected notification channel and prevents duplicate event sends.
+- Digest excludes unreviewed, expired, completed, cancelled, and duplicate events.
 - Telegram notification bot.
 - Source management admin panel.
 - Anonymous chat.

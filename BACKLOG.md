@@ -54,8 +54,11 @@ Confirmed work is ordered by priority.
 - Replace `SimpleRecommendationEngine` with an AI-backed implementation behind the existing `RecommendationEngine` interface.
 - n8n event discovery workflow.
 - Discovery source coverage: public event websites, Facebook Events, Meetup, Eventbrite, city sites, universities, Telegram, Discord, Reddit, and public calendars.
+- MVP discovery source policy: public sources, RSS/API, public Telegram channels, manual moderation, and user suggestions first.
+- Facebook Groups future integration only through official API or manual review; no personal account automation.
 - AI event normalization.
 - AI duplicate detection.
+- Event lifecycle job for `published` -> `expired` / `completed`.
 - Anonymous mode.
 - Reveal contact by mutual consent.
 - Reporting / blocking.
@@ -113,3 +116,7 @@ Confirmed work is ordered by priority.
 - DIGEST-002 Build evening digest selection.
 - DIGEST-003 Add `notification_digest_log` duplicate-send guard.
 - DIGEST-004 Add Telegram delivery through server/n8n.
+- SRC-001 Add `external_sources` source policy fields and health checks.
+- SRC-002 Add user-submitted event suggestions.
+- SRC-003 Add manual moderation queue for `pending_review`.
+- SRC-004 Document and enforce no Facebook credential storage.

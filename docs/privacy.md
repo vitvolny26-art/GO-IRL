@@ -82,6 +82,7 @@ Allowed:
 - public source URL
 - city/category hints
 - anonymized interest categories
+- source trust metadata
 
 Not allowed:
 
@@ -90,8 +91,41 @@ Not allowed:
 - phone
 - exact private profile data
 - private notification delivery identifiers
+- personal Facebook account data
+- private or closed group content
+- login credentials or session cookies
 
 Users should later have opt-out from AI recommendations.
+
+## External Source Privacy
+
+Event discovery must use public and permitted sources only.
+
+Allowed MVP source types:
+
+- public websites
+- RSS feeds
+- official APIs
+- public Telegram channels
+- public calendars
+- manual moderator-added sources
+- user-submitted event suggestions
+
+Facebook Groups are future-only and must use official API access or manual review. GO IRL must not automate a personal Facebook account or store Facebook credentials.
+
+## Mini App Background Policy
+
+The Mini App does not run background discovery or notifications.
+
+Reasons:
+
+- user control and transparency
+- lower battery use
+- Telegram WebView lifecycle can suspend the app
+- no hidden tracking
+- no service secrets in frontend code
+
+Server-side n8n/backend jobs handle discovery, digest, and notification delivery.
 
 ## Deletion
 
