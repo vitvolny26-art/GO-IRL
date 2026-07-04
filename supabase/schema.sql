@@ -226,8 +226,14 @@ on public.activities for insert to anon with check (
 drop policy if exists "organizer activities update" on public.activities;
 create policy "organizer activities update"
 on public.activities for update to anon
-using (organizer_key = public.go_irl_request_user_key())
-with check (organizer_key = public.go_irl_request_user_key());
+using (
+  organizer_key = public.go_irl_request_user_key()
+  or public.go_irl_request_is_admin()
+)
+with check (
+  organizer_key = public.go_irl_request_user_key()
+  or public.go_irl_request_is_admin()
+);
 
 drop policy if exists "organizer or admin activities delete" on public.activities;
 create policy "organizer or admin activities delete"

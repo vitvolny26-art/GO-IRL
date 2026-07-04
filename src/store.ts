@@ -130,6 +130,47 @@ const withoutMissingOptionalColumn = <T extends Partial<Record<OptionalActivityC
   return nextRow;
 };
 
+const activityFromInput = (id: string, input: NewActivity, current: Activity): Activity => {
+  const localizedText = {
+    ru: input.activityText,
+    uk: input.activityText,
+    cs: input.activityText,
+    en: input.activityText,
+  };
+  const localizedTitle = {
+    ru: input.titleText,
+    uk: input.titleText,
+    cs: input.titleText,
+    en: input.titleText,
+  };
+  const localizedDescription = {
+    ru: input.descriptionText,
+    uk: input.descriptionText,
+    cs: input.descriptionText,
+    en: input.descriptionText,
+  };
+
+  return {
+    ...current,
+    id,
+    type: input.type || inferActivityType(input.categoryId),
+    categoryId: normalizeCategoryId(input.categoryId),
+    activity: localizedText,
+    title: localizedTitle,
+    description: localizedDescription,
+    date: input.date,
+    time: input.time,
+    cityId: input.cityId,
+    address: input.address,
+    locationUrl: input.locationUrl,
+    participantNote: input.participantNote,
+    price: input.price,
+    capacity: input.capacity,
+    visibility: input.visibility,
+    metadata: input.metadata,
+  };
+};
+
 export const useAppStore = create<AppState>((set, get) => {
   const reload = async () => {
     if (typeof document !== "undefined" && document.hidden) return;
@@ -326,13 +367,19 @@ export const useAppStore = create<AppState>((set, get) => {
 
       let updateRow = row;
       let error = null as { message?: string } | null;
+      let count = 0;
       for (let attempt = 0; attempt <= optionalActivityColumns.length; attempt += 1) {
-        const result = await supabase.from("activities").update(updateRow).eq("id", id);
+        const result = await supabase.from("activities").update(updateRow, { count: "exact" }).eq("id", id);
         error = result.error;
+        count = result.count ?? 0;
         if (!isMissingOptionalColumnError(error)) break;
         updateRow = withoutMissingOptionalColumn(updateRow, error);
       }
       if (error) throw error;
+      if (count === 0) throw new Error("Activity was not updated");
+      set((state) => ({
+        activities: state.activities.map((activity) => (activity.id === id ? activityFromInput(id, input, current) : activity)),
+      }));
       await reload();
       set({ view: "home" });
       return id;
