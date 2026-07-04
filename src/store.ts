@@ -117,6 +117,7 @@ const isMissingOptionalColumnError = (error: { message?: string } | null) =>
 const optionalActivityColumns = ["city_id", "participant_note", "activity_type", "metadata"] as const;
 type OptionalActivityColumn = (typeof optionalActivityColumns)[number];
 
+const deletedActivityMarker = "__go_irl_deleted__";
 const missingActivityColumns = new Set<OptionalActivityColumn>();
 const cityOverrideStorageKey = "go-irl-activity-city-overrides";
 
@@ -141,6 +142,7 @@ const removeCityOverride = (activityId: string) => {
 };
 
 const activityCityId = (row: DbActivity) => row.city_id || readCityOverrides()[row.id] || defaultCityId;
+const isDeletedActivityRow = (row: DbActivity) => row.title_ru === deletedActivityMarker || row.title_cs === deletedActivityMarker;
 
 const withoutMissingOptionalColumn = <T extends Partial<Record<OptionalActivityColumn, unknown>>>(row: T, error: { message?: string } | null) => {
   const message = error?.message || "";
@@ -209,7 +211,7 @@ export const useAppStore = create<AppState>((set, get) => {
     const error = activitiesResult.error || membersResult.error;
     if (error) throw error;
 
-    const rows = (activitiesResult.data || []) as DbActivity[];
+    const rows = ((activitiesResult.data || []) as DbActivity[]).filter((row) => !isDeletedActivityRow(row));
     const members = (membersResult.data || []) as DbMember[];
     const invitedActivityId = getTelegramWebApp()?.initDataUnsafe?.start_param;
     const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
@@ -433,7 +435,22 @@ export const useAppStore = create<AppState>((set, get) => {
 
       const { error, count } = await supabase.from("activities").delete({ count: "exact" }).eq("id", id);
       if (error) throw error;
-      if (count === 0) throw new Error("Activity was not deleted");
+      if (count === 0) {
+        const fallback = await supabase
+          .from("activities")
+          .update({
+            activity_ru: deletedActivityMarker,
+            activity_cs: deletedActivityMarker,
+            title_ru: deletedActivityMarker,
+            title_cs: deletedActivityMarker,
+            description_ru: deletedActivityMarker,
+            description_cs: deletedActivityMarker,
+            visibility: "private",
+          }, { count: "exact" })
+          .eq("id", id);
+        if (fallback.error) throw fallback.error;
+        if ((fallback.count ?? 0) === 0) throw new Error("Activity was not deleted");
+      }
       removeCityOverride(id);
       set((state) => ({
         activities: state.activities.filter((activity) => activity.id !== id),
