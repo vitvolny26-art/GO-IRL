@@ -189,6 +189,97 @@ Constraints:
 - check skill_level in `beginner`, `intermediate`, `advanced`
 - check format in `casual`, `training`, `competition`
 
+### activity_chats
+
+Purpose: optional, temporary chat around one Activity/Event. Chat exists only to help people meet offline.
+
+Fields:
+- `id uuid primary key`
+- `activity_id uuid not null references events(id) on delete cascade`
+- `enabled boolean not null default false`
+- `status text not null default 'active'`
+- `auto_delete_enabled boolean not null default true`
+- `auto_delete_at timestamptz`
+- `created_at timestamptz`
+- `archived_at timestamptz`
+- `deleted_at timestamptz`
+
+Constraints and indexes:
+- unique `(activity_id)`
+- check status in `active`, `archived`, `deleted`
+- index `(status, auto_delete_at)`
+- index `(activity_id, status)`
+
+RLS:
+- organizer can read chat for their Activity.
+- confirmed chat members can read active chat.
+- admin/moderator can read through separate moderation permission.
+- guests, pending users, rejected users, and blocked users cannot read chat.
+- service role/n8n can archive chats through the cleanup workflow.
+
+Retention:
+- default MVP behavior is archive 24 hours after Activity end.
+- `status = archived` hides messages from normal UI.
+- hard delete is allowed only after privacy review.
+
+### activity_chat_members
+
+Purpose: explicit access list for Activity Chat.
+
+Fields:
+- `id uuid primary key`
+- `chat_id uuid not null references activity_chats(id) on delete cascade`
+- `user_id uuid not null references users(id) on delete cascade`
+- `role text not null`
+- `joined_at timestamptz`
+- `muted_until timestamptz`
+- `left_at timestamptz`
+
+Constraints and indexes:
+- unique `(chat_id, user_id)`
+- check role in `organizer`, `participant`, `moderator`
+- index `(user_id, left_at)`
+- index `(chat_id, role)`
+
+RLS:
+- user can read their own chat membership.
+- active members can read the member list for chats they belong to.
+- admin/moderator can read for moderation.
+- pending Activity requests do not create chat membership.
+
+### activity_chat_messages
+
+Purpose: messages inside optional Activity Chat.
+
+Fields:
+- `id uuid primary key`
+- `chat_id uuid not null references activity_chats(id) on delete cascade`
+- `sender_user_id uuid not null references users(id) on delete restrict`
+- `body text not null`
+- `created_at timestamptz`
+- `edited_at timestamptz`
+- `deleted_at timestamptz`
+- `moderation_status text not null default 'visible'`
+
+Constraints and indexes:
+- check body length
+- check moderation_status in `visible`, `reported`, `hidden`, `removed`
+- index `(chat_id, created_at)`
+- index `(sender_user_id, created_at)`
+- index `(moderation_status, created_at)`
+
+RLS:
+- user can read visible messages only for active chats where they are an active member.
+- archived chat messages are hidden from normal UI.
+- sender can soft-delete own message if chat is active.
+- admin/moderator can hide/remove messages.
+- service role can archive/hide messages during cleanup.
+
+Moderation:
+- reported messages can place the chat on moderation hold.
+- moderation/audit metadata may be retained for a limited period after archive.
+- chat content is not sent to AI without explicit consent.
+
 ### dating_profiles
 
 Future table for the Dating vertical. It must not use the generic event join model.
@@ -390,10 +481,34 @@ RLS:
 - owner can read own digest history if exposed.
 - service role writes.
 
+## Activity Chat Automation
+
+### n8n chat cleanup workflow
+
+Purpose: archive or delete temporary Activity Chats after their usefulness window ends.
+
+Schedule:
+- runs once per hour
+
+Workflow:
+1. Select `activity_chats` where `auto_delete_enabled = true`.
+2. Filter `auto_delete_at <= now()`.
+3. Skip chats with open complaints or moderation hold.
+4. Set `status = archived` and `archived_at = now()` for MVP.
+5. Hide messages from normal UI.
+6. Log the cleanup action for audit.
+7. Do not send notifications after archive.
+
+Default policy:
+- `auto_delete_at = activity.ends_at + interval '24 hours'`
+- archive is preferred over hard delete for MVP.
+- hard delete requires privacy review and retention policy approval.
+
 ## Migration Strategy
 
 1. Keep `activities` and `activity_members` running for Sprint 1.
 2. Add next-generation tables in `schema_next.sql`.
 3. Build write path for `users`, `user_profiles`, `notification_preferences`.
 4. Introduce `events` as canonical table in Sprint 2/3.
-5. Migrate or map `activities` to `events` only after UI and RLS tests are ready.
+5. Add optional Activity Chat tables only after event/user/RLS foundations are stable.
+6. Migrate or map `activities` to `events` only after UI and RLS tests are ready.

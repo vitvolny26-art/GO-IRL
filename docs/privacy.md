@@ -72,6 +72,36 @@ Planned:
 - hidden location until approved
 - anonymous chat later
 
+## Optional Activity Chat Privacy
+
+Activity Chat is optional and temporary.
+
+Purpose:
+
+- help confirmed participants meet offline
+- coordinate exact meeting point
+- agree who brings what
+- handle delays, time changes, and quick participant questions
+
+Non-goal:
+
+- GO IRL must not become a permanent messenger or social network.
+
+Rules:
+
+- Chat is created only when the organizer enables it for a specific Activity.
+- Chat exists only around that Activity.
+- Chat is visible only to the organizer, confirmed participants, admin, and moderator.
+- Guests, pending users, rejected users, and blocked users cannot see the chat.
+- Default retention is archive 24 hours after the Activity ends.
+- Archived chat messages are hidden from normal UI.
+- Hard delete requires a privacy review.
+- Open complaints or moderation hold can extend limited retention for safety review.
+- Users can report a message.
+- Users can block a participant.
+- Chat content must not be used for AI training, AI recommendations, or AI summaries without explicit user consent.
+- Chat notification delivery must respect opt-in, quiet hours, and Activity end/archive state.
+
 ## Dating Privacy
 
 Dating is a separate vertical with stronger privacy defaults.
@@ -150,3 +180,10 @@ Future deletion flow:
 - anonymize old event participation where needed
 - delete chat history when chats exist
 - keep only legally/safety-required audit records with minimization
+
+Activity Chat deletion policy:
+
+- MVP should archive chats by default instead of hard deleting immediately.
+- `activity_chats.status = archived` hides messages from normal UI.
+- moderation/audit metadata can be retained for a short, documented period.
+- hard delete can be added after privacy and safety review.

@@ -60,6 +60,21 @@ Do not send the same event repeatedly to the same user in the same digest window
 - n8n should store only delivery status and event IDs needed to prevent duplicate sends.
 - The Mini App is not a background notification worker.
 
+## Activity Chat Notifications
+
+Activity Chat notifications are future server-side notifications for optional Activity Chat.
+
+Rules:
+
+- Send only to organizer and confirmed participants who are active chat members.
+- Do not notify guests, pending users, rejected users, blocked users, or users who left the chat.
+- Allow users to mute or disable chat notifications.
+- Respect quiet hours and working hours.
+- Do not send chat notifications at night.
+- Do not send chat notifications after the Activity ends if the chat is archived.
+- Stop all chat notifications after `activity_chats.status = archived`.
+- Do not include sensitive chat content in notification logs.
+
 ## Source Safety
 
 Digest content comes from published events only.

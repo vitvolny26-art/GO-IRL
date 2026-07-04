@@ -46,6 +46,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 - Preserve the current generic event MVP as the fallback experience.
 - Keep Sport as the current reference vertical without expanding into Friends, Travel, or Dating yet.
 - Harden Supabase RLS and document every policy.
+- Chat data model for optional, temporary Activity Chat.
+- Chat RLS design with participant-only access.
+- Chat toggle in Activity settings as an architecture item, not runtime UI yet.
 - Apply and verify migrations for `city_id`, `metadata`, `participant_note`, and `activity_type`.
 - Add database verification SQL to release flow.
 - Replace local fallback as the primary source of truth once production schema is verified.
@@ -70,6 +73,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 3 - Server-Side Notifications
 
+- Activity chat MVP after database/RLS foundation is stable.
+- Participant-only chat access for organizer, confirmed participants, admin, and moderator.
+- Auto-archive Activity Chat after the Activity ends.
 - Add server-side notifications for join requests and event updates through n8n.
 - Build evening digest workflow through n8n.
 - Respect quiet hours and working hours; never send AI/n8n digest at night.
@@ -80,6 +86,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 ## Phase 4 - AI Event Discovery
 
+- Chat notifications through n8n with quiet hours.
+- Report/block in Activity Chat.
+- Moderation hold for chats under investigation.
 - Build n8n event discovery workflow.
 - Use public sources, RSS/API, public Telegram channels, manual moderation, and user suggestions first.
 - Facebook Groups are future-only through official API/manual review; no personal-account scraping or stored Facebook credentials.
@@ -95,6 +104,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 - CAL-002 Future native calendar integration.
 - CAL-003 Future Google OAuth calendar sync.
+- Activity Chat privacy review.
+- Activity Chat retention policies.
+- Optional encrypted chat research.
 - Friends vertical starts only after database and notification foundation is stable.
 - Travel vertical starts only after Friends and source discovery architecture are stable.
 - Dating vertical is last and must not begin until privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.

@@ -85,6 +85,10 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - Add release checklist for `supabase/verify_schema.sql`.
 - Supabase RLS hardening.
 - Roles and permission enforcement.
+- ACT-CHAT-001 Optional activity chat architecture: organizer can enable chat per Activity with `chat_enabled`, `chat_auto_delete_enabled`, and `chat_auto_delete_after_hours`.
+- Chat data model for `activity_chats`, `activity_chat_messages`, and `activity_chat_members`.
+- Chat RLS design: only organizer, confirmed participants, admin, and moderator can read chat; guests, pending users, rejected users, and blocked users cannot.
+- Activity settings design for "Create chat for participants" toggle.
 - Server-side admin role enforcement for event deletion and moderation.
 - Replace Sprint 1 admin allowlist with server-side enforcement.
 - User interests.
@@ -96,6 +100,9 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 ## Sprint 3 - Performance and n8n Notifications
 
 - CAL-001 Save Activity to Google Calendar through a template URL without OAuth.
+- ACT-CHAT-002 Auto-delete chat after activity: archive by default 24 hours after Activity end.
+- Activity Chat MVP with participant-only access.
+- Event Details design for "Participant chat" button and locked/archived states.
 - Rich Telegram share via bot message: send event invitations through Telegram Bot API with an inline `[Присоединиться]` button so the URL is not visible in the message text.
 - Lazy loading for heavy screens and vertical modules.
 - Code splitting for Dashboard, Discover, Create Event, Event Details, Profile, Organizer Dashboard, and Sport vertical.
@@ -110,6 +117,10 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 
 ## Sprint 4 - AI Event Discovery
 
+- ACT-CHAT-003 n8n chat cleanup workflow.
+- ACT-CHAT-004 Chat notifications with quiet hours, notification opt-out, and no messages after archive.
+- Chat report/block flow.
+- Chat moderation hold for open complaints.
 - Replace `SimpleRecommendationEngine` with an AI-backed implementation behind the existing `RecommendationEngine` interface.
 - n8n event discovery workflow.
 - Discovery source coverage: public event websites, Facebook Events, Meetup, Eventbrite, city sites, universities, Telegram, Discord, Reddit, and public calendars.
@@ -178,6 +189,28 @@ All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTI
 - SEC-003 Audit logs.
 - SEC-004 Token/session hardening.
 - SEC-005 Secrets management.
+
+## Optional Activity Chat
+
+- ACT-CHAT-001 Optional activity chat.
+  Organizer can enable chat for a specific Activity. Chat exists only around that Activity and is not a permanent messenger.
+- ACT-CHAT-002 Auto-delete chat after activity.
+  Default MVP behavior is archive, not hard delete: `chat.status = archived`, `archived_at = activity.ends_at + 24h`, messages hidden from UI, moderation/audit metadata retained for a limited period.
+- ACT-CHAT-003 n8n chat cleanup workflow.
+  Runs hourly, archives/deletes eligible chats, logs the action, and skips chats with open complaints or moderation hold.
+- ACT-CHAT-004 Chat notifications.
+  Notify only participants, respect quiet hours, allow opt-out, do not send after Activity end/archive.
+- UX copy to localize later:
+  - RU: "Создать чат для участников", "Чат участников", "Чат откроется после подтверждения участия", "Чат будет удалён через 24 часа после события", "Чат архивирован".
+  - UA: "Створити чат для учасників", "Чат учасників", "Чат відкриється після підтвердження участі", "Чат буде видалено через 24 години після події", "Чат архівовано".
+  - CS: "Vytvořit chat pro účastníky", "Chat účastníků", "Chat se otevře po potvrzení účasti", "Chat bude smazán 24 hodin po události", "Chat archivován".
+  - EN: "Create chat for participants", "Participant chat", "Chat opens after participation is confirmed", "Chat will be deleted 24 hours after the event", "Chat archived".
+
+## Sprint 5 - Privacy Review
+
+- Activity Chat privacy review.
+- Activity Chat retention policies.
+- Optional encrypted chat research.
 
 ## Database + AI Discovery + Evening Digest
 

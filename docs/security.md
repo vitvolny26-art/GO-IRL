@@ -78,6 +78,44 @@ Planned:
 - block prevents profile visibility and messages
 - moderation queue for abuse
 
+## Optional Activity Chat Security
+
+Activity Chat is optional and temporary. It is a coordination tool for a real-life Activity, not a permanent messenger.
+
+Access rules:
+
+- Organizer can access chat for their Activity.
+- Confirmed participants can access chat.
+- Admin/moderator can access chat through separate moderation permissions.
+- Guests cannot access chat.
+- Pending users cannot access chat.
+- Rejected users cannot access chat.
+- Blocked users cannot access chat with the blocker where the product model allows separation.
+
+RLS approach:
+
+- `activity_chats` has RLS enabled.
+- `activity_chat_members` has RLS enabled.
+- `activity_chat_messages` has RLS enabled.
+- User can read a chat only when they are an active chat member or have admin/moderator permission.
+- User can read messages only for visible, non-archived chats where they are a member.
+- Pending Activity membership is not enough for chat membership.
+- Service role/n8n can archive chats through a controlled cleanup workflow.
+
+Moderation:
+
+- Every message can be reported.
+- Reported chats can receive moderation hold.
+- n8n cleanup must not archive/delete chats with active moderation hold.
+- Audit logs should record moderation actions without excessive personal data.
+
+Retention:
+
+- Default MVP behavior is archive 24 hours after Activity end.
+- Archived messages are hidden from UI.
+- Hard delete requires privacy review.
+- Chat contents must not be sent to AI APIs without explicit consent.
+
 ## Secrets
 
 - no service keys in frontend

@@ -270,7 +270,27 @@ All background notifications go through backend/n8n.
 
 Notifications should respect working hours, quiet hours, opt-in preferences, and privacy rules.
 
-## 19. Roadmap Principles
+## 19. Activity Chat Philosophy
+
+Activity Chat is optional and temporary.
+
+It is created only when the organizer enables it for a specific Activity.
+
+It exists only around that Activity.
+
+It must not become a permanent messenger.
+
+The main goal of Activity Chat is to help people meet offline:
+
+- exact meeting point
+- who brings what
+- delays
+- time or location changes
+- quick participant questions
+
+By default, Activity Chat should be archived 24 hours after the Activity ends.
+
+## 20. Roadmap Principles
 
 Friends, Travel, and Dating come after foundation:
 
@@ -283,7 +303,7 @@ Friends, Travel, and Dating come after foundation:
 
 Sport remains the reference vertical until the foundation is stable.
 
-## 20. Non-Negotiables
+## 21. Non-Negotiables
 
 - No feature that does not support real-life meetings.
 - No hidden background tracking.
@@ -291,3 +311,4 @@ Sport remains the reference vertical until the foundation is stable.
 - No business logic in frontend.
 - No hardcoded categories forever.
 - No uncontrolled access to user data.
+- No permanent Activity Chat that turns GO IRL into a generic messenger.

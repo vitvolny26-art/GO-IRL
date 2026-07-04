@@ -85,6 +85,30 @@ Steps:
 5. Disable or flag sources after repeated failures.
 6. Send source health report to moderators later.
 
+## Workflow 5: Activity Chat Cleanup
+
+Schedule: hourly.
+
+Purpose: keep Activity Chat optional and temporary, so it helps people meet offline without becoming a permanent messenger.
+
+Steps:
+
+1. Read `activity_chats` where `auto_delete_enabled = true`.
+2. Filter chats where `auto_delete_at <= now()`.
+3. Skip chats with open reports, complaints, or moderation hold.
+4. For MVP, set `status = archived` and `archived_at = now()`.
+5. Hide archived messages from normal UI.
+6. Stop chat notifications after archive.
+7. Write a summarized audit log entry.
+8. Consider hard delete only after privacy review and retention-policy approval.
+
+Rules:
+
+- Default `auto_delete_at` is 24 hours after Activity end.
+- Chat cleanup must not run in the Mini App.
+- Service role key stays in n8n/backend only.
+- Cleanup logs must avoid storing full chat content unless needed for an active moderation case.
+
 ## Facebook Policy
 
 Facebook is not an MVP automated source.
