@@ -1133,18 +1133,17 @@ function GenericActivitySheet({
           <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
           <div><Compass /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
-          <div><UsersRound /><span>{t.freeSpots}</span><strong>{freeSpots} / {activity.capacity}</strong></div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
           {activity.participantNote && <div><Sparkles /><span>{t.participantNote}</span><strong>{activity.participantNote}</strong></div>}
           <div><CircleUserRound /><span>{t.organizer}</span><strong>{activity.organizer}</strong></div>
           <div><ShieldCheck /><span>{t.visibility}</span><strong>{accessLabel}</strong></div>
-          <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button">
-            <UsersRound />
-            <span>{t.participants}</span>
-            <strong>{activity.participants} / {activity.capacity}</strong>
-            <ChevronRight className={membersOpen ? "open" : ""} />
-          </button>
         </div>
+        <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button">
+          <UsersRound />
+          <span>{t.participants}</span>
+          <strong>{activity.participants} / {activity.capacity}</strong>
+          <ChevronRight className={membersOpen ? "open" : ""} />
+        </button>
         {membersOpen && (
           <div className="members-section">
             <div className="members-list">
