@@ -26,9 +26,6 @@ export const activityOptions: Record<string, Array<{ icon: string; name: Categor
     { icon: "🎲", name: { ru: "Настольные игры", uk: "Настільні ігри", cs: "Deskové hry", en: "Board games" } },
     { icon: "🎤", name: { ru: "Караоке", uk: "Караоке", cs: "Karaoke", en: "Karaoke" } },
     { icon: "🛼", name: { ru: "Ролики", uk: "Ролики", cs: "Inline bruslení", en: "Inline skating" } },
-    { icon: "🌆", name: { ru: "Городской заезд", uk: "Міський заїзд", cs: "Městská jízda", en: "City ride" } },
-    { icon: "🛣️", name: { ru: "Маршрут на роликах", uk: "Маршрут на роликах", cs: "Trasa na bruslích", en: "Skating route" } },
-    { icon: "✨", name: { ru: "Вечерние ролики", uk: "Вечірні ролики", cs: "Večerní bruslení", en: "Evening skating" } },
   ],
   party: [
     { icon: "🍺", name: { ru: "PIVO", uk: "PIVO", cs: "PIVO", en: "Beer" } },
