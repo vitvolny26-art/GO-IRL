@@ -59,6 +59,7 @@ Confirmed work is ordered by priority.
 
 ## Sprint 3 - AI Event Discovery
 
+- Rich Telegram share via bot message: send event invitations through Telegram Bot API with an inline `[Присоединиться]` button so the URL is not visible in the message text.
 - VERT-015 Friends vertical.
 - Replace `SimpleRecommendationEngine` with an AI-backed implementation behind the existing `RecommendationEngine` interface.
 - n8n event discovery workflow.

@@ -37,7 +37,7 @@ import {
   type DiscoverFilter,
 } from "./recommendations";
 import { useAppStore } from "./store";
-import { buildActivityShareText } from "./share";
+import { ShareTemplateService } from "./share";
 import { getUserKey } from "./supabase";
 import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
 import type { Activity, AppView, Category, Language, NewActivity, SportEnvironment, SportFormat, SportLevel, SportMetadata } from "./types";
@@ -256,8 +256,9 @@ function App() {
 
   const shareActivity = async (activity: Activity) => {
     const url = activityInviteUrl(activity);
-    const text = buildActivityShareText(activity, store.language);
-    const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    // Plain text cannot hide a URL behind a label. Rich hidden links need Bot API HTML/Markdown or an inline button.
+    const text = ShareTemplateService.buildPlainText(activity, store.language, url);
+    const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
 
     const webApp = getTelegramWebApp();
     if (webApp?.openTelegramLink) {
@@ -266,9 +267,9 @@ function App() {
     }
 
     if (navigator.share) {
-      await navigator.share({ title: "GO IRL", text, url });
+      await navigator.share({ title: "GO IRL", text });
     } else {
-      await navigator.clipboard?.writeText(`${text}\n${url}`);
+      await navigator.clipboard?.writeText(text);
       flash(t.copied);
     }
   };

@@ -34,7 +34,7 @@ describe("buildActivityShareText", () => {
     expect(text).toContain("👋 Привет!");
     expect(text).toContain("В среду собираемся поиграть в волейбол.");
     expect(text).toContain("📍 Оломоуц, Beach Arena");
-    expect(text).toContain("🕕 18:00-19:30");
+    expect(text).toContain("🕕 18:00–19:30");
     expect(text).toContain("💰 120 Kč");
     expect(text).toContain("👥 Осталось мест: 2");
     expect(text).toContain("👉 Присоединиться");
@@ -125,13 +125,23 @@ describe("buildActivityShareText", () => {
     }
   });
 
-  it("can append a fallback URL only after the GO IRL signature", () => {
+  it("places a plain-text URL below the CTA and never as the first line", () => {
     const url = "https://t.me/GOirl_bot?startapp=share-1";
-    const text = ShareTemplateService.build(activity, "ru", { templateIndex: 0, url, includeUrl: true });
+    const text = ShareTemplateService.buildPlainText(activity, "ru", url, 0);
     const lines = text.split("\n");
 
-    expect(lines.at(-3)).toBe("GO IRL");
-    expect(lines.at(-2)).toBe("Меньше скролла. Больше жизни.");
-    expect(lines.at(-1)).toBe(url);
+    expect(lines[0]).not.toBe(url);
+    expect(lines).toContain("👉 Присоединиться:");
+    expect(lines[lines.indexOf("👉 Присоединиться:") + 1]).toBe(url);
+    expect(lines.at(-2)).toBe("GO IRL");
+    expect(lines.at(-1)).toBe("Меньше скролла. Больше жизни.");
+  });
+
+  it("localizes the plain-text CTA before the URL", () => {
+    const url = "https://t.me/GOirl_bot?startapp=share-1";
+
+    expect(ShareTemplateService.buildPlainText(activity, "uk", url, 0)).toContain("👉 Приєднатися:\nhttps://t.me/GOirl_bot?startapp=share-1");
+    expect(ShareTemplateService.buildPlainText(activity, "cs", url, 0)).toContain("👉 Připojit se:\nhttps://t.me/GOirl_bot?startapp=share-1");
+    expect(ShareTemplateService.buildPlainText(activity, "en", url, 0)).toContain("👉 Join:\nhttps://t.me/GOirl_bot?startapp=share-1");
   });
 });

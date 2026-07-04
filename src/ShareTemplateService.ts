@@ -30,7 +30,7 @@ type ShareTemplateData = {
 type ShareBuildOptions = {
   templateIndex?: number;
   url?: string;
-  includeUrl?: boolean;
+  includePlainTextUrl?: boolean;
 };
 
 const addMinutes = (time: string, minutes: number) => {
@@ -57,7 +57,7 @@ const weekdayLabel = (activity: Activity, language: Language) => {
 
 const timeRangeLabel = (activity: Activity) => {
   const end = addMinutes(activity.time, activityDuration(activity));
-  return end ? `${activity.time}-${end}` : activity.time;
+  return end ? `${activity.time}–${end}` : activity.time;
 };
 
 const activityName = (activity: Activity, language: Language) =>
@@ -250,7 +250,7 @@ const buildShareTemplateData = (activity: Activity, language: Language, options:
     joinText: joinLabel[language],
     tagline: shareTagline[language],
     url: options.url,
-    includeUrl: options.includeUrl,
+    includeUrl: options.includePlainTextUrl,
   };
 };
 
@@ -274,11 +274,11 @@ const renderShareText = (data: ShareTemplateData, language: Language, closingLin
     "",
     closingLine,
     "",
-    data.joinText,
+    data.includeUrl && data.url ? `${data.joinText}:` : data.joinText,
+    data.includeUrl && data.url,
     "",
     "GO IRL",
     data.tagline,
-    data.includeUrl && data.url,
   ].filter(Boolean).join("\n");
 
 export const ShareTemplateService = {
@@ -287,6 +287,9 @@ export const ShareTemplateService = {
     const variants = closingLines[language];
     const index = options.templateIndex ?? Math.floor(Math.random() * variants.length);
     return renderShareText(data, language, variants[index % variants.length]);
+  },
+  buildPlainText(activity: Activity, language: Language, url: string, templateIndex?: number) {
+    return this.build(activity, language, { templateIndex, url, includePlainTextUrl: true });
   },
 };
 
