@@ -52,4 +52,47 @@ describe("buildActivityShareText", () => {
     expect(text).toContain("👉 Join");
     expect(text).toContain("Less scrolling. More life.");
   });
+
+  it("does not combine two different cities in the location line", () => {
+    const text = buildActivityShareText({ ...activity, cityId: "olomouc", address: "Прага" }, "ru", 0);
+
+    expect(text).toContain("📍 Прага");
+    expect(text).not.toContain("Оломоуц, Прага");
+  });
+
+  it("combines city and place only when they belong together", () => {
+    const text = buildActivityShareText({ ...activity, cityId: "praha", address: "парк Летна" }, "ru", 0);
+
+    expect(text).toContain("📍 Прага, парк Летна");
+  });
+
+  it("uses only the city when the place is empty or duplicates the city", () => {
+    const emptyPlace = buildActivityShareText({ ...activity, cityId: "praha", address: "" }, "ru", 0);
+    const cityAsPlace = buildActivityShareText({ ...activity, cityId: "praha", address: "Прага" }, "ru", 0);
+
+    expect(emptyPlace).toContain("📍 Прага");
+    expect(cityAsPlace).toContain("📍 Прага");
+    expect(cityAsPlace).not.toContain("Прага, Прага");
+  });
+
+  it("keeps all template variants human and non-promotional", () => {
+    const forbidden = [
+      "Будет живо",
+      "без бесконечного скролла",
+      "Не пропусти",
+      "Лучшее событие",
+      "Уникальная возможность",
+      "endless scrolling",
+      "Plan unlocked",
+    ];
+    const texts = (["ru", "uk", "cs", "en"] as const).flatMap((language) =>
+      [0, 1, 2].map((index) => buildActivityShareText(activity, language, index)),
+    );
+
+    for (const text of texts) {
+      for (const phrase of forbidden) {
+        expect(text).not.toContain(phrase);
+      }
+    }
+  });
 });

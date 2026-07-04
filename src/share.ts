@@ -1,4 +1,4 @@
-import { getCity } from "./config/cities";
+import { cities, getCity } from "./config/cities";
 import { localeByLanguage } from "./i18n";
 import type { Activity, Language } from "./types";
 
@@ -7,8 +7,7 @@ type ShareTemplate = (data: ShareTemplateData) => string;
 type ShareTemplateData = {
   activity: string;
   weekday: string;
-  city: string;
-  place: string;
+  location: string;
   timeRange: string;
   priceLine: string;
   lowSpotsLine: string;
@@ -45,6 +44,35 @@ const timeRangeLabel = (activity: Activity) => {
 
 const activityName = (activity: Activity, language: Language) =>
   activity.activity[language].replace(/^[^\p{L}\p{N}]+/u, "").trim() || activity.title[language];
+
+const normalizePlace = (value: string) => value.trim().replace(/\s+/g, " ").replace(/^[,\s]+|[,\s]+$/g, "");
+
+const knownCityNames = (language: Language) =>
+  cities.flatMap((city) => Object.values(city.name).concat(city.name[language])).filter(Boolean);
+
+const includesCityName = (value: string, cityName: string) =>
+  value.toLocaleLowerCase().includes(cityName.toLocaleLowerCase());
+
+const stripCityFromPlace = (place: string, cityName: string) =>
+  normalizePlace(place
+    .replace(new RegExp(`(^|[,\\s])${cityName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([,\\s]|$)`, "gi"), " ")
+    .replace(/\s*,\s*,+/g, ","));
+
+const locationLabel = (activity: Activity, language: Language) => {
+  const city = getCity(activity.cityId).name[language];
+  const place = normalizePlace(activity.address || "");
+  if (!city && !place) return "";
+  if (!place) return city;
+  if (!city) return place;
+
+  const otherCity = knownCityNames(language).find((name) => name !== city && includesCityName(place, name));
+  if (otherCity) return place;
+
+  const cleanedPlace = includesCityName(place, city) ? stripCityFromPlace(place, city) : place;
+  if (!cleanedPlace) return city;
+  if (cleanedPlace.toLocaleLowerCase() === city.toLocaleLowerCase()) return city;
+  return `${city}, ${cleanedPlace}`;
+};
 
 const priceLine = (activity: Activity, language: Language) => {
   if (activity.price <= 0) return "";
@@ -85,13 +113,13 @@ const shareTagline: Record<Language, string> = {
 
 const templates: Record<Language, ShareTemplate[]> = {
   ru: [
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Привет!",
         "",
         `В ${weekday} играем в ${activity}.`,
         "",
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
@@ -103,34 +131,34 @@ const templates: Record<Language, ShareTemplate[]> = {
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Привет!",
         "",
         `Собираемся в ${weekday} на ${activity}.`,
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Если хочешь выбраться в реальную жизнь, заходи:",
+        "Приходи, если удобно!",
         "",
         joinText,
         "",
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
-        "👋 Есть план!",
+        "👋 Привет!",
         "",
-        `${weekday}: ${activity}`,
-        `📍 ${city}, ${place}`,
+        `В ${weekday} собираемся на ${activity}.`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Будет живо, без бесконечного скролла.",
+        "Будем рады видеть тебя.",
         "",
         joinText,
         "",
@@ -139,13 +167,13 @@ const templates: Record<Language, ShareTemplate[]> = {
       ].filter(Boolean).join("\n"),
   ],
   uk: [
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Привіт!",
         "",
         `У ${weekday} граємо в ${activity}.`,
         "",
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
@@ -157,34 +185,34 @@ const templates: Record<Language, ShareTemplate[]> = {
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Привіт!",
         "",
         `Збираємося у ${weekday} на ${activity}.`,
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Якщо хочеш вибратися в реальне життя, заходь:",
+        "Приходь, якщо зручно!",
         "",
         joinText,
         "",
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
-        "👋 Є план!",
+        "👋 Привіт!",
         "",
-        `${weekday}: ${activity}`,
-        `📍 ${city}, ${place}`,
+        `У ${weekday} збираємося на ${activity}.`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Буде живо, без нескінченного скролу.",
+        "Будемо раді тебе бачити.",
         "",
         joinText,
         "",
@@ -193,13 +221,13 @@ const templates: Record<Language, ShareTemplate[]> = {
       ].filter(Boolean).join("\n"),
   ],
   cs: [
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Ahoj!",
         "",
         `V ${weekday} jdeme na ${activity}.`,
         "",
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
@@ -211,34 +239,34 @@ const templates: Record<Language, ShareTemplate[]> = {
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Ahoj!",
         "",
         `Scházíme se v ${weekday} na ${activity}.`,
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Jestli chceš ven do reálného života, přidej se:",
+        "Přijď, jestli se ti to hodí!",
         "",
         joinText,
         "",
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
-        "👋 Máme plán!",
+        "👋 Ahoj!",
         "",
-        `${weekday}: ${activity}`,
-        `📍 ${city}, ${place}`,
+        `V ${weekday} se scházíme na ${activity}.`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Bude to živé, žádné nekonečné scrollování.",
+        "Rádi tě uvidíme.",
         "",
         joinText,
         "",
@@ -247,13 +275,13 @@ const templates: Record<Language, ShareTemplate[]> = {
       ].filter(Boolean).join("\n"),
   ],
   en: [
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Hey!",
         "",
         `On ${weekday}, we are doing ${activity}.`,
         "",
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
@@ -265,34 +293,34 @@ const templates: Record<Language, ShareTemplate[]> = {
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
         "👋 Hey!",
         "",
         `We are meeting on ${weekday} for ${activity}.`,
-        `📍 ${city}, ${place}`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "If you want to get into real life, jump in:",
+        "Come by if it works for you!",
         "",
         joinText,
         "",
         "GO IRL",
         tagline,
       ].filter(Boolean).join("\n"),
-    ({ activity, weekday, city, place, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
+    ({ activity, weekday, location, timeRange, priceLine, lowSpotsLine, joinText, tagline }) =>
       [
-        "👋 Plan unlocked!",
+        "👋 Hey!",
         "",
-        `${weekday}: ${activity}`,
-        `📍 ${city}, ${place}`,
+        `On ${weekday}, we are meeting for ${activity}.`,
+        location && `📍 ${location}`,
         `🕕 ${timeRange}`,
         priceLine,
         lowSpotsLine,
         "",
-        "Real life, less endless scrolling.",
+        "Would be nice to see you there.",
         "",
         joinText,
         "",
@@ -306,8 +334,7 @@ export const buildActivityShareText = (activity: Activity, language: Language, t
   const data: ShareTemplateData = {
     activity: activityName(activity, language),
     weekday: weekdayLabel(activity, language),
-    city: getCity(activity.cityId).name[language],
-    place: activity.address,
+    location: locationLabel(activity, language),
     timeRange: timeRangeLabel(activity),
     priceLine: priceLine(activity, language),
     lowSpotsLine: lowSpotsLine(activity, language),
