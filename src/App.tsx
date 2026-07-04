@@ -32,7 +32,18 @@ import { useAppStore } from "./store";
 import { getUserKey } from "./supabase";
 import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
 import type { Activity, AppView, Language, NewActivity } from "./types";
-import { MAX_EVENT_PRICE, validateEventPrice } from "./validation";
+import {
+  MAX_EVENT_ADDRESS_LENGTH,
+  MAX_EVENT_CAPACITY,
+  MAX_EVENT_DESCRIPTION_LENGTH,
+  MAX_EVENT_PRICE,
+  MAX_EVENT_TITLE_LENGTH,
+  MIN_EVENT_CAPACITY,
+  validateEventCapacity,
+  validateEventPrice,
+  validateMaxLength,
+  validateRequiredText,
+} from "./validation";
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
@@ -267,6 +278,7 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
   return (
     <>
       <section className="home-hero">
+        <img className="home-brand-logo" src="/brand/logo-wide.png" alt="GO IRL" />
         <div className="home-kicker"><MapPin />{t.liveInCity} · {city.name[language]}</div>
         <h1>{t.homeTitle}</h1>
         <p>{t.homeSubtitle}</p>
@@ -345,7 +357,23 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
     const activityText = String(data.get("activityText"));
     const activityEmoji = activityText.split(" ")[0];
     const rawTitle = String(data.get("titleText")).trim();
+    const rawDescription = String(data.get("descriptionText")).trim();
+    const rawAddress = String(data.get("address")).trim();
     const price = Number(data.get("price"));
+    const capacity = Number(data.get("capacity"));
+    const fieldError =
+      validateRequiredText(rawTitle, t)
+      || validateRequiredText(rawDescription, t)
+      || validateRequiredText(rawAddress, t)
+      || validateMaxLength(rawTitle, MAX_EVENT_TITLE_LENGTH, t.titleTooLong)
+      || validateMaxLength(rawDescription, MAX_EVENT_DESCRIPTION_LENGTH, t.descriptionTooLong)
+      || validateMaxLength(rawAddress, MAX_EVENT_ADDRESS_LENGTH, t.addressTooLong)
+      || validateEventCapacity(capacity, t);
+    if (fieldError) {
+      setFormError(fieldError);
+      setSubmitting(false);
+      return;
+    }
     const priceError = validateEventPrice(price, t);
     if (priceError) {
       setPriceError(priceError);
@@ -358,13 +386,13 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
       categoryId,
       activityText,
       titleText: rawTitle.startsWith(activityEmoji) ? rawTitle : `${activityEmoji} ${rawTitle}`,
-      descriptionText: String(data.get("descriptionText")),
+      descriptionText: rawDescription,
       date: String(data.get("date")),
       time: String(data.get("time")),
-      address: String(data.get("address")),
+      address: rawAddress,
       locationUrl: String(data.get("locationUrl") || "").trim() || undefined,
       price,
-      capacity: Number(data.get("capacity")),
+      capacity,
       visibility: String(data.get("visibility")) as NewActivity["visibility"],
     };
     try {
@@ -387,17 +415,17 @@ function CreateView({ language, initialActivity, onCreated, onCancel }: { langua
       <form className="create-form" onSubmit={submit}>
         <label><span>{t.category}</span><select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>{categories.map((category) => <option key={category.id} value={category.id}>{category.icon} {category.name[language]}</option>)}</select></label>
         <label><span>{t.activity}</span><select key={`${categoryId}-${language}`} name="activityText" defaultValue={initialActivity?.categoryId === categoryId ? initialActivity.activity[language] : undefined} required>{activityOptions[categoryId].map((option) => <option key={`${option.icon}-${option.name[language]}`} value={`${option.icon} ${option.name[language]}`}>{option.icon} {option.name[language]}</option>)}</select></label>
-        <label><span>{t.title}</span><input name="titleText" defaultValue={initialActivity?.title[language]} placeholder={t.titlePlaceholder} required /></label>
-        <label><span>{t.description}</span><textarea name="descriptionText" rows={4} defaultValue={initialActivity?.description[language]} required /></label>
+        <label><span>{t.title}</span><input name="titleText" defaultValue={initialActivity?.title[language]} placeholder={t.titlePlaceholder} maxLength={MAX_EVENT_TITLE_LENGTH} required /></label>
+        <label><span>{t.description}</span><textarea name="descriptionText" rows={4} defaultValue={initialActivity?.description[language]} maxLength={MAX_EVENT_DESCRIPTION_LENGTH} required /></label>
         <div className="form-row">
           <label><span>{t.date}</span><input name="date" type="date" min={today} defaultValue={initialActivity?.date || today} required /></label>
           <label><span>{t.time}</span><input name="time" type="time" defaultValue={initialActivity?.time || "18:00"} required /></label>
         </div>
-        <label><span>{t.address}</span><input name="address" defaultValue={initialActivity?.address || selectedCity.name[language]} required /></label>
+        <label><span>{t.address}</span><input name="address" defaultValue={initialActivity?.address || selectedCity.name[language]} maxLength={MAX_EVENT_ADDRESS_LENGTH} required /></label>
         <label><span>{t.locationUrl}</span><input name="locationUrl" type="url" defaultValue={initialActivity?.locationUrl} placeholder={t.locationPlaceholder} /></label>
         <div className="form-row">
           <label className="price-field"><span>{t.price}</span><input name="price" type="number" min="0" max={MAX_EVENT_PRICE} defaultValue={initialActivity?.price || 0} onInput={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} onChange={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} required /><small className="field-error">{priceError || t.priceTooHigh}</small></label>
-          <label><span>{t.capacity}</span><input name="capacity" type="number" min="2" max="100" defaultValue={initialActivity?.capacity || 8} required /></label>
+          <label><span>{t.capacity}</span><input name="capacity" type="number" min={MIN_EVENT_CAPACITY} max={MAX_EVENT_CAPACITY} defaultValue={initialActivity?.capacity || 8} required /></label>
         </div>
         <fieldset>
           <legend>{t.visibility}</legend>

@@ -33,6 +33,8 @@ All notable confirmed changes to GO IRL are tracked here.
 - Praha/Prague city configuration.
 - Inline skating ("Ролики") is available as a first-class activity category.
 - Organizer/admin event delete flow with confirmation and Supabase RLS planning.
+- GO IRL brand logo assets, favicon, and Open Graph preview.
+- Create Event validation for required text, length limits, capacity, and price.
 
 ### Changed
 

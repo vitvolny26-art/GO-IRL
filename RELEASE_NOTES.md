@@ -20,6 +20,8 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Praha/Prague is available as a configured city while Olomouc stays the default.
 - Inline skating is a dedicated activity category.
 - Organizers and configured Sprint 1 admins can see a confirmed delete event action.
+- GO IRL logo is used in the header, home hero, favicon, app icon, and Open Graph preview.
+- Create Event now validates required text, length limits, capacity, and price before publishing.
 
 ### Before Public Release
 

@@ -1,5 +1,7 @@
 # GO IRL Telegram Mini App
 
+![GO IRL logo](public/brand/logo-wide.png)
+
 GO IRL (Go In Real Life) is a Telegram Mini App for creating and joining offline activities, starting with Olomouc.
 
 ## Current Stack
@@ -10,6 +12,7 @@ GO IRL (Go In Real Life) is a Telegram Mini App for creating and joining offline
 - Telegram WebApp bootstrap with guest fallback for local browser testing
 - Telegram Mini App lifecycle helpers for ready, expand, back, and explicit close actions
 - Dark mobile-first UI with safe-area aware header
+- Brand assets in `public/brand/`
 
 ## Setup
 
@@ -54,6 +57,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Sprint 1 temporary admin allowlist for organizer/admin event deletion
 - Safe-area aware fixed header for Telegram Mini App
 - Explicit "Done" / "Back to Telegram" UX; the Mini App closes only after a user action
+- GO IRL brand logo, favicon, app icon, and Open Graph preview
 - Supabase schema and RLS policies in `supabase/schema.sql`
 - Supabase setup guide in `supabase/README.md`
 - ESLint and Vitest quality gates

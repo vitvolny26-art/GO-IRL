@@ -36,8 +36,7 @@ export function AppHeader({
       <header className="app-header">
         <div className="header-inner">
           <button className="header-brand" onClick={onBrandClick} type="button" aria-label="GO IRL">
-            <span className="header-brand-mark">GO</span>
-            <span>IRL</span>
+            <img src="/brand/logo-square.png" alt="GO IRL" />
           </button>
 
           <div className="header-controls">
