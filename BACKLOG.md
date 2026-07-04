@@ -30,6 +30,7 @@ Confirmed work is ordered by priority.
 
 - Telegram `initData` is not validated by a trusted backend yet.
 - Review the latest Supabase RLS policies in the production dashboard after applying `supabase/schema.sql`.
+- Replace Sprint 1 admin allowlist with server-side enforcement backed by trusted Telegram `initData`, Supabase Auth claims, or backend-issued roles.
 
 ## Technical Debt
 
@@ -66,6 +67,7 @@ Confirmed work is ordered by priority.
 - Auto-expiring chats.
 - Admin moderation.
 - Audit logs.
+- Server-side admin role enforcement for event deletion and moderation.
 
 ## Maximum Privacy + User Data Security
 

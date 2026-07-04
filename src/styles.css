@@ -97,6 +97,7 @@ button, input, textarea, select { letter-spacing: 0; }
 .category-nature { background: rgba(87,217,232,.14); }
 .category-social { background: rgba(255,111,97,.14); }
 .category-creativity { background: rgba(174,140,255,.15); }
+.category-inline-skating { background: rgba(87,217,232,.14); }
 .activity-copy { min-width: 0; }
 .activity-label, .sheet-label { color: var(--lime); font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .activity-card h3 { margin: 4px 0 3px; font-size: 20px; line-height: 1.12; overflow-wrap: anywhere; }
@@ -171,6 +172,8 @@ button, input, textarea, select { letter-spacing: 0; }
 .profile-event-group h3 { margin: 8px 0 0; font-size: 16px; }
 .telegram-close-button { width: 100%; min-height: 50px; border: 1px solid rgba(87,217,232,.28); border-radius: 8px; background: rgba(87,217,232,.08); color: var(--cyan); font-size: 14px; font-weight: 900; }
 .telegram-close-button.compact { margin-top: 10px; }
+.danger-action { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 50px; margin-top: 10px; border: 1px solid rgba(255,111,97,.35); border-radius: 8px; background: rgba(255,111,97,.1); color: #ff8c80; font-size: 14px; font-weight: 900; }
+.danger-action svg { width: 18px; height: 18px; }
 .profile-skeleton { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 .profile-skeleton span { display: block; border-radius: 6px; background: linear-gradient(90deg, #1b1e24 0%, #262a32 42%, #1b1e24 82%); background-size: 220% 100%; animation: shimmer 1.15s ease-in-out infinite; }
 .profile-skeleton span:nth-child(1) { width: 72px; height: 72px; }

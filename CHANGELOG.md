@@ -29,6 +29,10 @@ All notable confirmed changes to GO IRL are tracked here.
 - Vite output filenames now use a `go-irl-v0` prefix to avoid stale Netlify asset reuse.
 - Vercel deployment configuration as a fallback when Netlify deploys are unavailable.
 - Sprint 1 home screen now works as an action dashboard with city context, metrics, quick actions, and category counts.
+- Ukrainian and English localization options.
+- Praha/Prague city configuration.
+- Inline skating ("Ролики") is available as a first-class activity category.
+- Organizer/admin event delete flow with confirmation and Supabase RLS planning.
 
 ### Changed
 

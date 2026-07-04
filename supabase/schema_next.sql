@@ -8,7 +8,7 @@ create table if not exists public.users (
   auth_provider text not null default 'telegram' check (auth_provider in ('telegram', 'email', 'anonymous')),
   provider_user_id_hash text not null,
   default_city_id text not null default 'olomouc',
-  language text not null default 'ru' check (language in ('ru', 'cs', 'en', 'ua')),
+  language text not null default 'ru' check (language in ('ru', 'uk', 'cs', 'en')),
   status text not null default 'active' check (status in ('active', 'blocked', 'deleted')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

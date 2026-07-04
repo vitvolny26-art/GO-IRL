@@ -16,6 +16,10 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Mini App lifecycle UX includes explicit Done / Back to Telegram actions.
 - Realtime subscriptions are cleaned up when the app is hidden or unmounted; no background notification polling is used.
 - Russian and Czech localization structure is in place.
+- Ukrainian and English localization options are available.
+- Praha/Prague is available as a configured city while Olomouc stays the default.
+- Inline skating is a dedicated activity category.
+- Organizers and configured Sprint 1 admins can see a confirmed delete event action.
 
 ### Before Public Release
 
@@ -26,3 +30,4 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Validate Telegram share links through `@GOirl_bot`.
 - Validate explicit Mini App close behavior on real Telegram clients.
 - Add trusted Telegram `initData` validation before treating identity as secure.
+- Replace temporary admin allowlist with server-side role enforcement before public moderation tools launch.

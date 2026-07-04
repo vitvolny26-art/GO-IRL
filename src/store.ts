@@ -1,9 +1,10 @@
 import { create } from "zustand";
 import { supabase, getUserKey } from "./supabase";
 import { getTelegramWebApp } from "./telegram";
+import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
-import type { Activity, AppView, Language, NewActivity } from "./types";
+import type { Activity, AppView, Language, NewActivity, UserRole } from "./types";
 
 type JoinResult = "joined" | "pending" | "left" | "full" | "private";
 
@@ -47,6 +48,7 @@ type AppState = {
   selectedCategory: string | null;
   loading: boolean;
   syncError: string | null;
+  userRole: UserRole;
   initialize: () => Promise<void>;
   disposeRealtime: () => void;
   setLanguage: (language: Language) => void;
@@ -56,17 +58,25 @@ type AppState = {
   toggleJoin: (id: string) => Promise<JoinResult>;
   createActivity: (activity: NewActivity) => Promise<string>;
   updateActivity: (id: string, activity: NewActivity) => Promise<string>;
+  deleteActivity: (id: string) => Promise<void>;
   reviewRequest: (activityId: string, memberKey: string, approved: boolean) => Promise<void>;
 };
 
 let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 
+const localizedDbText = (ru: string, cs: string) => ({
+  ru,
+  uk: ru,
+  cs,
+  en: ru,
+});
+
 const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   id: row.id,
   categoryId: row.category_id,
-  activity: { ru: row.activity_ru, cs: row.activity_cs },
-  title: { ru: row.title_ru, cs: row.title_cs },
-  description: { ru: row.description_ru, cs: row.description_cs },
+  activity: localizedDbText(row.activity_ru, row.activity_cs),
+  title: localizedDbText(row.title_ru, row.title_cs),
+  description: localizedDbText(row.description_ru, row.description_cs),
   date: row.event_date,
   time: row.event_time.slice(0, 5),
   address: row.address,
@@ -111,7 +121,9 @@ export const useAppStore = create<AppState>((set, get) => {
   };
 
   return {
-    language: localStorage.getItem("go-irl-language") === "cs" ? "cs" : "ru",
+    language: ["ru", "uk", "cs", "en"].includes(localStorage.getItem("go-irl-language") || "")
+      ? localStorage.getItem("go-irl-language") as Language
+      : "ru",
     selectedCityId: cities.some((city) => city.id === localStorage.getItem("go-irl-city"))
       ? localStorage.getItem("go-irl-city")!
       : defaultCityId,
@@ -123,6 +135,7 @@ export const useAppStore = create<AppState>((set, get) => {
     selectedCategory: null,
     loading: true,
     syncError: null,
+    userRole: getCurrentUserRole(getUserKey()),
 
     initialize: async () => {
       set({ loading: true });
@@ -262,6 +275,19 @@ export const useAppStore = create<AppState>((set, get) => {
       await reload();
       set({ view: "home" });
       return id;
+    },
+
+    deleteActivity: async (id) => {
+      const userKey = getUserKey();
+      const current = get().activities.find((item) => item.id === id);
+      if (!current || (current.organizerKey !== userKey && !isCurrentUserAdmin(userKey))) {
+        throw new Error("Only organizer or admin can delete activity");
+      }
+
+      const { error } = await supabase.from("activities").delete().eq("id", id);
+      if (error) throw error;
+      await reload();
+      set({ view: "home" });
     },
 
     reviewRequest: async (activityId, memberKey, approved) => {

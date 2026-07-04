@@ -39,6 +39,13 @@ create table if not exists public.activity_members (
   primary key (activity_id, user_key)
 );
 
+create table if not exists public.admin_users (
+  user_key text primary key,
+  role text not null default 'admin' check (role = 'admin'),
+  note text,
+  created_at timestamptz not null default now()
+);
+
 alter table public.activity_members
 add column if not exists display_name text not null default 'GO IRL User';
 
@@ -72,6 +79,7 @@ execute function public.go_irl_touch_updated_at();
 
 alter table public.activities enable row level security;
 alter table public.activity_members enable row level security;
+alter table public.admin_users enable row level security;
 
 create or replace function public.go_irl_request_user_key()
 returns text
@@ -158,12 +166,28 @@ as $$
     );
 $$;
 
+create or replace function public.go_irl_request_is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users admin_user
+    where admin_user.user_key = public.go_irl_request_user_key()
+      and admin_user.role = 'admin'
+  );
+$$;
+
 drop policy if exists "public activities read" on public.activities;
 drop policy if exists "public activities create" on public.activities;
 drop policy if exists "public members read" on public.activity_members;
 drop policy if exists "public members create" on public.activity_members;
 drop policy if exists "public members update" on public.activity_members;
 drop policy if exists "public members delete" on public.activity_members;
+drop policy if exists "admin users locked" on public.admin_users;
 
 create policy "public activities read"
 on public.activities for select to anon using (
@@ -180,6 +204,13 @@ create policy "organizer activities update"
 on public.activities for update to anon
 using (organizer_key = public.go_irl_request_user_key())
 with check (organizer_key = public.go_irl_request_user_key());
+
+drop policy if exists "organizer or admin activities delete" on public.activities;
+create policy "organizer or admin activities delete"
+on public.activities for delete to anon using (
+  organizer_key = public.go_irl_request_user_key()
+  or public.go_irl_request_is_admin()
+);
 
 create policy "public members read"
 on public.activity_members for select to anon using (
@@ -218,7 +249,7 @@ on public.activity_members for delete to anon using (
   )
 );
 
-grant select, insert, update on public.activities to anon;
+grant select, insert, update, delete on public.activities to anon;
 grant select, insert, update, delete on public.activity_members to anon;
 
 do $$

@@ -18,6 +18,7 @@ import {
   Sparkles,
   Star,
   Ticket,
+  Trash2,
   UserRoundCheck,
   UsersRound,
   X,
@@ -156,6 +157,21 @@ function App() {
     }
   };
 
+  const handleDelete = async (activity: Activity) => {
+    const confirmed = window.confirm(`${t.deleteEventTitle}\n\n${t.deleteEventWarning}`);
+    if (!confirmed) return;
+
+    try {
+      await store.deleteActivity(activity.id);
+      setSelected(null);
+      flash(t.eventDeleted);
+      notifyTelegram("success");
+    } catch {
+      flash(t.deleteError);
+      notifyTelegram("error");
+    }
+  };
+
   const shareActivity = async (activity: Activity) => {
     const url = activityInviteUrl(activity);
     const text = `${activity.title[store.language]} — ${dateLabel(activity.date, store.language)}, ${activity.time}. ${activity.address}`;
@@ -228,6 +244,7 @@ function App() {
             setEditingActivity(activity);
             store.setView("create");
           }}
+          onDelete={handleDelete}
           onCloseMiniApp={requestCloseMiniApp}
         />
       )}
@@ -629,6 +646,7 @@ function ActivitySheet({
   onJoin,
   onShare,
   onEdit,
+  onDelete,
   onCloseMiniApp,
 }: {
   activity: Activity;
@@ -640,13 +658,15 @@ function ActivitySheet({
   onJoin: (activity: Activity) => void;
   onShare: (activity: Activity) => void;
   onEdit: (activity: Activity) => void;
+  onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
 }) {
-  const { joinedIds, waitingIds, pendingIds, reviewRequest } = useAppStore();
+  const { joinedIds, waitingIds, pendingIds, reviewRequest, userRole } = useAppStore();
   const [membersOpen, setMembersOpen] = useState(false);
   const t = getTranslation(language);
   const category = categories.find((item) => item.id === activity.categoryId)!;
   const isOrganizer = activity.organizerKey === getUserKey();
+  const canDelete = isOrganizer || userRole === "admin";
   const joined = joinedIds.includes(activity.id);
   const waiting = waitingIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
@@ -761,6 +781,12 @@ function ActivitySheet({
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
         </div>
+        {canDelete && (
+          <button className="danger-action" onClick={() => onDelete(activity)} type="button">
+            <Trash2 size={18} />
+            {t.delete}
+          </button>
+        )}
         <button className="telegram-close-button compact" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
       </article>
     </div>

@@ -24,6 +24,7 @@ Create `.env.local` from `.env.example` and fill:
 VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 VITE_TELEGRAM_BOT_USERNAME=GOirl_bot
+VITE_GO_IRL_ADMIN_KEYS=telegram:123456789,telegram_username:yourusername
 ```
 
 After starting Vite, open the local URL shown in the terminal. For Telegram testing, the deployed Mini App URL is configured in BotFather.
@@ -48,7 +49,9 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Activity creation with category, activity type, address, and optional location URL
 - Share link that opens the Telegram Mini App with `startapp`
 - City selection architecture with Olomouc as the first city
-- Russian and Czech localization architecture
+- City expansion with Praha/Prague available through configuration
+- Russian, Ukrainian, Czech, and English localization architecture
+- Sprint 1 temporary admin allowlist for organizer/admin event deletion
 - Safe-area aware fixed header for Telegram Mini App
 - Explicit "Done" / "Back to Telegram" UX; the Mini App closes only after a user action
 - Supabase schema and RLS policies in `supabase/schema.sql`
