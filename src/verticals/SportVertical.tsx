@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { useAppStore } from "../store";
@@ -102,29 +102,29 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
       <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
         <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "рџЏ†"}</div>
         <div>
-          <div className="sport-eyebrow">рџЏ† {sportLevelLabel(meta.level, language)} В· {sportEnvironmentLabel(meta.environment, language)}</div>
+          <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} В· {sportEnvironmentLabel(meta.environment, language)}</span></div>
           <h3>{activity.activity[language]}</h3>
           <p>{activity.title[language]}</p>
         </div>
         <ChevronRight className="card-arrow" size={18} />
       </button>
       <div className="sport-chip-row">
-        <span>вљЅ {meta.sportType || activity.activity[language]}</span>
+        <span className="sport-card-chip"><Flag size={16} aria-hidden="true" /><span>{meta.sportType || activity.activity[language]}</span></span>
         <button
-          className="sport-members-badge"
+          className="sport-card-participants-chip"
+          type="button"
+          aria-label={`${t.participants}: ${activity.participants} / ${activity.capacity}`}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
-            onOpenMembers?.(activity);
+            (onOpenMembers || onOpen)(activity);
           }}
-          type="button"
-          aria-label={`${activity.participants} / ${activity.capacity} ${t.participants}`}
         >
-          рџ‘Ґ {activity.participants} / {activity.capacity}
+          <UsersRound size={16} aria-hidden="true" />
+          <span>{activity.participants} / {activity.capacity}</span>
         </button>
-        <span>вЏ± {meta.durationMinutes || 90} {t.minutesShort}</span>
-      </div>
-      <div className="activity-card-details sport-details-grid">
+        <span className="sport-card-chip"><Clock3 size={16} aria-hidden="true" /><span>{meta.durationMinutes || 90} {t.minutesShort}</span></span>
+      </div>      <div className="activity-card-details sport-details-grid">
         <div><MapPin /><span>{activity.address}</span></div>
         <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
         <div><Ticket /><span>{activity.price ? `${activity.price} KДЌ` : t.free}</span></div>
