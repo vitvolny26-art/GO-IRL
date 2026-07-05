@@ -1,0 +1,2527 @@
+﻿=== SNAPSHOT ===
+
+Sunday, July 5, 2026 2:07:22 PM
+
+
+ M src/verticals/SportVertical.tsx
+?? deepseek_powershell_20260705_284627.ps1
+?? go-irl-fix-openmembers-lint-and-click.js
+?? go-irl-force-sport-card-members-open-v1.ps1
+?? go-irl-hardfix-sport-card-mojibake-v2.ps1
+?? snapshot.txt
+
+
+--- src/verticals/SportVertical.tsx ---
+import { useEffect, useState } from "react";
+import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
+import { getTranslation, localeByLanguage } from "../i18n";
+import { useAppStore } from "../store";
+import { getUserKey } from "../supabase";
+import type { Activity, Language, SportMetadata } from "../types";
+import { getSportMetadata, sportEnvironmentLabel, sportEnvironments, sportFormatLabel, sportFormats, sportLevelLabel, sportLevels } from "./sport";
+
+type SportCardProps = {
+  activity: Activity;
+  language: Language;
+  onOpen: (activity: Activity) => void;
+  onJoin: (activity: Activity) => void;
+  onOpenMembers?: (activity: Activity) => void;
+};
+
+type SportSheetProps = {
+  activity: Activity;
+  language: Language;
+  cityName: string;
+  loading: boolean;
+  error: string | null;
+  onClose: () => void;
+  onJoin: (activity: Activity) => void;
+  onShare: (activity: Activity) => void;
+  onCalendar: (activity: Activity) => void;
+  onEdit: (activity: Activity) => void;
+  onDelete: (activity: Activity) => void;
+  onCloseMiniApp: () => void;
+  initialMembersOpen?: boolean;
+};
+
+export function SportCreateFields({ language, initialSport }: { language: Language; initialSport: SportMetadata }) {
+  const t = getTranslation(language);
+  return (
+    <div className="sport-create-panel">
+      <div className="sport-panel-title">🏆 {t.sportVertical}</div>
+      <div className="form-row">
+        <label><span>{t.sportLevel}</span><select name="sportLevel" defaultValue={initialSport.level || "intermediate"}>{sportLevels.map((level) => <option key={level.id} value={level.id}>{level.label[language]}</option>)}</select></label>
+        <label><span>{t.sportFormat}</span><select name="sportFormat" defaultValue={initialSport.format || "casual"}>{sportFormats.map((format) => <option key={format.id} value={format.id}>{format.label[language]}</option>)}</select></label>
+      </div>
+      <div className="form-row">
+        <label><span>{t.sportEnvironment}</span><select name="sportEnvironment" defaultValue={initialSport.environment || "outdoor"}>{sportEnvironments.map((environment) => <option key={environment.id} value={environment.id}>{environment.label[language]}</option>)}</select></label>
+        <label><span>{t.sportDuration}</span><input name="sportDuration" type="number" min="15" max="480" step="15" defaultValue={initialSport.durationMinutes || 90} /></label>
+      </div>
+      <label className="sport-check"><input name="sportEquipmentNeeded" type="checkbox" defaultChecked={Boolean(initialSport.equipmentNeeded)} /><span>{t.sportEquipmentNeeded}</span></label>
+      <label><span>{t.sportEquipment}</span><input name="sportEquipment" defaultValue={initialSport.equipment} placeholder={t.sportEquipmentPlaceholder} /></label>
+      <label><span>{t.sportBring}</span><input name="sportBring" defaultValue={initialSport.bring} placeholder={t.sportBringPlaceholder} /></label>
+      <label><span>{t.sportRequirements}</span><input name="sportRequirements" defaultValue={initialSport.requirements} placeholder={t.sportRequirementsPlaceholder} /></label>
+      <label><span>{t.sportOrganizerTips}</span><textarea name="sportOrganizerTips" rows={3} defaultValue={initialSport.organizerTips} placeholder={t.sportOrganizerTipsPlaceholder} /></label>
+    </div>
+  );
+}
+
+const compactDateLabel = (date: string, language: Language) => {
+  const t = getTranslation(language);
+  const eventDate = new Date(`${date}T12:00:00`);
+  const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (date === todayKey) return t.today;
+  if (date === tomorrow.toISOString().slice(0, 10)) return t.tomorrow;
+
+  return new Intl.DateTimeFormat(localeByLanguage[language], {
+    day: "numeric",
+    month: "short",
+  }).format(eventDate);
+};
+
+const dateLabel = (date: string, language: Language) =>
+  new Intl.DateTimeFormat(localeByLanguage[language], {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T12:00:00`));
+
+function SportDetailsSkeleton() {
+  return (
+    <div className="details-skeleton" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
+export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMembers }: SportCardProps) {
+  const { joinedIds, pendingIds } = useAppStore();
+  const t = getTranslation(language);
+  const meta = getSportMetadata(activity);
+  const free = Math.max(activity.capacity - activity.participants, 0);
+  const joined = joinedIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const isOrganizer = activity.organizerKey === getUserKey();
+  const full = activity.participants >= activity.capacity;
+  const action = isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
+  const openMembersFromCard = () => {
+    window.dispatchEvent(new CustomEvent("goirl:open-members", { detail: { activityId: activity.id } }));
+    openMembersFromCard();
+  };
+
+  return (
+    <article className="sport-card">
+      <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
+        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "🏆"}</div>
+        <div>
+          <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} · {sportEnvironmentLabel(meta.environment, language)}</span></div>
+          <h3>{activity.activity[language]}</h3>
+          <p>{activity.title[language]}</p>
+        </div>
+        <ChevronRight className="card-arrow" size={18} />
+      </button>
+      <div className="sport-chip-row">
+        <span className="sport-card-chip"><Flag size={16} aria-hidden="true" /><span>{meta.sportType || activity.activity[language]}</span></span>
+        <button
+          className="sport-card-participants-chip"
+          type="button"
+          aria-label={`${t.participants}: ${activity.participants} / ${activity.capacity}`}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openMembersFromCard();
+          }}
+          onTouchEnd={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openMembersFromCard();
+          }}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openMembersFromCard();
+          }}
+        >
+          <UsersRound size={16} aria-hidden="true" />
+          <span>{activity.participants} / {activity.capacity}</span>
+        </button>
+        <span className="sport-card-chip"><Clock3 size={16} aria-hidden="true" /><span>{meta.durationMinutes || 90} {t.minutesShort}</span></span>
+      </div>      <div className="activity-card-details sport-details-grid">
+        <div><MapPin /><span>{activity.address}</span></div>
+        <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
+        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
+        <div><ShieldCheck /><span>{sportFormatLabel(meta.format, language)}</span></div>
+      </div>
+      <div className="activity-card-footer">
+        <span className={free <= 1 ? "spots urgent" : "spots"}><UsersRound />{free > 0 ? `${free} ${t.left}` : t.full}</span>
+        <span className="card-status">{t.sportSkillMatch}</span>
+        <button className={joined || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{action}</button>
+      </div>
+    </article>
+  );
+}
+
+export function SportActivitySheet({
+  activity,
+  language,
+  cityName,
+  loading,
+  error,
+  onClose,
+  onJoin,
+  onShare,
+  onCalendar,
+  onEdit,
+  onDelete,
+  onCloseMiniApp,
+  initialMembersOpen = false,
+}: SportSheetProps) {
+  const { joinedIds, pendingIds, userRole, reviewRequest } = useAppStore();
+  const [membersOpen, setMembersOpen] = useState(initialMembersOpen);
+  const t = getTranslation(language);
+  const meta = getSportMetadata(activity);
+  const isOrganizer = activity.organizerKey === getUserKey();
+  const canDelete = isOrganizer || userRole === "admin";
+  const canManageActivity = isOrganizer || userRole === "admin" || userRole === "moderator";
+  const joined = joinedIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const full = activity.participants >= activity.capacity;
+  const action = isOrganizer ? t.edit : pending ? t.cancelRequest : joined ? t.leave : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
+  const joinedMembers = activity.members.filter((member) => member.status === "joined");
+  const waitingMembers = activity.members.filter((member) => member.status === "waiting");
+  const pendingMembers = activity.members.filter((member) => member.status === "pending");
+
+  useEffect(() => {
+    setMembersOpen(initialMembersOpen);
+  }, [activity.id, initialMembersOpen]);
+
+  const handleReview = async (memberKey: string, approved: boolean) => {
+    await reviewRequest(activity.id, memberKey, approved);
+  };
+
+  return (
+    <div className="sheet-backdrop" onMouseDown={onClose}>
+      <article className="activity-sheet sport-sheet" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="sheet-handle" />
+        <button className="sheet-close" onClick={onClose} type="button" aria-label={t.close}><X /></button>
+        {loading && <SportDetailsSkeleton />}
+        {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
+        <div className="sport-sheet-hero">
+          <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || "🏆"}</div>
+          <div>
+            <div className="sport-eyebrow">🏆 {sportLevelLabel(meta.level, language)} · {sportFormatLabel(meta.format, language)}</div>
+            <h2>{activity.title[language]}</h2>
+            <p>{activity.description[language]}</p>
+          </div>
+        </div>
+        <div className="sport-chip-row sport-sheet-chips">
+          <span>⚽ {meta.sportType || activity.activity[language]}</span>
+          <span>🌤 {sportEnvironmentLabel(meta.environment, language)}</span>
+          <span>⏱ {meta.durationMinutes || 90} {t.minutesShort}</span>
+        </div>
+        <div className="detail-list sport-detail-list">
+          <div><Sparkles /><span>{t.sportLevel}</span><strong>{sportLevelLabel(meta.level, language)}</strong></div>
+          <div><ShieldCheck /><span>{t.sportFormat}</span><strong>{sportFormatLabel(meta.format, language)}</strong></div>
+          <div><MapPin /><span>{t.city}</span><strong>{cityName}</strong></div>
+          <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
+          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
+          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
+          <div><ShieldCheck /><span>{t.sportEquipmentNeeded}</span><strong>{meta.equipmentNeeded ? t.yes : t.no}</strong></div>
+          {meta.equipment && <div><Sparkles /><span>{t.sportEquipment}</span><strong>{meta.equipment}</strong></div>}
+          {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
+          {meta.requirements && <div><ShieldCheck /><span>{t.sportRequirements}</span><strong>{meta.requirements}</strong></div>}
+          {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
+          <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
+        </div>
+        <button className="detail-members-toggle" onClick={() => setMembersOpen((open: boolean) => !open)} type="button" aria-expanded={membersOpen}>
+          <UsersRound />
+          <span>{t.participants}</span>
+          <strong>{activity.participants} / {activity.capacity}</strong>
+          <ChevronRight className={membersOpen ? "open" : ""} />
+        </button>
+        {membersOpen && (
+          <div className="members-section">
+            <div className="members-list">
+              {joinedMembers.map((member) => (
+                <div className="member-row" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <UsersRound />
+                </div>
+              ))}
+              {!joinedMembers.length && <p>{t.noParticipants}</p>}
+              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} · {waitingMembers.length}</div>}
+              {waitingMembers.map((member) => (
+                <div className="member-row waiting-member" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <Clock3 />
+                </div>
+              ))}
+              {canManageActivity && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} · {pendingMembers.length}</div>}
+              {canManageActivity && pendingMembers.map((member) => (
+                <div className="member-row pending-member" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <span className="request-actions">
+                    <button onClick={() => void handleReview(member.userKey, true)} type="button" aria-label={t.approve} title={t.approve}><Check /></button>
+                    <button onClick={() => void handleReview(member.userKey, false)} type="button" aria-label={t.reject} title={t.reject}><X /></button>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="sheet-actions">
+          <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
+          <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
+          <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
+          <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
+        </div>
+        {canDelete && <button className="danger-action" onClick={() => onDelete(activity)} type="button"><Trash2 size={18} />{t.delete}</button>}
+        <button className="telegram-close-button compact" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
+      </article>
+    </div>
+  );
+}
+
+
+
+
+--- src/App.tsx ---
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CalendarPlus,
+  Check,
+  ChevronRight,
+  CircleUserRound,
+  Clock3,
+  Compass,
+  Dices,
+  Flag,
+  Home,
+  MapPin,
+  Pencil,
+  Plus,
+  Search,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Ticket,
+  Trash2,
+  UserRoundCheck,
+  UsersRound,
+  X,
+  Zap,
+} from "lucide-react";
+import { activityOptions, categories } from "./data";
+import { AppHeader } from "./components/AppHeader";
+import { buildGoogleCalendarUrl } from "./calendar/googleCalendar";
+import { initializeTrustedAuth } from "./authSession";
+import { cities, getCity } from "./config/cities";
+import { getTranslation, localeByLanguage } from "./i18n";
+import {
+  applyDiscoverFilters,
+  matchesActivityInterest,
+  searchActivities,
+  simpleRecommendationEngine,
+  type DiscoverFilter,
+} from "./recommendations";
+import { useAppStore } from "./store";
+import { ShareTemplateService } from "./share";
+import { getUserKey } from "./supabase";
+import { closeMiniApp, expandMiniApp, getTelegramWebApp, impactTelegram, notifyTelegram, readyMiniApp, showBackButton } from "./telegram";
+import type { Activity, AppView, Category, Language, NewActivity, SportEnvironment, SportFormat, SportLevel, SportMetadata } from "./types";
+import {
+  MAX_EVENT_ADDRESS_LENGTH,
+  MAX_EVENT_CAPACITY,
+  MAX_EVENT_DESCRIPTION_LENGTH,
+  MAX_EVENT_NOTE_LENGTH,
+  MAX_EVENT_PRICE,
+  MAX_EVENT_TITLE_LENGTH,
+  MIN_EVENT_CAPACITY,
+  validateEventCapacity,
+  validateEventDate,
+  validateEventPrice,
+  validateMaxLength,
+  validateOptionalUrl,
+  validateRequiredText,
+} from "./validation";
+
+const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
+
+const activityInviteUrl = (activity: Activity) =>
+  `https://t.me/${BOT_USERNAME}?startapp=${encodeURIComponent(activity.id)}`;
+
+const LazySportActivityCard = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivityCard })));
+const LazySportActivitySheet = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivitySheet })));
+const LazySportCreateFields = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportCreateFields })));
+
+const dateLabel = (date: string, language: Language) =>
+  new Intl.DateTimeFormat(localeByLanguage[language], {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T12:00:00`));
+
+const compactDateLabel = (date: string, language: Language) => {
+  const t = getTranslation(language);
+  const eventDate = new Date(`${date}T12:00:00`);
+  const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  if (date === todayKey) return t.today;
+  if (date === tomorrow.toISOString().slice(0, 10)) return t.tomorrow;
+
+  return new Intl.DateTimeFormat(localeByLanguage[language], {
+    day: "numeric",
+    month: "short",
+  }).format(eventDate);
+};
+
+const fallbackCategory: Category = {
+  id: "custom",
+  icon: "✨",
+  name: { ru: "Событие", uk: "Подія", cs: "Událost", en: "Event" },
+};
+
+const getActivityCategory = (activity: Activity) =>
+  categories.find((item) => item.id === activity.categoryId) || fallbackCategory;
+
+const isSportExperience = (activity: Activity) => activity.type === "sport" || activity.categoryId === "sport";
+
+const safeDate = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
+};
+
+const favoriteActivityOptions = (language: Language) => {
+  const t = getTranslation(language);
+  return [
+    { id: "coffee", label: t.templateCoffee },
+    { id: "walks", label: t.templateWalk },
+    { id: "skating", label: t.templateSkating },
+    { id: "cycling", label: t.favoriteCycling },
+    { id: "running", label: t.favoriteRunning },
+    { id: "hiking", label: t.favoriteHiking },
+    { id: "board-games", label: t.templateBoardGames },
+    { id: "football", label: t.favoriteFootball },
+    { id: "tennis", label: t.favoriteTennis },
+    { id: "volleyball", label: t.favoriteVolleyball },
+    { id: "basketball", label: t.favoriteBasketball },
+    { id: "swimming", label: t.favoriteSwimming },
+    { id: "yoga", label: t.favoriteYoga },
+    { id: "fitness", label: t.favoriteFitness },
+    { id: "concerts", label: t.favoriteConcerts },
+    { id: "cinema", label: t.favoriteCinema },
+    { id: "food", label: t.templateFood },
+    { id: "language-exchange", label: t.favoriteLanguageExchange },
+    { id: "other", label: t.templateOther },
+  ];
+};
+
+const sportMetadataFromForm = (data: FormData, sportType: string): SportMetadata => ({
+  sportType,
+  level: String(data.get("sportLevel") || "intermediate") as SportLevel,
+  format: String(data.get("sportFormat") || "casual") as SportFormat,
+  environment: String(data.get("sportEnvironment") || "outdoor") as SportEnvironment,
+  equipmentNeeded: data.get("sportEquipmentNeeded") === "on",
+  equipment: String(data.get("sportEquipment") || "").trim(),
+  bring: String(data.get("sportBring") || "").trim(),
+  requirements: String(data.get("sportRequirements") || "").trim(),
+  organizerTips: String(data.get("sportOrganizerTips") || "").trim(),
+  durationMinutes: Number(data.get("sportDuration") || 90),
+});
+
+function App() {
+  const store = useAppStore();
+  const [selected, setSelected] = useState<Activity | null>(null);
+  const [selectedMembersOpen, setSelectedMembersOpen] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+  const [completion, setCompletion] = useState("");
+  const [completionActivityId, setCompletionActivityId] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
+  const invitationHandled = useRef(false);
+  const toastTimer = useRef<number | null>(null);
+  const t = getTranslation(store.language);
+
+  useEffect(() => {
+    readyMiniApp();
+    expandMiniApp();
+    void (async () => {
+      await initializeTrustedAuth();
+      await useAppStore.getState().initialize();
+    })();
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        useAppStore.getState().disposeRealtime();
+      } else {
+        void (async () => {
+          await initializeTrustedAuth();
+          await useAppStore.getState().initialize();
+        })();
+      }
+    };
+
+    window.addEventListener("focus", handleVisibility);
+    window.addEventListener("blur", handleVisibility);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+      window.removeEventListener("focus", handleVisibility);
+      window.removeEventListener("blur", handleVisibility);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      useAppStore.getState().disposeRealtime();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (selected || store.view !== "home") {
+      return showBackButton(() => {
+        if (selected) setSelected(null);
+        else store.setView("home");
+      });
+    }
+    return undefined;
+  }, [selected, store.view, store]);
+
+  useEffect(() => {
+    if (invitationHandled.current) return;
+    const tg = getTelegramWebApp();
+    const startParam = tg?.initDataUnsafe?.start_param;
+    if (startParam) {
+      const invitedActivity = store.activities.find((item) => item.id === startParam);
+      if (invitedActivity) {
+        invitationHandled.current = true;
+        setSelected(invitedActivity);
+      }
+    }
+  }, [store.activities]);
+
+  const flash = (message: string) => {
+    setNotice(message);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setNotice(""), 2200);
+  };
+
+  const requestCloseMiniApp = () => {
+    if (!closeMiniApp()) flash(t.telegramCloseFallback);
+  };
+
+  const openRandom = () => {
+    const random = store.activities[Math.floor(Math.random() * store.activities.length)];
+    if (random) setSelected(random);
+    impactTelegram("medium");
+  };
+
+  const handleJoin = async (activity: Activity) => {
+    try {
+      const result = await store.toggleJoin(activity.id);
+      const message = result === "joined"
+        ? t.joined
+        : result === "pending"
+          ? t.requested
+          : result === "full"
+            ? t.eventFull
+            : result === "private"
+              ? t.privateJoinInfo
+              : t.leave;
+      flash(message);
+      notifyTelegram(result === "left" || result === "full" || result === "private" ? "warning" : "success");
+    } catch {
+      flash(t.joinError);
+    }
+  };
+
+  const handleDelete = async (activity: Activity) => {
+    const confirmed = window.confirm(`${t.deleteEventTitle}\n\n${t.deleteEventWarning}`);
+    if (!confirmed) return;
+
+    try {
+      await store.deleteActivity(activity.id);
+      setSelected(null);
+      flash(t.eventDeleted);
+      notifyTelegram("success");
+    } catch {
+      flash(t.deleteError);
+      notifyTelegram("error");
+    }
+  };
+
+  const shareActivity = async (activity: Activity) => {
+    const url = activityInviteUrl(activity);
+    // Plain text cannot hide a URL behind a label. Rich hidden links need Bot API HTML/Markdown or an inline button.
+    const text = ShareTemplateService.buildPlainText(activity, store.language, url);
+    const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+
+    const webApp = getTelegramWebApp();
+    if (webApp?.openTelegramLink) {
+      webApp.openTelegramLink(telegramShareUrl);
+      return;
+    }
+
+    if (navigator.share) {
+      await navigator.share({ title: "GO IRL", text });
+    } else {
+      await navigator.clipboard?.writeText(text);
+      flash(t.copied);
+    }
+  };
+
+  const saveToGoogleCalendar = (activity: Activity) => {
+    const url = buildGoogleCalendarUrl(activity, {
+      language: store.language,
+      eventUrl: activityInviteUrl(activity),
+    });
+    const webApp = getTelegramWebApp();
+    if (webApp?.openLink) {
+      webApp.openLink(url, { try_instant_view: false });
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <div className="app">
+      <AppHeader
+        language={store.language}
+        selectedCityId={store.selectedCityId}
+        translation={t}
+        onBrandClick={() => store.setView("home")}
+        onCityChange={store.setSelectedCity}
+        onLanguageChange={store.setLanguage}
+      />
+
+      <main>
+        {store.syncError && <div className="sync-banner">{t.databaseError}</div>}
+        {store.loading && <div className="sync-loading">{t.loadingEvents}</div>}
+        {store.view === "home" && (
+          <HomeView
+            language={store.language}
+            onOpen={setSelected}
+            onJoin={handleJoin}
+            onRandom={openRandom}
+            onCreate={() => store.setView("create")}
+          />
+        )}
+        {store.view === "discover" && <DiscoverView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
+        {store.view === "explore" && <ExploreView language={store.language} onOpen={setSelected} onJoin={handleJoin} />}
+        {store.view === "create" && <CreateView key={editingActivity?.id || "new-event"} language={store.language} initialActivity={editingActivity} onCancel={() => {
+          setEditingActivity(null);
+          store.setView("home");
+        }} onCreated={(id) => {
+          flash(editingActivity ? t.updatedSuccess : t.createdSuccess);
+          setEditingActivity(null);
+          setCompletionActivityId(id);
+          setCompletion(editingActivity ? t.updatedSuccess : t.createdSuccess);
+        }} />}
+        {store.view === "profile" && <ProfileView language={store.language} onOpen={setSelected} onJoin={handleJoin} onCloseMiniApp={requestCloseMiniApp} />}
+      </main>
+
+      <BottomNav view={store.view} setView={store.setView} language={store.language} />
+
+      {selected && (
+        <ActivitySheet
+          activity={store.activities.find((item) => item.id === selected.id) || selected}
+          language={store.language}
+          cityName={getCity((store.activities.find((item) => item.id === selected.id) || selected).cityId).name[store.language]}
+          loading={store.loading}
+          error={store.syncError}
+          onClose={() => {
+            setSelected(null);
+            setSelectedMembersOpen(false);
+          }}
+          onJoin={handleJoin}
+          onShare={shareActivity}
+          onCalendar={saveToGoogleCalendar}
+          onEdit={(activity) => {
+            setSelected(null);
+            setSelectedMembersOpen(false);
+            setEditingActivity(activity);
+            store.setView("create");
+          }}
+          onDelete={handleDelete}
+          onCloseMiniApp={requestCloseMiniApp}
+          initialMembersOpen={selectedMembersOpen}
+        />
+      )}
+      {completion && (
+        <CompletionBar
+          message={completion}
+          language={store.language}
+          onDismiss={() => {
+            setCompletion("");
+            setCompletionActivityId(null);
+          }}
+          onOpen={() => {
+            const activity = useAppStore.getState().activities.find((item) => item.id === completionActivityId);
+            if (activity) setSelected(activity);
+          }}
+          onShare={() => {
+            const activity = useAppStore.getState().activities.find((item) => item.id === completionActivityId);
+            if (activity) void shareActivity(activity);
+          }}
+          onCalendar={() => {
+            const activity = useAppStore.getState().activities.find((item) => item.id === completionActivityId);
+            if (activity) saveToGoogleCalendar(activity);
+          }}
+          onCloseMiniApp={requestCloseMiniApp}
+        />
+      )}
+      {notice && <div className="toast">{notice}</div>}
+    </div>
+  );
+}
+
+function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onRandom: () => void; onCreate: () => void }) {
+  const { activities, loading, selectedCityId, setCategory } = useAppStore();
+  const t = getTranslation(language);
+  const city = getCity(selectedCityId);
+  const today = new Date().toISOString().slice(0, 10);
+  const nearby = activities.filter((item) => item.date >= today).slice(0, 4);
+  const popular = activities.filter((item) => item.popular);
+  const urgent = activities.filter((item) => item.urgent);
+  const activeCategoryCount = new Set(activities.map((item) => item.categoryId)).size;
+
+  return (
+    <>
+      <section className="home-hero">
+        <img className="home-brand-logo" src="/brand/logo-wide.png" alt="GO IRL" />
+        <div className="home-kicker"><MapPin />{t.liveInCity} · {city.name[language]}</div>
+        <h1>{t.homeTitle}</h1>
+        <p>{t.homeSubtitle}</p>
+        <div className="home-stats" aria-label={t.categories}>
+          <div><strong>{nearby.length}</strong><span>{t.upcomingCount}</span></div>
+          <div><strong>{activeCategoryCount || categories.length}</strong><span>{t.activeDirections}</span></div>
+          <div><strong>{urgent.length}</strong><span>{t.urgentShort}</span></div>
+        </div>
+      </section>
+
+      <div className="quick-actions">
+        <button className="quick primary" onClick={onRandom} type="button"><Dices size={25} /><span>{t.surprise}</span></button>
+        <button className="quick secondary" onClick={onCreate} type="button"><Plus size={25} /><span>{t.create}</span></button>
+      </div>
+
+      <SectionHeader title={t.chooseDirection} />
+      <div className="category-grid module-grid">
+        {categories.map((category) => (
+          <button className="category-button" key={category.id} onClick={() => setCategory(category.id)} type="button">
+            <span>{category.icon}</span>
+            <strong>{category.name[language]}</strong>
+            <small>{activities.filter((activity) => activity.categoryId === category.id).length} {t.eventCountLabel}</small>
+            <ChevronRight size={16} />
+          </button>
+        ))}
+      </div>
+
+      {loading ? <EventListSkeleton /> : nearby.length ? <ActivitySection title={t.nearby} activities={nearby} language={language} onOpen={onOpen} onJoin={onJoin} /> : <EmptyState text={t.noEvents} />}
+      {urgent.length > 0 && <ActivitySection title={t.urgent} icon={<Zap size={18} />} activities={urgent} language={language} onOpen={onOpen} onJoin={onJoin} urgent />}
+      <ActivitySection title={t.popular} activities={popular} language={language} onOpen={onOpen} onJoin={onJoin} />
+    </>
+  );
+}
+
+function DiscoverView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { activities, loading, selectedCityId } = useAppStore();
+  const t = getTranslation(language);
+  const [query, setQuery] = useState("");
+  const [activeFilters, setActiveFilters] = useState<DiscoverFilter[]>([]);
+  const [locationState, setLocationState] = useState<"idle" | "ready" | "blocked">("idle");
+  const profile = useMemo(() => loadProfile(t.guestName, selectedCityId), [selectedCityId, t.guestName]);
+  const favoriteTerms = profile.favoriteActivities;
+  const now = useMemo(() => new Date(), []);
+  const city = getCity(profile.cityId || selectedCityId);
+  const recommended = simpleRecommendationEngine.recommend(activities, {
+    cityId: profile.cityId || selectedCityId,
+    favoriteActivities: favoriteTerms,
+    language,
+    now,
+  });
+  const filteredActivities = applyDiscoverFilters(searchActivities(recommended, query, language), activeFilters, language, now);
+  const today = now.toISOString().slice(0, 10);
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  const tomorrowDate = tomorrow.toISOString().slice(0, 10);
+  const weekLimit = new Date(now);
+  weekLimit.setDate(now.getDate() + 7);
+  const weekLimitDate = weekLimit.toISOString().slice(0, 10);
+  const nearby = recommended.filter((activity) => activity.cityId === city.id).slice(0, 8);
+  const interestMatches = favoriteTerms.length
+    ? recommended.filter((activity) => matchesActivityInterest(activity, favoriteTerms, language)).slice(0, 8)
+    : recommended.slice(0, 4);
+  const filterOptions: Array<{ id: DiscoverFilter; label: string }> = [
+    { id: "today", label: t.today },
+    { id: "tomorrow", label: t.tomorrow },
+    { id: "weekend", label: t.weekend },
+    { id: "free", label: t.free },
+    { id: "up-to-200", label: t.upTo200 },
+    { id: "sport", label: t.templateSport },
+    { id: "board-games", label: t.templateBoardGames },
+    { id: "skating", label: t.templateSkating },
+    { id: "walks", label: t.templateWalk },
+    { id: "coffee", label: t.templateCoffee },
+    { id: "beginners", label: t.beginners },
+    { id: "public-only", label: t.publicOnly },
+  ];
+
+  const toggleFilter = (filter: DiscoverFilter) => {
+    setActiveFilters((current) => current.includes(filter) ? current.filter((item) => item !== filter) : [...current, filter]);
+  };
+
+  const enableLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationState("blocked");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => setLocationState("ready"),
+      () => setLocationState("blocked"),
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 5000 },
+    );
+  };
+
+  return (
+    <section className="page-section discover-page">
+      <div className="page-title"><Sparkles /><div><h1>{t.forYou}</h1><p>{t.discoverSubtitle}</p></div></div>
+      <label className="discover-search">
+        <Search />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.searchPlaceholder} />
+      </label>
+      <div className="discover-filter-block">
+        <span>{t.quickFilters}</span>
+        <div className="filter-row discover-filters">
+          {filterOptions.map((filter) => (
+            <button className={activeFilters.includes(filter.id) ? "filter active" : "filter"} key={filter.id} onClick={() => toggleFilter(filter.id)} type="button">
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {(query || activeFilters.length > 0) && (
+        <ActivitySection title={t.matchedForYou} activities={filteredActivities} language={language} onOpen={onOpen} onJoin={onJoin} />
+      )}
+
+      {loading ? (
+        <EventListSkeleton />
+      ) : (
+        <>
+          <DiscoverSection title={t.byInterestsSection} activities={interestMatches} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.nearestEvents} activities={recommended.slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.popularEvents} activities={recommended.filter((activity) => activity.popular).slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.newEvents} activities={[...recommended].reverse().slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.todaySection} activities={recommended.filter((activity) => activity.date === today)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.tomorrowSection} activities={recommended.filter((activity) => activity.date === tomorrowDate)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <DiscoverSection title={t.thisWeekSection} activities={recommended.filter((activity) => activity.date >= today && activity.date <= weekLimitDate).slice(0, 8)} language={language} onOpen={onOpen} onJoin={onJoin} />
+          <section className="discover-section">
+            <div className="section-title discover-section-title">
+              <MapPin />
+              <h2>{t.nearMeSection}</h2>
+              {locationState === "idle" && <button onClick={enableLocation} type="button">{t.enableLocation}</button>}
+            </div>
+            {locationState === "blocked" && <div className="nearby-note">{t.nearMeUnavailable}</div>}
+            <div className="horizontal-events">
+              {nearby.length ? nearby.map((activity) => <DiscoverActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />) : <EmptyState text={t.noEvents} />}
+            </div>
+          </section>
+        </>
+      )}
+    </section>
+  );
+}
+
+function DiscoverSection({ title, activities, language, onOpen, onJoin }: { title: string; activities: Activity[]; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  if (!activities.length) return null;
+  return (
+    <section className="discover-section">
+      <SectionHeader title={title} />
+      <div className="horizontal-events">
+        {activities.map((activity) => <DiscoverActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />)}
+      </div>
+    </section>
+  );
+}
+
+function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { joinedIds, pendingIds } = useAppStore();
+  const t = getTranslation(language);
+  const category = getActivityCategory(activity);
+  const joined = joinedIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const isOrganizer = activity.organizerKey === getUserKey();
+
+  return (
+    <article className="discover-card">
+      <button className="discover-card-main" onClick={() => onOpen(activity)} type="button">
+        <div className={`category-icon category-${category.id}`}>{category.icon}</div>
+        <div>
+          <span>{category.name[language]}</span>
+          <h3>{activity.activity[language]}</h3>
+          <p>{activity.title[language]}</p>
+        </div>
+      </button>
+      <div className="discover-card-meta">
+        <span><CalendarDays />{compactDateLabel(activity.date, language)}</span>
+        <span><Clock3 />{activity.time}</span>
+        <span><MapPin />{getCity(activity.cityId).name[language]}</span>
+        <span><UsersRound />{Math.max(activity.capacity - activity.participants, 0)} {t.left}</span>
+      </div>
+      <button className={joined || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button">
+        {isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : activity.visibility === "invite" ? t.request : t.join}
+      </button>
+    </article>
+  );
+}
+
+function ExploreView({ language, onOpen, onJoin }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { activities, loading, selectedCategory, selectedCityId, setCategory } = useAppStore();
+  const t = getTranslation(language);
+  const city = getCity(selectedCityId);
+  const filtered = selectedCategory ? activities.filter((item) => item.categoryId === selectedCategory) : activities;
+
+  return (
+    <section className="page-section">
+      <div className="page-title"><Compass /><div><h1>{t.all}</h1><p>{city.name[language]}</p></div></div>
+      <div className="filter-row">
+        <button className={!selectedCategory ? "filter active" : "filter"} onClick={() => setCategory(null)} type="button">{t.all}</button>
+        {categories.map((category) => (
+          <button className={selectedCategory === category.id ? "filter active" : "filter"} key={category.id} onClick={() => setCategory(category.id)} type="button">
+            {category.icon} {category.name[language]}
+          </button>
+        ))}
+      </div>
+      <div className="activity-stack">
+        {loading ? <EventListSkeleton /> : filtered.length ? filtered.map((item) => <ActivityCard key={item.id} activity={item} language={language} onOpen={onOpen} onJoin={onJoin} />) : <EmptyState text={t.noEvents} />}
+      </div>
+    </section>
+  );
+}
+
+function CreateView({ language, initialActivity, onCreated, onCancel }: { language: Language; initialActivity: Activity | null; onCreated: (id: string) => void; onCancel: () => void }) {
+  const createActivity = useAppStore((state) => state.createActivity);
+  const updateActivity = useAppStore((state) => state.updateActivity);
+  const selectedCityId = useAppStore((state) => state.selectedCityId);
+  const setSelectedCity = useAppStore((state) => state.setSelectedCity);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [categoryId, setCategoryId] = useState(initialActivity?.categoryId || "sport");
+  const [cityId, setCityId] = useState(initialActivity?.cityId || selectedCityId);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [priceError, setPriceError] = useState("");
+  const t = getTranslation(language);
+  const selectedCity = getCity(cityId);
+  const today = new Date().toISOString().slice(0, 10);
+  const initialSport = initialActivity?.metadata?.sport || {};
+  const quickTemplates = [
+    { id: "coffee", label: t.templateCoffee, icon: "☕", categoryId: "activities", activity: "☕", title: t.templateCoffee, description: t.templateCoffee, capacity: 4 },
+    { id: "walk", label: t.templateWalk, icon: "🚶", categoryId: "social", activity: "🚶", title: t.templateWalk, description: t.templateWalk, capacity: 6 },
+    { id: "sport", label: t.templateSport, icon: "🏐", categoryId: "sport", activity: "🏐", title: t.templateSport, description: t.templateSport, capacity: 8 },
+    { id: "skating", label: t.templateSkating, icon: "🛼", categoryId: "activities", activity: "🛼", title: t.templateSkating, description: t.templateSkating, capacity: 6 },
+    { id: "food", label: t.templateFood, icon: "🍽️", categoryId: "social", activity: "🍽️", title: t.templateFood, description: t.templateFood, capacity: 4 },
+    { id: "board-games", label: t.templateBoardGames, icon: "🎲", categoryId: "activities", activity: "🎲", title: t.templateBoardGames, description: t.templateBoardGames, capacity: 6 },
+    { id: "other", label: t.templateOther, icon: "✨", categoryId: "activities", activity: "☕", title: t.templateOther, description: t.templateOther, capacity: 4 },
+  ];
+
+  const setFieldValue = (name: string, value: string) => {
+    const field = formRef.current?.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+    if (field) field.value = value;
+  };
+
+  const applyTemplate = (template: (typeof quickTemplates)[number]) => {
+    const option = activityOptions[template.categoryId].find((item) => item.icon === template.activity) || activityOptions[template.categoryId][0];
+    setCategoryId(template.categoryId);
+    window.requestAnimationFrame(() => {
+      setFieldValue("activityText", `${option.icon} ${option.name[language]}`);
+      setFieldValue("titleText", `${template.icon} ${template.title}`);
+      setFieldValue("descriptionText", template.description);
+      setFieldValue("capacity", String(template.capacity));
+    });
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setFormError("");
+    const data = new FormData(event.currentTarget);
+    const activityText = String(data.get("activityText"));
+    const activityEmoji = activityText.split(" ")[0];
+    const rawTitle = String(data.get("titleText")).trim();
+    const rawDescription = String(data.get("descriptionText")).trim();
+    const rawAddress = String(data.get("address")).trim();
+    const rawLocationUrl = String(data.get("locationUrl") || "").trim();
+    const rawParticipantNote = String(data.get("participantNote") || "").trim();
+    const date = String(data.get("date"));
+    const price = Number(data.get("price"));
+    const capacity = Number(data.get("capacity"));
+    const fieldError =
+      validateRequiredText(rawTitle, t)
+      || validateRequiredText(rawDescription, t)
+      || validateRequiredText(rawAddress, t)
+      || validateEventDate(date, t)
+      || validateMaxLength(rawTitle, MAX_EVENT_TITLE_LENGTH, t.titleTooLong)
+      || validateMaxLength(rawDescription, MAX_EVENT_DESCRIPTION_LENGTH, t.descriptionTooLong)
+      || validateMaxLength(rawAddress, MAX_EVENT_ADDRESS_LENGTH, t.addressTooLong)
+      || validateMaxLength(rawParticipantNote, MAX_EVENT_NOTE_LENGTH, t.noteTooLong)
+      || validateEventCapacity(capacity, t)
+      || validateOptionalUrl(rawLocationUrl, t);
+    if (fieldError) {
+      setFormError(fieldError);
+      setSubmitting(false);
+      return;
+    }
+    const priceError = validateEventPrice(price, t);
+    if (priceError) {
+      setPriceError(priceError);
+      setFormError("");
+      setSubmitting(false);
+      return;
+    }
+
+    const activity: NewActivity = {
+      type: categoryId === "sport" ? "sport" : "custom",
+      categoryId,
+      activityText,
+      titleText: rawTitle.startsWith(activityEmoji) ? rawTitle : `${activityEmoji} ${rawTitle}`,
+      descriptionText: rawDescription,
+      date,
+      time: String(data.get("time")),
+      cityId,
+      address: rawAddress,
+      locationUrl: rawLocationUrl || undefined,
+      participantNote: rawParticipantNote || undefined,
+      price,
+      capacity,
+      visibility: String(data.get("visibility")) as NewActivity["visibility"],
+      metadata: categoryId === "sport" ? { sport: sportMetadataFromForm(data, activityText) } : undefined,
+    };
+    try {
+      const id = initialActivity
+        ? await updateActivity(initialActivity.id, activity)
+        : await createActivity(activity);
+      setSelectedCity(cityId);
+      onCreated(id);
+      if (!initialActivity) event.currentTarget.reset();
+    } catch {
+      setFormError(t.publishError);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="page-section create-page">
+      <button className="back-button" onClick={onCancel} type="button"><ArrowLeft size={20} /></button>
+      <div className="page-title">{initialActivity ? <Pencil /> : <Plus />}<div><h1>{initialActivity ? t.edit : t.createTitle}</h1><p>{t.createHint}</p></div></div>
+      <form className="create-form" ref={formRef} onSubmit={submit}>
+        <div className="template-row" aria-label={t.quickTemplates}>
+          <span>{t.quickTemplates}</span>
+          <div>
+            {quickTemplates.map((template) => (
+              <button key={template.id} onClick={() => applyTemplate(template)} type="button">
+                {template.icon} {template.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <label><span>{t.category}</span><select name="categoryId" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>{categories.map((category) => <option key={category.id} value={category.id}>{category.icon} {category.name[language]}</option>)}</select></label>
+        <label><span>{t.activity}</span><select key={`${categoryId}-${language}`} name="activityText" defaultValue={initialActivity?.categoryId === categoryId ? initialActivity.activity[language] : undefined} required>{activityOptions[categoryId].map((option) => <option key={`${option.icon}-${option.name[language]}`} value={`${option.icon} ${option.name[language]}`}>{option.icon} {option.name[language]}</option>)}</select></label>
+        {categoryId === "sport" && (
+          <Suspense fallback={<div className="sport-create-panel">{t.loadingEvents}</div>}>
+            <LazySportCreateFields language={language} initialSport={initialSport} />
+          </Suspense>
+        )}
+        <label><span>{t.title}</span><input name="titleText" defaultValue={initialActivity?.title[language]} placeholder={t.titlePlaceholder} maxLength={MAX_EVENT_TITLE_LENGTH} required /></label>
+        <label><span>{t.description}</span><textarea name="descriptionText" rows={4} defaultValue={initialActivity?.description[language]} maxLength={MAX_EVENT_DESCRIPTION_LENGTH} required /></label>
+        <div className="form-row">
+          <label><span>{t.date}</span><input name="date" type="date" min={today} defaultValue={initialActivity?.date || today} required /></label>
+          <label><span>{t.time}</span><input name="time" type="time" defaultValue={initialActivity?.time || "18:00"} required /></label>
+        </div>
+        <label><span>{t.city}</span><select name="cityId" value={cityId} onChange={(event) => setCityId(event.target.value)} required>{cities.map((city) => <option key={city.id} value={city.id}>{city.name[language]}</option>)}</select></label>
+        <label><span>{t.address}</span><input name="address" defaultValue={initialActivity?.address || selectedCity.name[language]} maxLength={MAX_EVENT_ADDRESS_LENGTH} required /></label>
+        <label><span>{t.locationUrl}</span><input name="locationUrl" type="url" defaultValue={initialActivity?.locationUrl} placeholder={t.locationPlaceholder} /></label>
+        <label><span>{t.participantNote}</span><textarea name="participantNote" rows={3} defaultValue={initialActivity?.participantNote} maxLength={MAX_EVENT_NOTE_LENGTH} placeholder={t.participantNotePlaceholder} /></label>
+        <div className="form-row">
+          <label className="price-field"><span>{t.price}</span><input name="price" type="number" min="0" max={MAX_EVENT_PRICE} defaultValue={initialActivity?.price || 0} onInput={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} onChange={(event) => setPriceError(validateEventPrice(Number(event.currentTarget.value), t))} required /><small className="field-error">{priceError || t.priceTooHigh}</small></label>
+          <label><span>{t.capacity}</span><input name="capacity" type="number" min={MIN_EVENT_CAPACITY} max={MAX_EVENT_CAPACITY} defaultValue={initialActivity?.capacity || 8} required /></label>
+        </div>
+        <fieldset>
+          <legend>{t.visibility}</legend>
+          <div className="segmented">
+            <label><input name="visibility" type="radio" value="public" defaultChecked={!initialActivity || initialActivity.visibility === "public"} /><span>{t.public}</span></label>
+            <label><input name="visibility" type="radio" value="private" defaultChecked={initialActivity?.visibility === "private"} /><span>{t.private}</span></label>
+            <label><input name="visibility" type="radio" value="invite" defaultChecked={initialActivity?.visibility === "invite"} /><span>{t.invite}</span></label>
+          </div>
+        </fieldset>
+        {formError && <div className="form-error">{formError}</div>}
+        <button className="publish-button" type="submit" disabled={submitting || Boolean(priceError)}>{initialActivity ? <Pencil size={20} /> : <Sparkles size={20} />}{submitting ? "…" : initialActivity ? t.save : t.publish}</button>
+      </form>
+    </section>
+  );
+}
+
+type LocalProfile = {
+  name: string;
+  bio: string;
+  cityId: string;
+  avatar: string;
+  registeredAt: string;
+  favoriteActivities: string[];
+};
+
+const avatarOptions = ["GI", "GO", "IRL", "🏐", "🎉", "🌿"];
+
+const loadProfile = (fallbackName: string, fallbackCityId: string): LocalProfile => {
+  const stored = localStorage.getItem("go-irl-profile");
+  const registeredAt = localStorage.getItem("go-irl-registered-at") || new Date().toISOString();
+  localStorage.setItem("go-irl-registered-at", registeredAt);
+  if (!stored) return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt, favoriteActivities: [] };
+
+  try {
+    const parsed = JSON.parse(stored) as Partial<LocalProfile>;
+    return {
+      name: parsed.name || fallbackName,
+      bio: parsed.bio || "",
+      cityId: parsed.cityId || fallbackCityId,
+      avatar: parsed.avatar || "GI",
+      registeredAt: parsed.registeredAt || registeredAt,
+      favoriteActivities: Array.isArray(parsed.favoriteActivities) ? parsed.favoriteActivities : [],
+    };
+  } catch {
+    return { name: fallbackName, bio: "", cityId: fallbackCityId, avatar: "GI", registeredAt, favoriteActivities: [] };
+  }
+};
+
+function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onCloseMiniApp: () => void }) {
+  const { activities, joinedIds, pendingIds, loading, syncError, selectedCityId, setSelectedCity } = useAppStore();
+  const [editing, setEditing] = useState(false);
+  const t = getTranslation(language);
+  const tgUser = getTelegramWebApp()?.initDataUnsafe?.user;
+  const fallbackName = [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(" ") || t.guestName;
+  const [profile, setProfile] = useState(() => loadProfile(fallbackName, selectedCityId));
+  const userKey = getUserKey();
+  const city = getCity(profile.cityId);
+  const today = new Date().toISOString().slice(0, 10);
+  const organized = activities.filter((item) => item.organizerKey === userKey);
+  const participating = activities.filter((item) => joinedIds.includes(item.id) && item.organizerKey !== userKey);
+  const pendingRequests = activities.filter((item) => pendingIds.includes(item.id));
+  const activeEvents = activities.filter((item) => item.date >= today && (item.organizerKey === userKey || joinedIds.includes(item.id) || pendingIds.includes(item.id)));
+  const joinedCount = activities.filter((item) => joinedIds.includes(item.id)).length;
+  const registeredLabel = new Intl.DateTimeFormat(localeByLanguage[language], { day: "numeric", month: "short", year: "numeric" }).format(safeDate(profile.registeredAt));
+  const favoriteOptions = favoriteActivityOptions(language);
+  const selectedFavorites = favoriteOptions.filter((option) => profile.favoriteActivities.includes(option.id));
+
+  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const nextProfile: LocalProfile = {
+      name: String(data.get("profileName") || fallbackName).trim() || fallbackName,
+      bio: String(data.get("profileBio") || "").trim(),
+      cityId: String(data.get("profileCity") || selectedCityId),
+      avatar: String(data.get("profileAvatar") || "GI"),
+      registeredAt: profile.registeredAt,
+      favoriteActivities: data.getAll("favoriteActivities").map(String),
+    };
+    localStorage.setItem("go-irl-profile", JSON.stringify(nextProfile));
+    setProfile(nextProfile);
+    setSelectedCity(nextProfile.cityId);
+    setEditing(false);
+    notifyTelegram("success");
+  };
+
+  return (
+    <section className="page-section profile-page">
+      {loading && <ProfileSkeleton />}
+      {syncError && <div className="details-error profile-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
+      <div className="profile-hero">
+        <div className="profile-avatar">{profile.avatar}</div>
+        <div className="profile-main">
+          <div className="profile-kicker"><MapPin />{city.name[language]}</div>
+          <h1>{profile.name}</h1>
+          <p>{profile.bio || t.profileBioFallback}</p>
+          <small>{t.registeredAt}: {registeredLabel}</small>
+        </div>
+        <button className="profile-edit-button" onClick={() => setEditing((value) => !value)} type="button"><Pencil size={18} />{editing ? t.close : t.editProfile}</button>
+      </div>
+
+      {editing && (
+        <form className="profile-edit-form" onSubmit={saveProfile}>
+          <label><span>{t.name}</span><input name="profileName" defaultValue={profile.name} required /></label>
+          <label><span>{t.shortBio}</span><textarea name="profileBio" rows={3} defaultValue={profile.bio} placeholder={t.profileBioPlaceholder} /></label>
+          <label><span>{t.city}</span><select name="profileCity" defaultValue={profile.cityId}>{cities.map((item) => <option key={item.id} value={item.id}>{item.name[language]}</option>)}</select></label>
+          <div className="interest-picker">
+            <span>{t.favoriteActivities}</span>
+            <p>{t.favoriteActivitiesHint}</p>
+            <div>
+              {favoriteOptions.map((option) => (
+                <label key={option.id}>
+                  <input name="favoriteActivities" type="checkbox" value={option.id} defaultChecked={profile.favoriteActivities.includes(option.id)} />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="avatar-picker" role="radiogroup" aria-label={t.avatar}>
+            {avatarOptions.map((avatar) => (
+              <label key={avatar}>
+                <input name="profileAvatar" type="radio" value={avatar} defaultChecked={profile.avatar === avatar} />
+                <span>{avatar}</span>
+              </label>
+            ))}
+          </div>
+          <button className="publish-button" type="submit"><Pencil size={18} />{t.save}</button>
+        </form>
+      )}
+
+      <SectionHeader title={t.favoriteActivities} />
+      {selectedFavorites.length ? (
+        <div className="profile-interest-list">
+          {selectedFavorites.map((option) => <span key={option.id}>{option.label}</span>)}
+        </div>
+      ) : (
+        <EmptyState text={t.noFavoriteActivities} />
+      )}
+
+      <SectionHeader title={t.profileStats} />
+      <div className="life-grid profile-stats-grid">
+        <Metric icon={<Star />} value={String(organized.length)} label={t.createdEvents} />
+        <Metric icon={<UserRoundCheck />} value={String(joinedCount)} label={t.visitedEvents} />
+        <Metric icon={<Zap />} value={String(activeEvents.length)} label={t.activeEvents} />
+        <Metric icon={<Clock3 />} value={String(pendingRequests.length)} label={t.pendingRequests} />
+      </div>
+
+      <SectionHeader title={t.myEvents} />
+      <ProfileEventGroup title={t.organizing} activities={organized} language={language} emptyText={t.noOrganizedEvents} onOpen={onOpen} onJoin={onJoin} />
+      <ProfileEventGroup title={t.participating} activities={participating} language={language} emptyText={t.noJoinedEvents} onOpen={onOpen} onJoin={onJoin} />
+      <ProfileEventGroup title={t.waitingDecision} activities={pendingRequests} language={language} emptyText={t.noPendingRequests} onOpen={onOpen} onJoin={onJoin} />
+      <button className="telegram-close-button" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
+    </section>
+  );
+}
+
+function ProfileEventGroup({ title, activities, language, emptyText, onOpen, onJoin }: { title: string; activities: Activity[]; language: Language; emptyText: string; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  return (
+    <section className="profile-event-group">
+      <h3>{title}</h3>
+      {activities.length ? (
+        <div className="activity-stack">{activities.map((activity) => <ActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />)}</div>
+      ) : (
+        <EmptyState text={emptyText} />
+      )}
+    </section>
+  );
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="profile-skeleton" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
+function ActivitySection({ title, activities, language, onOpen, onJoin, icon, urgent = false }: { title: string; activities: Activity[]; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; icon?: React.ReactNode; urgent?: boolean }) {
+  if (!activities.length) return null;
+  return (
+    <section className={urgent ? "activity-section urgent-section" : "activity-section"}>
+      <SectionHeader title={title} icon={icon} />
+      <div className="activity-stack">{activities.map((activity) => <ActivityCard key={activity.id} activity={activity} language={language} onOpen={onOpen} onJoin={onJoin} />)}</div>
+    </section>
+  );
+}
+
+function ActivityCard(props: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onOpenMembers?: (activity: Activity) => void }) {
+  if (!isSportExperience(props.activity)) return <GenericActivityCard {...props} />;
+  return (
+    <Suspense fallback={<GenericActivityCard {...props} />}>
+      <LazySportActivityCard {...props} />
+    </Suspense>
+  );
+}
+
+function GenericActivityCard({ activity, language, onOpen, onJoin }: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+  const { joinedIds, waitingIds, pendingIds } = useAppStore();
+  const t = getTranslation(language);
+  const category = getActivityCategory(activity);
+  const free = activity.capacity - activity.participants;
+  const joined = joinedIds.includes(activity.id);
+  const waiting = waitingIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const isOrganizer = activity.organizerKey === getUserKey();
+  const full = activity.participants >= activity.capacity;
+  const action = isOrganizer
+    ? t.open
+    : pending
+      ? t.requested
+      : joined
+        ? t.joined
+        : waiting
+          ? t.waiting
+          : activity.visibility === "private"
+            ? t.privateAccess
+            : full
+              ? t.eventFull
+              : activity.visibility === "invite"
+                ? t.request
+                : t.join;
+  const status = isOrganizer
+    ? t.organizerStatus
+    : pending
+      ? t.requested
+      : joined
+        ? t.joined
+        : waiting
+          ? t.waiting
+          : full
+            ? t.eventFull
+            : activity.visibility === "private"
+              ? t.privateAccess
+              : activity.visibility === "invite"
+                ? t.inviteStatus
+                : t.publicStatus;
+
+  return (
+    <article className="activity-card">
+      <button className="activity-card-main" onClick={() => onOpen(activity)} type="button">
+        <div className={`category-icon category-${category.id}`}>{category.icon}</div>
+        <div className="activity-copy">
+          <div className="activity-label">{category.name[language]}</div>
+          <h3>{activity.activity[language]}</h3>
+          <p>{activity.title[language]}</p>
+        </div>
+        <ChevronRight className="card-arrow" size={18} />
+      </button>
+
+      <div className="activity-card-details">
+        <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
+        <div><Clock3 /><span>{activity.time}</span></div>
+        <div><MapPin /><span>{activity.address}</span></div>
+        <div><UsersRound /><span>{activity.participants} / {activity.capacity}</span></div>
+        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
+        <div><Star /><span>{t.organizerRli}</span></div>
+      </div>
+
+      <div className="activity-card-footer">
+        <span className={free <= 1 ? "spots urgent" : "spots"}>
+          <UsersRound />{free > 0 ? `${free} ${t.left}` : t.full}
+        </span>
+        <span className="card-status">{status}</span>
+        <button className={joined || waiting || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button">
+          {action}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+type ActivitySheetProps = {
+  activity: Activity;
+  language: Language;
+  cityName: string;
+  loading: boolean;
+  error: string | null;
+  onClose: () => void;
+  onJoin: (activity: Activity) => void;
+  onShare: (activity: Activity) => void;
+  onCalendar: (activity: Activity) => void;
+  onEdit: (activity: Activity) => void;
+  onDelete: (activity: Activity) => void;
+  onCloseMiniApp: () => void;
+  initialMembersOpen?: boolean;
+};
+
+function ActivitySheet(props: ActivitySheetProps) {
+  if (!isSportExperience(props.activity)) return <GenericActivitySheet {...props} />;
+  return (
+    <Suspense fallback={<GenericActivitySheet {...props} />}>
+      <LazySportActivitySheet {...props} />
+    </Suspense>
+  );
+}
+
+function GenericActivitySheet({
+  activity,
+  language,
+  cityName,
+  loading,
+  error,
+  onClose,
+  onJoin,
+  onShare,
+  onCalendar,
+  onEdit,
+  onDelete,
+  onCloseMiniApp,
+  initialMembersOpen = false,
+}: ActivitySheetProps) {
+  const { joinedIds, waitingIds, pendingIds, reviewRequest, userRole } = useAppStore();
+  const [membersOpen, setMembersOpen] = useState(initialMembersOpen);
+
+  useEffect(() => {
+    setMembersOpen(initialMembersOpen);
+  }, [activity.id, initialMembersOpen]);
+  const t = getTranslation(language);
+  const category = getActivityCategory(activity);
+  const isOrganizer = activity.organizerKey === getUserKey();
+  const canDelete = isOrganizer || userRole === "admin";
+  const joined = joinedIds.includes(activity.id);
+  const waiting = waitingIds.includes(activity.id);
+  const pending = pendingIds.includes(activity.id);
+  const full = activity.participants >= activity.capacity;
+  const action = isOrganizer
+    ? t.edit
+    : pending
+      ? t.cancelRequest
+      : joined || waiting
+        ? t.leave
+        : activity.visibility === "private"
+          ? t.privateAccess
+          : full
+            ? t.eventFull
+            : activity.visibility === "invite"
+              ? t.request
+              : t.join;
+  const status = isOrganizer
+    ? t.organizerStatus
+    : pending
+      ? t.requested
+      : joined
+        ? t.joined
+        : waiting
+          ? t.waiting
+          : full
+            ? t.eventFull
+            : activity.visibility === "private"
+              ? t.privateJoinInfo
+              : activity.visibility === "invite"
+                ? t.inviteStatus
+                : t.publicStatus;
+  const accessLabel = activity.visibility === "public" ? t.publicAccess : activity.visibility === "private" ? t.privateAccess : t.inviteAccess;
+  const joinedMembers = activity.members.filter((member) => member.status === "joined");
+  const waitingMembers = activity.members.filter((member) => member.status === "waiting");
+  const pendingMembers = activity.members.filter((member) => member.status === "pending");
+
+  const handleReview = async (memberKey: string, approved: boolean) => {
+    await reviewRequest(activity.id, memberKey, approved);
+  };
+
+  return (
+    <div className="sheet-backdrop" onMouseDown={onClose}>
+      <article className="activity-sheet" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="sheet-handle" />
+        <button className="sheet-close" onClick={onClose} type="button" aria-label={t.close}><X /></button>
+        {loading && <EventDetailsSkeleton />}
+        {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
+        <div className={`sheet-symbol category-${category.id}`}>{category.icon}</div>
+        <div className="sheet-label">{category.name[language]} · {activity.activity[language]}</div>
+        <h2>{activity.title[language]}</h2>
+        <p className="sheet-description">{activity.description[language]}</p>
+        <div className="details-status-row">
+          <span className={isOrganizer ? "details-status organizer" : pending ? "details-status pending" : joined ? "details-status joined" : full ? "details-status full" : "details-status"}>{status}</span>
+          <span className="details-access">{accessLabel}</span>
+        </div>
+        <div className="detail-list">
+          <div><Sparkles /><span>{t.category}</span><strong>{category.name[language]}</strong></div>
+          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
+          <div><Compass /><span>{t.city}</span><strong>{cityName}</strong></div>
+          <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
+          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
+          {activity.participantNote && <div><Sparkles /><span>{t.participantNote}</span><strong>{activity.participantNote}</strong></div>}
+          <div><CircleUserRound /><span>{t.organizer}</span><strong>{activity.organizer}</strong></div>
+          <div><ShieldCheck /><span>{t.visibility}</span><strong>{accessLabel}</strong></div>
+        </div>
+        <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button">
+          <UsersRound />
+          <span>{t.participants}</span>
+          <strong>{activity.participants} / {activity.capacity}</strong>
+          <ChevronRight className={membersOpen ? "open" : ""} />
+        </button>
+        {membersOpen && (
+          <div className="members-section">
+            <div className="members-list">
+              {joinedMembers.map((member) => (
+                <div className="member-row" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <UserRoundCheck />
+                </div>
+              ))}
+              {!joinedMembers.length && <p>{t.noParticipants}</p>}
+              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} · {waitingMembers.length}</div>}
+              {waitingMembers.map((member) => (
+                <div className="member-row waiting-member" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <Clock3 />
+                </div>
+              ))}
+              {isOrganizer && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} · {pendingMembers.length}</div>}
+              {isOrganizer && pendingMembers.map((member) => (
+                <div className="member-row pending-member" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <span className="request-actions">
+                    <button onClick={() => void handleReview(member.userKey, true)} type="button" aria-label={t.approve} title={t.approve}><Check /></button>
+                    <button onClick={() => void handleReview(member.userKey, false)} type="button" aria-label={t.reject} title={t.reject}><X /></button>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!isOrganizer && (joined || waiting || pending) && <div className="status-banner">{joined ? <UserRoundCheck /> : <Clock3 />}<span>{joined ? t.joined : waiting ? t.waiting : t.requested}</span></div>}
+        {!isOrganizer && activity.visibility === "private" && !joined && !waiting && !pending && <div className="status-banner neutral"><ShieldCheck /><span>{t.privateJoinInfo}</span></div>}
+        {full && !joined && !waiting && !pending && !isOrganizer && <div className="status-banner danger"><UsersRound /><span>{t.eventFull}</span></div>}
+        <div className="sheet-actions">
+          <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !waiting && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
+          <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
+          <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
+          <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Flag /></button>
+        </div>
+        {canDelete && (
+          <button className="danger-action" onClick={() => onDelete(activity)} type="button">
+            <Trash2 size={18} />
+            {t.delete}
+          </button>
+        )}
+        <button className="telegram-close-button compact" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
+      </article>
+    </div>
+  );
+}
+
+function CompletionBar({
+  message,
+  language,
+  onDismiss,
+  onOpen,
+  onShare,
+  onCalendar,
+  onCloseMiniApp,
+}: {
+  message: string;
+  language: Language;
+  onDismiss: () => void;
+  onOpen: () => void;
+  onShare: () => void;
+  onCalendar: () => void;
+  onCloseMiniApp: () => void;
+}) {
+  const t = getTranslation(language);
+  return (
+    <div className="completion-bar">
+      <div>
+        <strong>{message}</strong>
+        <span>{t.closeAfterDoneHint}</span>
+      </div>
+      <button onClick={onOpen} type="button">{t.openCreatedEvent}</button>
+      <button onClick={onCalendar} type="button">{t.addToGoogleCalendar}</button>
+      <button onClick={onShare} type="button">{t.share}</button>
+      <button onClick={onCloseMiniApp} type="button">{t.done}</button>
+      <button className="secondary" onClick={onDismiss} type="button">{t.close}</button>
+    </div>
+  );
+}
+
+function EventDetailsSkeleton() {
+  return (
+    <div className="details-skeleton" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
+
+function BottomNav({ view, setView, language }: { view: AppView; setView: (view: AppView) => void; language: Language }) {
+  const t = getTranslation(language);
+  const items: Array<{ id: AppView; label: string; icon: React.ReactNode }> = [
+    { id: "home", label: t.navHome, icon: <Home /> },
+    { id: "discover", label: t.navDiscover, icon: <Sparkles /> },
+    { id: "explore", label: t.navExplore, icon: <Compass /> },
+    { id: "create", label: t.navCreate, icon: <Plus /> },
+    { id: "profile", label: t.navProfile, icon: <CircleUserRound /> },
+  ];
+  return <nav className="bottom-nav">{items.map((item) => <button className={view === item.id ? "active" : ""} key={item.id} onClick={() => setView(item.id)} type="button">{item.icon}<span>{item.label}</span></button>)}</nav>;
+}
+
+function SectionHeader({ title, icon }: { title: string; icon?: React.ReactNode }) {
+  return <div className="section-title">{icon}<h2>{title}</h2></div>;
+}
+
+function Metric({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+  return <div className="metric">{icon}<strong>{value}</strong><span>{label}</span></div>;
+}
+
+function EmptyState({ text }: { text: string }) {
+  return <div className="empty-state"><Dices /><p>{text}</p></div>;
+}
+
+function EventListSkeleton() {
+  return (
+    <div className="event-list-skeleton" aria-hidden="true">
+      {[0, 1, 2].map((item) => (
+        <div className="event-skeleton-card" key={item}>
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default App;
+
+
+
+--- src/store.ts ---
+import { create } from "zustand";
+import { categories } from "./data";
+import { supabase, getUserKey } from "./supabase";
+import {
+  getCurrentDisplayName,
+  getCurrentStartParam,
+  getCurrentUserRole as getTrustedUserRole,
+  initializeTrustedAuth,
+  isTrustedAuthReady } from "./authSession";
+import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
+import { cities, defaultCityId } from "./config/cities";
+import { getTranslation } from "./i18n";
+import type { Activity, ActivityMetadata, ActivityType, AppView, Language, NewActivity, UserRole } from "./types";
+
+type JoinResult = "joined" | "pending" | "left" | "full" | "private";
+
+type DbActivity = {
+  id: string;
+  category_id: string;
+  activity_ru: string;
+  activity_cs: string;
+  title_ru: string;
+  title_cs: string;
+  description_ru: string;
+  description_cs: string;
+  event_date: string;
+  event_time: string;
+  city_id?: string | null;
+  address: string;
+  location_url: string | null;
+  participant_note?: string | null;
+  activity_type?: ActivityType | null;
+  metadata?: ActivityMetadata | null;
+  price: number;
+  capacity: number;
+  organizer: string;
+  organizer_key: string;
+  visibility: Activity["visibility"];
+  urgent: boolean;
+  popular: boolean;
+};
+
+type DbMember = {
+  activity_id: string;
+  user_key: string;
+  display_name: string;
+  status: "joined" | "waiting" | "pending";
+};
+
+type AppState = {
+  language: Language;
+  selectedCityId: string;
+  view: AppView;
+  activities: Activity[];
+  joinedIds: string[];
+  waitingIds: string[];
+  pendingIds: string[];
+  selectedCategory: string | null;
+  loading: boolean;
+  syncError: string | null;
+  userRole: UserRole;
+  initialize: () => Promise<void>;
+  disposeRealtime: () => void;
+  setLanguage: (language: Language) => void;
+  setSelectedCity: (cityId: string) => void;
+  setView: (view: AppView) => void;
+  setCategory: (id: string | null) => void;
+  toggleJoin: (id: string) => Promise<JoinResult>;
+  createActivity: (activity: NewActivity) => Promise<string>;
+  updateActivity: (id: string, activity: NewActivity) => Promise<string>;
+  deleteActivity: (id: string) => Promise<void>;
+  reviewRequest: (activityId: string, memberKey: string, approved: boolean) => Promise<void>;
+};
+
+let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+
+class AuthNotReadyError extends Error {
+  constructor() {
+    super("Authentication is not ready yet");
+    this.name = "AuthNotReadyError";
+  }
+}
+
+const ensureTrustedAuthForWrite = async () => {
+  if (isTrustedAuthReady()) return;
+
+  const session = await initializeTrustedAuth();
+
+  if (!session || !("source" in session) || session.source !== "trusted-telegram") {
+    throw new AuthNotReadyError();
+  }
+};
+
+const localizedDbText = (ru: string, cs: string) => ({
+  ru,
+  uk: ru,
+  cs,
+  en: ru });
+
+const normalizeCategoryId = (categoryId: string) => {
+  if (categoryId === "inline-skating") return "activities";
+  return categories.some((category) => category.id === categoryId) ? categoryId : "activities";
+};
+
+const inferActivityType = (categoryId: string, explicitType?: ActivityType | null): ActivityType =>
+  explicitType || (normalizeCategoryId(categoryId) === "sport" ? "sport" : "custom");
+
+const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
+  id: row.id,
+  type: activityOverride(row.id).type || inferActivityType(row.category_id, row.activity_type),
+  categoryId: normalizeCategoryId(row.category_id),
+  activity: localizedDbText(row.activity_ru, row.activity_cs),
+  title: localizedDbText(row.title_ru, row.title_cs),
+  description: localizedDbText(row.description_ru, row.description_cs),
+  date: row.event_date,
+  time: row.event_time.slice(0, 5),
+  cityId: activityCityId(row),
+  address: row.address,
+  locationUrl: row.location_url || undefined,
+  participantNote: row.participant_note || activityOverride(row.id).participantNote || undefined,
+  price: row.price,
+  capacity: row.capacity,
+  participants: members.filter((member) => member.activity_id === row.id && member.status === "joined").length,
+  members: members
+    .filter((member) => member.activity_id === row.id)
+    .map((member) => ({ userKey: member.user_key, name: member.display_name, status: member.status })),
+  organizer: row.organizer,
+  organizerKey: row.organizer_key,
+  visibility: row.visibility,
+  urgent: row.urgent,
+  popular: row.popular,
+  metadata: row.metadata || activityOverride(row.id).metadata || undefined });
+
+const isMissingOptionalColumnError = (error: { message?: string } | null) =>
+  Boolean(error?.message?.includes("city_id") || error?.message?.includes("participant_note") || error?.message?.includes("activity_type") || error?.message?.includes("metadata"));
+
+const optionalActivityColumns = ["city_id", "participant_note", "activity_type", "metadata"] as const;
+type OptionalActivityColumn = (typeof optionalActivityColumns)[number];
+
+const deletedActivityMarker = "__go_irl_deleted__";
+const missingActivityColumns = new Set<OptionalActivityColumn>();
+const activityOverrideStorageKey = "go-irl-activity-overrides";
+const legacyCityOverrideStorageKey = "go-irl-activity-city-overrides";
+
+type ActivityOverride = {
+  cityId?: string;
+  participantNote?: string;
+  type?: ActivityType;
+  metadata?: ActivityMetadata;
+};
+
+const readActivityOverrides = (): Record<string, ActivityOverride> => {
+  try {
+    return JSON.parse(localStorage.getItem(activityOverrideStorageKey) || "{}") as Record<string, ActivityOverride>;
+  } catch {
+    return {};
+  }
+};
+
+const readLegacyCityOverrides = (): Record<string, string> => {
+  try {
+    return JSON.parse(localStorage.getItem(legacyCityOverrideStorageKey) || "{}") as Record<string, string>;
+  } catch {
+    return {};
+  }
+};
+
+const writeActivityOverride = (activityId: string, override: ActivityOverride) => {
+  const overrides = readActivityOverrides();
+  overrides[activityId] = { ...overrides[activityId], ...override };
+  localStorage.setItem(activityOverrideStorageKey, JSON.stringify(overrides));
+};
+
+const removeActivityOverride = (activityId: string) => {
+  const overrides = readActivityOverrides();
+  delete overrides[activityId];
+  localStorage.setItem(activityOverrideStorageKey, JSON.stringify(overrides));
+};
+
+const activityOverride = (activityId: string) => readActivityOverrides()[activityId] || {};
+const activityCityId = (row: DbActivity) => row.city_id || activityOverride(row.id).cityId || readLegacyCityOverrides()[row.id] || defaultCityId;
+const isDeletedActivityRow = (row: DbActivity) => row.title_ru === deletedActivityMarker || row.title_cs === deletedActivityMarker;
+
+const withoutMissingOptionalColumn = <T extends Partial<Record<OptionalActivityColumn, unknown>>>(row: T, error: { message?: string } | null) => {
+  const message = error?.message || "";
+  const nextRow = { ...row };
+  const missingColumns = optionalActivityColumns.filter((column) => message.includes(column));
+  const columnsToRemove = missingColumns.length ? missingColumns : optionalActivityColumns;
+
+  for (const column of columnsToRemove) {
+    missingActivityColumns.add(column);
+    delete nextRow[column];
+  }
+
+  return nextRow;
+};
+
+const optionalOverrideFromInput = (input: NewActivity): ActivityOverride => {
+  const override: ActivityOverride = {};
+  if (missingActivityColumns.has("city_id")) override.cityId = input.cityId;
+  if (missingActivityColumns.has("participant_note")) override.participantNote = input.participantNote;
+  if (missingActivityColumns.has("activity_type")) override.type = input.type || inferActivityType(input.categoryId);
+  if (missingActivityColumns.has("metadata")) override.metadata = input.metadata;
+  return override;
+};
+
+const hasActivityOverride = (override: ActivityOverride) => Object.values(override).some((value) => value !== undefined);
+
+const activityFromInput = (id: string, input: NewActivity, current: Activity): Activity => {
+  const localizedText = {
+    ru: input.activityText,
+    uk: input.activityText,
+    cs: input.activityText,
+    en: input.activityText };
+  const localizedTitle = {
+    ru: input.titleText,
+    uk: input.titleText,
+    cs: input.titleText,
+    en: input.titleText };
+  const localizedDescription = {
+    ru: input.descriptionText,
+    uk: input.descriptionText,
+    cs: input.descriptionText,
+    en: input.descriptionText };
+
+  return {
+    ...current,
+    id,
+    type: input.type || inferActivityType(input.categoryId),
+    categoryId: normalizeCategoryId(input.categoryId),
+    activity: localizedText,
+    title: localizedTitle,
+    description: localizedDescription,
+    date: input.date,
+    time: input.time,
+    cityId: input.cityId,
+    address: input.address,
+    locationUrl: input.locationUrl,
+    participantNote: input.participantNote,
+    price: input.price,
+    capacity: input.capacity,
+    visibility: input.visibility,
+    metadata: input.metadata };
+};
+
+export const useAppStore = create<AppState>((set, get) => {
+  const reload = async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
+    const userKey = getUserKey();
+    const [activitiesResult, membersResult] = await Promise.all([
+      supabase.from("activities").select("*").order("event_date").order("event_time"),
+      supabase.from("activity_members").select("activity_id,user_key,display_name,status"),
+    ]);
+
+    const error = activitiesResult.error || membersResult.error;
+    if (error) throw error;
+
+    const rows = ((activitiesResult.data || []) as DbActivity[]).filter((row) => !isDeletedActivityRow(row));
+    const members = (membersResult.data || []) as DbMember[];
+    const invitedActivityId = getCurrentStartParam();
+    const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
+    const visibleMembers = members;
+
+    set({
+      activities: visibleRows.map((row) => mapActivity(row, visibleMembers)),
+      joinedIds: members.filter((member) => member.user_key === userKey && member.status === "joined").map((member) => member.activity_id),
+      waitingIds: members.filter((member) => member.user_key === userKey && member.status === "waiting").map((member) => member.activity_id),
+      pendingIds: members.filter((member) => member.user_key === userKey && member.status === "pending").map((member) => member.activity_id),
+      syncError: null });
+  };
+
+  return {
+    language: ["ru", "uk", "cs", "en"].includes(localStorage.getItem("go-irl-language") || "")
+      ? localStorage.getItem("go-irl-language") as Language
+      : "ru",
+    selectedCityId: cities.some((city) => city.id === localStorage.getItem("go-irl-city"))
+      ? localStorage.getItem("go-irl-city")!
+      : defaultCityId,
+    view: "home",
+    activities: [],
+    joinedIds: [],
+    waitingIds: [],
+    pendingIds: [],
+    selectedCategory: null,
+    loading: true,
+    syncError: null,
+    userRole: getTrustedUserRole() === "user" ? getCurrentUserRole(getUserKey()) : getTrustedUserRole(),
+
+    initialize: async () => {
+      set({ loading: true });
+      try {
+        set({ userRole: getTrustedUserRole() === "user" ? getCurrentUserRole(getUserKey()) : getTrustedUserRole() });
+        await reload();
+        if (!realtimeChannel && !(typeof document !== "undefined" && document.hidden)) {
+          realtimeChannel = supabase
+            .channel("go-irl-live")
+            .on("postgres_changes", { event: "*", schema: "public", table: "activities" }, () => {
+              if (!(typeof document !== "undefined" && document.hidden)) void reload();
+            })
+            .on("postgres_changes", { event: "*", schema: "public", table: "activity_members" }, () => {
+              if (!(typeof document !== "undefined" && document.hidden)) void reload();
+            })
+            .subscribe();
+        }
+      } catch (error) {
+        console.error(error);
+        set({ syncError: "database_unavailable" });
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    disposeRealtime: () => {
+      if (realtimeChannel) {
+        void supabase.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+      }
+    },
+
+    setLanguage: (language) => {
+      localStorage.setItem("go-irl-language", language);
+      set({ language });
+    },
+    setSelectedCity: (selectedCityId) => {
+      if (!cities.some((city) => city.id === selectedCityId)) return;
+      localStorage.setItem("go-irl-city", selectedCityId);
+      set({ selectedCityId });
+    },
+    setView: (view) => set({ view }),
+    setCategory: (selectedCategory) => set({ selectedCategory, view: "explore" }),
+
+    toggleJoin: async (id) => {
+      await ensureTrustedAuthForWrite();
+      const userKey = getUserKey();
+      const { joinedIds, waitingIds, pendingIds, activities } = get();
+
+      if (joinedIds.includes(id) || waitingIds.includes(id) || pendingIds.includes(id)) {
+        const { error } = await supabase.from("activity_members").delete().eq("activity_id", id).eq("user_key", userKey);
+        if (error) throw error;
+        await reload();
+        return "left";
+      }
+
+      const activity = activities.find((item) => item.id === id);
+      if (!activity) throw new Error("Activity not found");
+      if (activity.visibility === "private") return "private";
+      if (activity.participants >= activity.capacity) return "full";
+
+      const status: DbMember["status"] = activity.visibility === "invite" ? "pending" : "joined";
+      const displayName = getCurrentDisplayName(getTranslation(get().language).guestName);
+      const { error } = await supabase.from("activity_members").insert({
+        activity_id: id,
+        user_key: userKey,
+        display_name: displayName,
+        status });
+      if (error) throw error;
+      await reload();
+      return status;
+    },
+
+    createActivity: async (input) => {
+      await ensureTrustedAuthForWrite();
+      const userKey = getUserKey();
+      const organizer = getCurrentDisplayName(getTranslation(get().language).guestName);
+      const row = {
+        category_id: input.categoryId,
+        activity_ru: input.activityText,
+        activity_cs: input.activityText,
+        title_ru: input.titleText,
+        title_cs: input.titleText,
+        description_ru: input.descriptionText,
+        description_cs: input.descriptionText,
+        event_date: input.date,
+        event_time: input.time,
+        city_id: input.cityId,
+        address: input.address,
+        location_url: input.locationUrl || null,
+        participant_note: input.participantNote || null,
+        activity_type: input.type || inferActivityType(input.categoryId),
+        metadata: input.metadata || null,
+        price: input.price,
+        capacity: input.capacity,
+        organizer,
+        organizer_key: userKey,
+        visibility: input.visibility };
+
+      let insertRow = row;
+      let data = null as { id: string } | null;
+      let error = null as { message?: string } | null;
+      for (let attempt = 0; attempt <= optionalActivityColumns.length; attempt += 1) {
+        const result = await supabase.from("activities").insert(insertRow).select("id").single();
+        data = result.data;
+        error = result.error;
+        if (!isMissingOptionalColumnError(error)) break;
+        insertRow = withoutMissingOptionalColumn(insertRow, error);
+      }
+      if (error) throw error;
+      if (!data) throw new Error("Activity was not created");
+      const override = optionalOverrideFromInput(input);
+      if (hasActivityOverride(override)) {
+        writeActivityOverride(data.id, override);
+      } else {
+        removeActivityOverride(data.id);
+      }
+
+      const { error: memberError } = await supabase.from("activity_members").insert({
+        activity_id: data.id,
+        user_key: userKey,
+        display_name: organizer,
+        status: "joined" });
+      if (memberError) throw memberError;
+
+      await reload();
+      set({ view: "home" });
+      return data.id as string;
+    },
+
+    updateActivity: async (id, input) => {
+      await ensureTrustedAuthForWrite();
+      const userKey = getUserKey();
+      const current = get().activities.find((item) => item.id === id);
+      if (!current || current.organizerKey !== userKey) throw new Error("Only organizer can edit activity");
+
+      const row = {
+        category_id: input.categoryId,
+        activity_ru: input.activityText,
+        activity_cs: input.activityText,
+        title_ru: input.titleText,
+        title_cs: input.titleText,
+        description_ru: input.descriptionText,
+        description_cs: input.descriptionText,
+        event_date: input.date,
+        event_time: input.time,
+        city_id: input.cityId,
+        address: input.address,
+        location_url: input.locationUrl || null,
+        participant_note: input.participantNote || null,
+        activity_type: input.type || inferActivityType(input.categoryId),
+        metadata: input.metadata || null,
+        price: input.price,
+        capacity: input.capacity,
+        visibility: input.visibility };
+
+      let updateRow = row;
+      let error = null as { message?: string } | null;
+      let count = 0;
+      for (let attempt = 0; attempt <= optionalActivityColumns.length; attempt += 1) {
+        const result = await supabase.from("activities").update(updateRow, { count: "exact" }).eq("id", id);
+        error = result.error;
+        count = result.count ?? 0;
+        if (!isMissingOptionalColumnError(error)) break;
+        updateRow = withoutMissingOptionalColumn(updateRow, error);
+      }
+      if (error) throw error;
+      if (count === 0) throw new Error("Activity was not updated");
+      const override = optionalOverrideFromInput(input);
+      if (hasActivityOverride(override)) {
+        writeActivityOverride(id, override);
+      } else {
+        removeActivityOverride(id);
+      }
+      set((state) => ({
+        activities: state.activities.map((activity) => (activity.id === id ? activityFromInput(id, input, current) : activity)) }));
+      await reload();
+      set({ view: "home" });
+      return id;
+    },
+
+    deleteActivity: async (id) => {
+      await ensureTrustedAuthForWrite();
+      const userKey = getUserKey();
+      const current = get().activities.find((item) => item.id === id);
+      const isAdmin = getTrustedUserRole() === "admin" || isCurrentUserAdmin(userKey);
+      if (!current || (current.organizerKey !== userKey && !isAdmin)) {
+        throw new Error("Only organizer or admin can delete activity");
+      }
+
+      const membersResult = await supabase.from("activity_members").delete().eq("activity_id", id);
+      if (membersResult.error) throw membersResult.error;
+
+      const { error, count } = await supabase.from("activities").delete({ count: "exact" }).eq("id", id);
+      if (error) throw error;
+      if (count === 0) {
+        const fallback = await supabase
+          .from("activities")
+          .update({
+            activity_ru: deletedActivityMarker,
+            activity_cs: deletedActivityMarker,
+            title_ru: deletedActivityMarker,
+            title_cs: deletedActivityMarker,
+            description_ru: deletedActivityMarker,
+            description_cs: deletedActivityMarker,
+            visibility: "private" }, { count: "exact" })
+          .eq("id", id);
+        if (fallback.error) throw fallback.error;
+        if ((fallback.count ?? 0) === 0) throw new Error("Activity was not deleted");
+      }
+      removeActivityOverride(id);
+      set((state) => ({
+        activities: state.activities.filter((activity) => activity.id !== id),
+        joinedIds: state.joinedIds.filter((activityId) => activityId !== id),
+        waitingIds: state.waitingIds.filter((activityId) => activityId !== id),
+        pendingIds: state.pendingIds.filter((activityId) => activityId !== id) }));
+      await reload();
+      set({ view: "home" });
+    },
+
+    reviewRequest: async (activityId, memberKey, approved) => {
+      await ensureTrustedAuthForWrite();
+      const activity = get().activities.find((item) => item.id === activityId);
+      if (!activity || activity.organizerKey !== getUserKey()) throw new Error("Only organizer can review requests");
+
+      if (!approved) {
+        const { error } = await supabase.from("activity_members").delete().eq("activity_id", activityId).eq("user_key", memberKey);
+        if (error) throw error;
+      } else {
+        const status: DbMember["status"] = activity.participants >= activity.capacity ? "waiting" : "joined";
+        const { error } = await supabase
+          .from("activity_members")
+          .update({ status })
+          .eq("activity_id", activityId)
+          .eq("user_key", memberKey);
+        if (error) throw error;
+      }
+      await reload();
+    } };
+});
+
+
+
+--- src/authSession.ts ---
+import { resolveDemoIdentity, type DemoIdentityResolution } from "./securityIdentity";
+import { getTelegramInitData, getTelegramWebApp } from "./telegram";
+import type { UserRole } from "./types";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const legacyDemoAuthEnabled = import.meta.env.DEV || import.meta.env.VITE_GO_IRL_LEGACY_DEMO_AUTH === "true";
+const sessionStorageKey = "go-irl-trusted-session-v2";
+
+export type TrustedAuthUser = {
+  id: string;
+  userKey: string;
+  telegramId: number;
+  firstName?: string | null;
+  lastName?: string | null;
+  username?: string | null;
+  role: UserRole;
+};
+
+export type TrustedAuthSession = {
+  accessToken: string;
+  expiresAt: number;
+  user: TrustedAuthUser;
+  startParam?: string;
+  source: "trusted-telegram";
+};
+
+export type AppAuthIdentity =
+  | TrustedAuthSession
+  | (DemoIdentityResolution & { source: DemoIdentityResolution["source"]; legacy: true });
+
+let trustedSession: TrustedAuthSession | null = readTrustedSession();
+let legacyIdentity: DemoIdentityResolution | null = null;
+let authError: string | null = null;
+
+function readTrustedSession() {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(sessionStorageKey) || "null") as TrustedAuthSession | null;
+    if (!parsed?.accessToken || !parsed.expiresAt) return null;
+    if (parsed.expiresAt <= Math.floor(Date.now() / 1000) + 60) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeTrustedSession(session: TrustedAuthSession) {
+  trustedSession = session;
+  sessionStorage.setItem(sessionStorageKey, JSON.stringify(session));
+}
+
+function resolveLegacyDemoIdentity() {
+  if (!legacyDemoAuthEnabled) return null;
+  if (!legacyIdentity) {
+    legacyIdentity = resolveDemoIdentity({
+      telegramId: getTelegramWebApp()?.initDataUnsafe?.user?.id,
+      storage: localStorage,
+      randomUUID: () => crypto.randomUUID(),
+    });
+  }
+  return legacyIdentity;
+}
+
+export async function initializeTrustedAuth() {
+  if (trustedSession && trustedSession.expiresAt > Math.floor(Date.now() / 1000) + 60) {
+    return trustedSession;
+  }
+
+  const initData = getTelegramInitData();
+  if (!initData) {
+    const legacy = resolveLegacyDemoIdentity();
+    if (legacy) return { ...legacy, legacy: true } as const;
+    authError = "telegram_init_data_missing";
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/verifyTelegramInitData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: publishableKey,
+      },
+      body: JSON.stringify({ initData }),
+    });
+
+    const payload = await response.json() as {
+      error?: string;
+      session?: { access_token: string; expires_at: number };
+      user?: TrustedAuthUser;
+      startParam?: string;
+    };
+
+    if (!response.ok || !payload.session?.access_token || !payload.user) {
+      authError = payload.error || "trusted_auth_failed";
+      return null;
+    }
+
+    const session: TrustedAuthSession = {
+      accessToken: payload.session.access_token,
+      expiresAt: payload.session.expires_at,
+      user: payload.user,
+      startParam: payload.startParam,
+      source: "trusted-telegram",
+    };
+    writeTrustedSession(session);
+    authError = null;
+    return session;
+  } catch {
+    authError = "trusted_auth_unavailable";
+    return null;
+  }
+}
+
+export const getTrustedAccessToken = async () => {
+  if (trustedSession && trustedSession.expiresAt > Math.floor(Date.now() / 1000) + 60) {
+    return trustedSession.accessToken;
+  }
+
+  const session = await initializeTrustedAuth();
+
+  if (session && "source" in session && session.source === "trusted-telegram") {
+    return session.accessToken;
+  }
+
+  return null;
+};
+
+export function isTrustedAuthReady() {
+  return Boolean(trustedSession && trustedSession.expiresAt > Math.floor(Date.now() / 1000) + 60);
+}
+
+export function getCurrentAuthSession() {
+  return trustedSession;
+}
+
+export function getCurrentAuthIdentity(): AppAuthIdentity | null {
+  if (trustedSession) return trustedSession;
+  const legacy = resolveLegacyDemoIdentity();
+  return legacy ? { ...legacy, legacy: true } : null;
+}
+
+export function getCurrentUserKey() {
+  return trustedSession?.user.userKey || resolveLegacyDemoIdentity()?.userKey || "unauthenticated";
+}
+
+export function getCurrentUserRole() {
+  return trustedSession?.user.role || "user";
+}
+
+export function getCurrentStartParam() {
+  return trustedSession?.startParam || getTelegramWebApp()?.initDataUnsafe?.start_param;
+}
+
+export function getCurrentDisplayName(fallback: string) {
+  const trustedUser = trustedSession?.user;
+  if (trustedUser) {
+    return [trustedUser.firstName, trustedUser.lastName].filter(Boolean).join(" ") || fallback;
+  }
+
+  const telegramUser = legacyDemoAuthEnabled ? getTelegramWebApp()?.initDataUnsafe?.user : null;
+  return [telegramUser?.first_name, telegramUser?.last_name].filter(Boolean).join(" ") || fallback;
+}
+
+export function getAuthError() {
+  return authError;
+}
+
+export function isLegacyDemoAuthEnabled() {
+  return legacyDemoAuthEnabled;
+}
+
+
+
+--- src/supabase.ts ---
+import { createClient } from "@supabase/supabase-js";
+import {
+  getCurrentAuthIdentity,
+  getCurrentUserKey,
+  getCurrentStartParam,
+  getTrustedAccessToken,
+  isLegacyDemoAuthEnabled,
+} from "./authSession";
+import type { DemoIdentityResolution, DemoIdentitySource } from "./securityIdentity";
+
+const url = import.meta.env.VITE_SUPABASE_URL;
+const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+if (!url || !publishableKey) {
+  throw new Error("Supabase environment variables are missing");
+}
+
+export type UserKeyResolutionSource = DemoIdentitySource;
+
+export type UserKeyResolution = DemoIdentityResolution;
+
+export function resolveUserIdentity(): UserKeyResolution {
+  const identity = getCurrentAuthIdentity();
+  if (identity && "security" in identity) return identity;
+  return {
+    userKey: getCurrentUserKey(),
+    source: "guest-local-storage",
+    security: "unsafe-demo-only",
+  };
+}
+
+const legacyHeaders = () => {
+  if (!isLegacyDemoAuthEnabled()) return {};
+  const identity = resolveUserIdentity();
+  const invitedActivityId = getCurrentStartParam();
+  return {
+    "x-go-irl-user-key": identity.userKey,
+    ...(invitedActivityId ? { "x-go-irl-invite-activity": invitedActivityId } : {}),
+  };
+};
+
+export const supabase = createClient(url, publishableKey, {
+  auth: { persistSession: false },
+  accessToken: getTrustedAccessToken,
+  global: {
+    headers: legacyHeaders(),
+  },
+});
+
+export function getUserKey() {
+  return getCurrentUserKey();
+}
+
+export function getUserKeyResolution() {
+  return getCurrentAuthIdentity();
+}
+
+
+
+--- src/types.ts ---
+export type Language = "ru" | "uk" | "cs" | "en";
+export type AppView = "home" | "discover" | "explore" | "create" | "profile";
+export type UserRole = "user" | "organizer" | "moderator" | "admin";
+export type ActivityType = "sport" | "dating" | "friends" | "food" | "travel" | "culture" | "local" | "custom";
+export type SportLevel = "beginner" | "intermediate" | "advanced";
+export type SportFormat = "casual" | "training" | "competition";
+export type SportEnvironment = "indoor" | "outdoor";
+export type CoachRequestType = "organizer_request" | "participant_interest";
+export type CoachRequestStatus = "pending" | "matched" | "confirmed" | "cancelled" | "completed" | "rejected";
+export type CoachPaymentMode = "organizer" | "split" | "free" | "unknown";
+
+export type SportMetadata = {
+  sportType?: string;
+  level?: SportLevel;
+  format?: SportFormat;
+  environment?: SportEnvironment;
+  equipmentNeeded?: boolean;
+  equipment?: string;
+  bring?: string;
+  requirements?: string;
+  organizerTips?: string;
+  durationMinutes?: number;
+};
+
+export type ActivityMetadata = {
+  sport?: SportMetadata;
+  dating?: Record<string, unknown>;
+  friends?: Record<string, unknown>;
+  food?: Record<string, unknown>;
+  travel?: Record<string, unknown>;
+  custom?: Record<string, unknown>;
+};
+
+export type Category = {
+  id: string;
+  icon: string;
+  name: Record<Language, string>;
+};
+
+export type ActivityMember = {
+  userKey: string;
+  name: string;
+  status: "joined" | "waiting" | "pending";
+};
+
+export type Activity = {
+  id: string;
+  type?: ActivityType;
+  categoryId: string;
+  activity: Record<Language, string>;
+  title: Record<Language, string>;
+  description: Record<Language, string>;
+  date: string;
+  time: string;
+  cityId: string;
+  address: string;
+  locationUrl?: string;
+  participantNote?: string;
+  price: number;
+  capacity: number;
+  participants: number;
+  members: ActivityMember[];
+  organizer: string;
+  organizerKey: string;
+  visibility: "public" | "private" | "invite";
+  urgent?: boolean;
+  popular?: boolean;
+  metadata?: ActivityMetadata;
+};
+
+export type NewActivity = Omit<Activity, "id" | "participants" | "members" | "organizer" | "organizerKey" | "activity" | "title" | "description"> & {
+  titleText: string;
+  descriptionText: string;
+  activityText: string;
+};
+
+export type CoachProfile = {
+  id: string;
+  userKey: string;
+  displayName: string;
+  city?: string;
+  bio?: string;
+  sports: string[];
+  languages: string[];
+  priceFrom?: number;
+  priceCurrency: string;
+  isVerified: boolean;
+  isActive: boolean;
+  ratingAvg: number;
+  ratingCount: number;
+  ratingWeighted: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CoachRequest = {
+  id: string;
+  activityId: string;
+  requesterUserKey: string;
+  coachProfileId?: string;
+  requestType: CoachRequestType;
+  sportType?: string;
+  goal?: string;
+  level?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  paymentMode: CoachPaymentMode;
+  status: CoachRequestStatus;
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CoachReview = {
+  id: string;
+  coachProfileId: string;
+  activityId: string;
+  reviewerUserKey: string;
+  overallRating: number;
+  communicationRating?: number;
+  punctualityRating?: number;
+  trainingQualityRating?: number;
+  beginnerFriendlinessRating?: number;
+  tags: string[];
+  comment?: string;
+  isPublic: boolean;
+  createdAt: string;
+};
+
+
+
+--- package.json ---
+{
+  "name": "go-irl-miniapp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "@tanstack/react-query": "^5.101.2",
+    "lucide-react": "^1.23.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.1",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.9"
+  }
+}
+
