@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { useAppStore } from "../store";
@@ -34,7 +34,7 @@ export function SportCreateFields({ language, initialSport }: { language: Langua
   const t = getTranslation(language);
   return (
     <div className="sport-create-panel">
-      <div className="sport-panel-title">🏆 {t.sportVertical}</div>
+      <div className="sport-panel-title">рџЏ† {t.sportVertical}</div>
       <div className="form-row">
         <label><span>{t.sportLevel}</span><select name="sportLevel" defaultValue={initialSport.level || "intermediate"}>{sportLevels.map((level) => <option key={level.id} value={level.id}>{level.label[language]}</option>)}</select></label>
         <label><span>{t.sportFormat}</span><select name="sportFormat" defaultValue={initialSport.format || "casual"}>{sportFormats.map((format) => <option key={format.id} value={format.id}>{format.label[language]}</option>)}</select></label>
@@ -100,16 +100,16 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
   return (
     <article className="sport-card">
       <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "🏆"}</div>
+        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "рџЏ†"}</div>
         <div>
-          <div className="sport-eyebrow">🏆 {sportLevelLabel(meta.level, language)} · {sportEnvironmentLabel(meta.environment, language)}</div>
+          <div className="sport-eyebrow">рџЏ† {sportLevelLabel(meta.level, language)} В· {sportEnvironmentLabel(meta.environment, language)}</div>
           <h3>{activity.activity[language]}</h3>
           <p>{activity.title[language]}</p>
         </div>
         <ChevronRight className="card-arrow" size={18} />
       </button>
       <div className="sport-chip-row">
-        <span>⚽ {meta.sportType || activity.activity[language]}</span>
+        <span>вљЅ {meta.sportType || activity.activity[language]}</span>
         <button
           className="sport-members-badge"
           onClick={(event) => {
@@ -120,14 +120,14 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
           type="button"
           aria-label={`${activity.participants} / ${activity.capacity} ${t.participants}`}
         >
-          👥 {activity.participants} / {activity.capacity}
+          рџ‘Ґ {activity.participants} / {activity.capacity}
         </button>
-        <span>⏱ {meta.durationMinutes || 90} {t.minutesShort}</span>
+        <span>вЏ± {meta.durationMinutes || 90} {t.minutesShort}</span>
       </div>
       <div className="activity-card-details sport-details-grid">
         <div><MapPin /><span>{activity.address}</span></div>
         <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
-        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
+        <div><Ticket /><span>{activity.price ? `${activity.price} KДЌ` : t.free}</span></div>
         <div><ShieldCheck /><span>{sportFormatLabel(meta.format, language)}</span></div>
       </div>
       <div className="activity-card-footer">
@@ -164,11 +164,14 @@ export function SportActivitySheet({
   const joined = joinedIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
   const full = activity.participants >= activity.capacity;
-  const freeSpots = Math.max(activity.capacity - activity.participants, 0);
   const action = isOrganizer ? t.edit : pending ? t.cancelRequest : joined ? t.leave : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
   const joinedMembers = activity.members.filter((member) => member.status === "joined");
   const waitingMembers = activity.members.filter((member) => member.status === "waiting");
   const pendingMembers = activity.members.filter((member) => member.status === "pending");
+
+  useEffect(() => {
+    setMembersOpen(initialMembersOpen);
+  }, [activity.id, initialMembersOpen]);
 
   const handleReview = async (memberKey: string, approved: boolean) => {
     await reviewRequest(activity.id, memberKey, approved);
@@ -182,17 +185,17 @@ export function SportActivitySheet({
         {loading && <SportDetailsSkeleton />}
         {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
         <div className="sport-sheet-hero">
-          <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || "🏆"}</div>
+          <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || "рџЏ†"}</div>
           <div>
-            <div className="sport-eyebrow">🏆 {sportLevelLabel(meta.level, language)} · {sportFormatLabel(meta.format, language)}</div>
+            <div className="sport-eyebrow">рџЏ† {sportLevelLabel(meta.level, language)} В· {sportFormatLabel(meta.format, language)}</div>
             <h2>{activity.title[language]}</h2>
             <p>{activity.description[language]}</p>
           </div>
         </div>
         <div className="sport-chip-row sport-sheet-chips">
-          <span>⚽ {meta.sportType || activity.activity[language]}</span>
-          <span>🌤 {sportEnvironmentLabel(meta.environment, language)}</span>
-          <span>⏱ {meta.durationMinutes || 90} {t.minutesShort}</span>
+          <span>вљЅ {meta.sportType || activity.activity[language]}</span>
+          <span>рџЊ¤ {sportEnvironmentLabel(meta.environment, language)}</span>
+          <span>вЏ± {meta.durationMinutes || 90} {t.minutesShort}</span>
         </div>
         <div className="detail-list sport-detail-list">
           <div><Sparkles /><span>{t.sportLevel}</span><strong>{sportLevelLabel(meta.level, language)}</strong></div>
@@ -200,7 +203,7 @@ export function SportActivitySheet({
           <div><MapPin /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
           <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
-          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
+          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} KДЌ` : t.free}</strong></div>
           <div><ShieldCheck /><span>{t.sportEquipmentNeeded}</span><strong>{meta.equipmentNeeded ? t.yes : t.no}</strong></div>
           {meta.equipment && <div><Sparkles /><span>{t.sportEquipment}</span><strong>{meta.equipment}</strong></div>}
           {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
@@ -208,7 +211,7 @@ export function SportActivitySheet({
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
           <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
         </div>
-        <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button" aria-expanded={membersOpen}>
+        <button className="detail-members-toggle" onClick={() => setMembersOpen((open: boolean) => !open)} type="button" aria-expanded={membersOpen}>
           <UsersRound />
           <span>{t.participants}</span>
           <strong>{activity.participants} / {activity.capacity}</strong>
@@ -225,7 +228,7 @@ export function SportActivitySheet({
                 </div>
               ))}
               {!joinedMembers.length && <p>{t.noParticipants}</p>}
-              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} · {waitingMembers.length}</div>}
+              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} В· {waitingMembers.length}</div>}
               {waitingMembers.map((member) => (
                 <div className="member-row waiting-member" key={member.userKey}>
                   <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
@@ -233,7 +236,7 @@ export function SportActivitySheet({
                   <Clock3 />
                 </div>
               ))}
-              {canManageActivity && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} · {pendingMembers.length}</div>}
+              {canManageActivity && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} В· {pendingMembers.length}</div>}
               {canManageActivity && pendingMembers.map((member) => (
                 <div className="member-row pending-member" key={member.userKey}>
                   <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
@@ -259,3 +262,4 @@ export function SportActivitySheet({
     </div>
   );
 }
+

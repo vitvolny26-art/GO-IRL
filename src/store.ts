@@ -6,12 +6,11 @@ import {
   getCurrentStartParam,
   getCurrentUserRole as getTrustedUserRole,
   initializeTrustedAuth,
-  isTrustedAuthReady,
-} from "./authSession";
+  isTrustedAuthReady } from "./authSession";
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
-import type { Activity, ActivityMetadata, ActivityType, AppView, CoachRequest, CoachRequestType, Language, NewActivity, UserRole } from "./types";
+import type { Activity, ActivityMetadata, ActivityType, AppView, Language, NewActivity, UserRole } from "./types";
 
 type JoinResult = "joined" | "pending" | "left" | "full" | "private";
 
@@ -96,8 +95,7 @@ const localizedDbText = (ru: string, cs: string) => ({
   ru,
   uk: ru,
   cs,
-  en: ru,
-});
+  en: ru });
 
 const normalizeCategoryId = (categoryId: string) => {
   if (categoryId === "inline-skating") return "activities";
@@ -131,8 +129,7 @@ const mapActivity = (row: DbActivity, members: DbMember[]): Activity => ({
   visibility: row.visibility,
   urgent: row.urgent,
   popular: row.popular,
-  metadata: row.metadata || activityOverride(row.id).metadata || undefined,
-});
+  metadata: row.metadata || activityOverride(row.id).metadata || undefined });
 
 const isMissingOptionalColumnError = (error: { message?: string } | null) =>
   Boolean(error?.message?.includes("city_id") || error?.message?.includes("participant_note") || error?.message?.includes("activity_type") || error?.message?.includes("metadata"));
@@ -214,20 +211,17 @@ const activityFromInput = (id: string, input: NewActivity, current: Activity): A
     ru: input.activityText,
     uk: input.activityText,
     cs: input.activityText,
-    en: input.activityText,
-  };
+    en: input.activityText };
   const localizedTitle = {
     ru: input.titleText,
     uk: input.titleText,
     cs: input.titleText,
-    en: input.titleText,
-  };
+    en: input.titleText };
   const localizedDescription = {
     ru: input.descriptionText,
     uk: input.descriptionText,
     cs: input.descriptionText,
-    en: input.descriptionText,
-  };
+    en: input.descriptionText };
 
   return {
     ...current,
@@ -246,8 +240,7 @@ const activityFromInput = (id: string, input: NewActivity, current: Activity): A
     price: input.price,
     capacity: input.capacity,
     visibility: input.visibility,
-    metadata: input.metadata,
-  };
+    metadata: input.metadata };
 };
 
 export const useAppStore = create<AppState>((set, get) => {
@@ -273,8 +266,7 @@ export const useAppStore = create<AppState>((set, get) => {
       joinedIds: members.filter((member) => member.user_key === userKey && member.status === "joined").map((member) => member.activity_id),
       waitingIds: members.filter((member) => member.user_key === userKey && member.status === "waiting").map((member) => member.activity_id),
       pendingIds: members.filter((member) => member.user_key === userKey && member.status === "pending").map((member) => member.activity_id),
-      syncError: null,
-    });
+      syncError: null });
   };
 
   return {
@@ -360,8 +352,7 @@ export const useAppStore = create<AppState>((set, get) => {
         activity_id: id,
         user_key: userKey,
         display_name: displayName,
-        status,
-      });
+        status });
       if (error) throw error;
       await reload();
       return status;
@@ -391,8 +382,7 @@ export const useAppStore = create<AppState>((set, get) => {
         capacity: input.capacity,
         organizer,
         organizer_key: userKey,
-        visibility: input.visibility,
-      };
+        visibility: input.visibility };
 
       let insertRow = row;
       let data = null as { id: string } | null;
@@ -417,8 +407,7 @@ export const useAppStore = create<AppState>((set, get) => {
         activity_id: data.id,
         user_key: userKey,
         display_name: organizer,
-        status: "joined",
-      });
+        status: "joined" });
       if (memberError) throw memberError;
 
       await reload();
@@ -450,8 +439,7 @@ export const useAppStore = create<AppState>((set, get) => {
         metadata: input.metadata || null,
         price: input.price,
         capacity: input.capacity,
-        visibility: input.visibility,
-      };
+        visibility: input.visibility };
 
       let updateRow = row;
       let error = null as { message?: string } | null;
@@ -472,8 +460,7 @@ export const useAppStore = create<AppState>((set, get) => {
         removeActivityOverride(id);
       }
       set((state) => ({
-        activities: state.activities.map((activity) => (activity.id === id ? activityFromInput(id, input, current) : activity)),
-      }));
+        activities: state.activities.map((activity) => (activity.id === id ? activityFromInput(id, input, current) : activity)) }));
       await reload();
       set({ view: "home" });
       return id;
@@ -503,8 +490,7 @@ export const useAppStore = create<AppState>((set, get) => {
             title_cs: deletedActivityMarker,
             description_ru: deletedActivityMarker,
             description_cs: deletedActivityMarker,
-            visibility: "private",
-          }, { count: "exact" })
+            visibility: "private" }, { count: "exact" })
           .eq("id", id);
         if (fallback.error) throw fallback.error;
         if ((fallback.count ?? 0) === 0) throw new Error("Activity was not deleted");
@@ -514,8 +500,7 @@ export const useAppStore = create<AppState>((set, get) => {
         activities: state.activities.filter((activity) => activity.id !== id),
         joinedIds: state.joinedIds.filter((activityId) => activityId !== id),
         waitingIds: state.waitingIds.filter((activityId) => activityId !== id),
-        pendingIds: state.pendingIds.filter((activityId) => activityId !== id),
-      }));
+        pendingIds: state.pendingIds.filter((activityId) => activityId !== id) }));
       await reload();
       set({ view: "home" });
     },
@@ -538,6 +523,5 @@ export const useAppStore = create<AppState>((set, get) => {
         if (error) throw error;
       }
       await reload();
-    },
-  };
+    } };
 });

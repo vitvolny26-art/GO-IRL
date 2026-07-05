@@ -564,7 +564,6 @@ function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity
   const category = getActivityCategory(activity);
   const joined = joinedIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
-  const freeSpots = Math.max(activity.capacity - activity.participants, 0);
   const isOrganizer = activity.organizerKey === getUserKey();
 
   return (
@@ -581,7 +580,7 @@ function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity
         <span><CalendarDays />{compactDateLabel(activity.date, language)}</span>
         <span><Clock3 />{activity.time}</span>
         <span><MapPin />{getCity(activity.cityId).name[language]}</span>
-        <span><UsersRound />{freeSpots} {t.left}</span>
+        <span><UsersRound />{Math.max(activity.capacity - activity.participants, 0)} {t.left}</span>
       </div>
       <button className={joined || pending ? "card-join secondary" : "card-join"} onClick={() => isOrganizer ? onOpen(activity) : onJoin(activity)} type="button">
         {isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : activity.visibility === "invite" ? t.request : t.join}
@@ -1046,6 +1045,7 @@ type ActivitySheetProps = {
   onEdit: (activity: Activity) => void;
   onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
+  initialMembersOpen?: boolean;
 };
 
 function ActivitySheet(props: ActivitySheetProps) {
@@ -1070,9 +1070,14 @@ function GenericActivitySheet({
   onEdit,
   onDelete,
   onCloseMiniApp,
+  initialMembersOpen = false,
 }: ActivitySheetProps) {
   const { joinedIds, waitingIds, pendingIds, reviewRequest, userRole } = useAppStore();
-  const [membersOpen, setMembersOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(initialMembersOpen);
+
+  useEffect(() => {
+    setMembersOpen(initialMembersOpen);
+  }, [activity.id, initialMembersOpen]);
   const t = getTranslation(language);
   const category = getActivityCategory(activity);
   const isOrganizer = activity.organizerKey === getUserKey();
@@ -1081,7 +1086,6 @@ function GenericActivitySheet({
   const waiting = waitingIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
   const full = activity.participants >= activity.capacity;
-  const freeSpots = Math.max(activity.capacity - activity.participants, 0);
   const action = isOrganizer
     ? t.edit
     : pending
