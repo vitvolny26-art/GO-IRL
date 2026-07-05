@@ -59,6 +59,7 @@ import {
   validateOptionalUrl,
   validateRequiredText,
 } from "./validation";
+import { ActivityChatPanel } from "./components/ActivityChatPanel";
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
@@ -1190,7 +1191,9 @@ function GenericActivitySheet({
         {!isOrganizer && (joined || waiting || pending) && <div className="status-banner">{joined ? <UserRoundCheck /> : <Clock3 />}<span>{joined ? t.joined : waiting ? t.waiting : t.requested}</span></div>}
         {!isOrganizer && activity.visibility === "private" && !joined && !waiting && !pending && <div className="status-banner neutral"><ShieldCheck /><span>{t.privateJoinInfo}</span></div>}
         {full && !joined && !waiting && !pending && !isOrganizer && <div className="status-banner danger"><UsersRound /><span>{t.eventFull}</span></div>}
-        <div className="sheet-actions">
+              <ActivityChatPanel activity={activity} />
+
+      <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !waiting && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>

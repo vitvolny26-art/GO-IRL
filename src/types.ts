@@ -126,3 +126,31 @@ export type CoachReview = {
   isPublic: boolean;
   createdAt: string;
 };
+
+
+export type ActivityChatStatus = "active" | "expired" | "archived" | "deleted";
+
+export type ActivityChatMessageStatus = "visible" | "deleted" | "hidden_by_moderator";
+
+export type ActivityChat = {
+  id: string;
+  activityId: string;
+  createdByUserKey: string;
+  status: ActivityChatStatus;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ActivityChatMessage = {
+  id: string;
+  chatId: string;
+  activityId: string;
+  senderUserKey: string;
+  senderDisplayName?: string | null;
+  body: string;
+  status: ActivityChatMessageStatus;
+  createdAt: string;
+  editedAt?: string | null;
+  deletedAt?: string | null;
+};

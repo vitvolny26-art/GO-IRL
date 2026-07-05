@@ -6,6 +6,7 @@ import { getUserKey } from "../supabase";
 import type { Activity, Language, SportMetadata } from "../types";
 import { getSportMetadata, sportEnvironmentLabel, sportEnvironments, sportFormatLabel, sportFormats, sportLevelLabel, sportLevels } from "./sport";
 import { CoachRequestPanel } from "../components/CoachRequestPanel";
+import { ActivityChatPanel } from "../components/ActivityChatPanel";
 
 type SportCardProps = {
   activity: Activity;
@@ -254,6 +255,8 @@ export function SportActivitySheet({
           </div>
         )}
               <CoachRequestPanel activity={activity} userRole={userRole} />
+      <ActivityChatPanel activity={activity} />
+
 
       <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
