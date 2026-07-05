@@ -150,6 +150,7 @@ const sportMetadataFromForm = (data: FormData, sportType: string): SportMetadata
 function App() {
   const store = useAppStore();
   const [selected, setSelected] = useState<Activity | null>(null);
+  const [selectedMembersOpen, setSelectedMembersOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [completion, setCompletion] = useState("");
   const [completionActivityId, setCompletionActivityId] = useState<string | null>(null);
@@ -342,17 +343,22 @@ function App() {
           cityName={getCity((store.activities.find((item) => item.id === selected.id) || selected).cityId).name[store.language]}
           loading={store.loading}
           error={store.syncError}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setSelected(null);
+            setSelectedMembersOpen(false);
+          }}
           onJoin={handleJoin}
           onShare={shareActivity}
           onCalendar={saveToGoogleCalendar}
           onEdit={(activity) => {
             setSelected(null);
+            setSelectedMembersOpen(false);
             setEditingActivity(activity);
             store.setView("create");
           }}
           onDelete={handleDelete}
           onCloseMiniApp={requestCloseMiniApp}
+          initialMembersOpen={selectedMembersOpen}
         />
       )}
       {completion && (
@@ -943,7 +949,7 @@ function ActivitySection({ title, activities, language, onOpen, onJoin, icon, ur
   );
 }
 
-function ActivityCard(props: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void }) {
+function ActivityCard(props: { activity: Activity; language: Language; onOpen: (activity: Activity) => void; onJoin: (activity: Activity) => void; onOpenMembers?: (activity: Activity) => void }) {
   if (!isSportExperience(props.activity)) return <GenericActivityCard {...props} />;
   return (
     <Suspense fallback={<GenericActivityCard {...props} />}>

@@ -1,4 +1,5 @@
-import { CalendarDays, CalendarPlus, ChevronRight, CircleUserRound, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
+import { useState } from "react";
+import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Flag, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
@@ -10,6 +11,7 @@ type SportCardProps = {
   language: Language;
   onOpen: (activity: Activity) => void;
   onJoin: (activity: Activity) => void;
+  onOpenMembers?: (activity: Activity) => void;
 };
 
 type SportSheetProps = {
@@ -25,6 +27,7 @@ type SportSheetProps = {
   onEdit: (activity: Activity) => void;
   onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
+  initialMembersOpen?: boolean;
 };
 
 export function SportCreateFields({ language, initialSport }: { language: Language; initialSport: SportMetadata }) {
@@ -83,7 +86,7 @@ function SportDetailsSkeleton() {
   );
 }
 
-export function SportActivityCard({ activity, language, onOpen, onJoin }: SportCardProps) {
+export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMembers }: SportCardProps) {
   const { joinedIds, pendingIds } = useAppStore();
   const t = getTranslation(language);
   const meta = getSportMetadata(activity);
@@ -107,7 +110,18 @@ export function SportActivityCard({ activity, language, onOpen, onJoin }: SportC
       </button>
       <div className="sport-chip-row">
         <span>⚽ {meta.sportType || activity.activity[language]}</span>
-        <span>👥 {activity.participants} / {activity.capacity}</span>
+        <button
+          className="sport-members-badge"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onOpenMembers?.(activity);
+          }}
+          type="button"
+          aria-label={`${activity.participants} / ${activity.capacity} ${t.participants}`}
+        >
+          👥 {activity.participants} / {activity.capacity}
+        </button>
         <span>⏱ {meta.durationMinutes || 90} {t.minutesShort}</span>
       </div>
       <div className="activity-card-details sport-details-grid">
@@ -138,17 +152,27 @@ export function SportActivitySheet({
   onEdit,
   onDelete,
   onCloseMiniApp,
+  initialMembersOpen = false,
 }: SportSheetProps) {
-  const { joinedIds, pendingIds, userRole } = useAppStore();
+  const { joinedIds, pendingIds, userRole, reviewRequest } = useAppStore();
+  const [membersOpen, setMembersOpen] = useState(initialMembersOpen);
   const t = getTranslation(language);
   const meta = getSportMetadata(activity);
   const isOrganizer = activity.organizerKey === getUserKey();
   const canDelete = isOrganizer || userRole === "admin";
+  const canManageActivity = isOrganizer || userRole === "admin" || userRole === "moderator";
   const joined = joinedIds.includes(activity.id);
   const pending = pendingIds.includes(activity.id);
   const full = activity.participants >= activity.capacity;
   const freeSpots = Math.max(activity.capacity - activity.participants, 0);
   const action = isOrganizer ? t.edit : pending ? t.cancelRequest : joined ? t.leave : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
+  const joinedMembers = activity.members.filter((member) => member.status === "joined");
+  const waitingMembers = activity.members.filter((member) => member.status === "waiting");
+  const pendingMembers = activity.members.filter((member) => member.status === "pending");
+
+  const handleReview = async (memberKey: string, approved: boolean) => {
+    await reviewRequest(activity.id, memberKey, approved);
+  };
 
   return (
     <div className="sheet-backdrop" onMouseDown={onClose}>
@@ -176,7 +200,6 @@ export function SportActivitySheet({
           <div><MapPin /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
           <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
-          <div><UsersRound /><span>{t.freeSpots}</span><strong>{freeSpots} / {activity.capacity}</strong></div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
           <div><ShieldCheck /><span>{t.sportEquipmentNeeded}</span><strong>{meta.equipmentNeeded ? t.yes : t.no}</strong></div>
           {meta.equipment && <div><Sparkles /><span>{t.sportEquipment}</span><strong>{meta.equipment}</strong></div>}
@@ -185,6 +208,45 @@ export function SportActivitySheet({
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
           <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
         </div>
+        <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button" aria-expanded={membersOpen}>
+          <UsersRound />
+          <span>{t.participants}</span>
+          <strong>{activity.participants} / {activity.capacity}</strong>
+          <ChevronRight className={membersOpen ? "open" : ""} />
+        </button>
+        {membersOpen && (
+          <div className="members-section">
+            <div className="members-list">
+              {joinedMembers.map((member) => (
+                <div className="member-row" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <UsersRound />
+                </div>
+              ))}
+              {!joinedMembers.length && <p>{t.noParticipants}</p>}
+              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} · {waitingMembers.length}</div>}
+              {waitingMembers.map((member) => (
+                <div className="member-row waiting-member" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <Clock3 />
+                </div>
+              ))}
+              {canManageActivity && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} · {pendingMembers.length}</div>}
+              {canManageActivity && pendingMembers.map((member) => (
+                <div className="member-row pending-member" key={member.userKey}>
+                  <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
+                  <strong>{member.name}</strong>
+                  <span className="request-actions">
+                    <button onClick={() => void handleReview(member.userKey, true)} type="button" aria-label={t.approve} title={t.approve}><Check /></button>
+                    <button onClick={() => void handleReview(member.userKey, false)} type="button" aria-label={t.reject} title={t.reject}><X /></button>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
