@@ -34,7 +34,7 @@ export function SportCreateFields({ language, initialSport }: { language: Langua
   const t = getTranslation(language);
   return (
     <div className="sport-create-panel">
-      <div className="sport-panel-title">рџЏ† {t.sportVertical}</div>
+      <div className="sport-panel-title"> {t.sportVertical}</div>
       <div className="form-row">
         <label><span>{t.sportLevel}</span><select name="sportLevel" defaultValue={initialSport.level || "intermediate"}>{sportLevels.map((level) => <option key={level.id} value={level.id}>{level.label[language]}</option>)}</select></label>
         <label><span>{t.sportFormat}</span><select name="sportFormat" defaultValue={initialSport.format || "casual"}>{sportFormats.map((format) => <option key={format.id} value={format.id}>{format.label[language]}</option>)}</select></label>
@@ -97,10 +97,16 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
   const full = activity.participants >= activity.capacity;
   const action = isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
 
+  const openMembersFromCard = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
+    event.preventDefault();
+    event.stopPropagation();
+    (onOpenMembers ?? onOpen)(activity);
+  };
+
   return (
     <article className="sport-card">
       <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "рџЏ†"}</div>
+        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || ""}</div>
         <div>
           <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} В· {sportEnvironmentLabel(meta.environment, language)}</span></div>
           <h3>{activity.activity[language]}</h3>
@@ -114,11 +120,7 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
           className="sport-card-participants-chip"
           type="button"
           aria-label={`${t.participants}: ${activity.participants} / ${activity.capacity}`}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            (onOpenMembers || onOpen)(activity);
-          }}
+          onClick={openMembersFromCard}
         >
           <UsersRound size={16} aria-hidden="true" />
           <span>{activity.participants} / {activity.capacity}</span>
@@ -185,15 +187,15 @@ export function SportActivitySheet({
         {loading && <SportDetailsSkeleton />}
         {error && <div className="details-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
         <div className="sport-sheet-hero">
-          <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || "рџЏ†"}</div>
+          <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || ""}</div>
           <div>
-            <div className="sport-eyebrow">рџЏ† {sportLevelLabel(meta.level, language)} В· {sportFormatLabel(meta.format, language)}</div>
+            <div className="sport-eyebrow"> {sportLevelLabel(meta.level, language)} В· {sportFormatLabel(meta.format, language)}</div>
             <h2>{activity.title[language]}</h2>
             <p>{activity.description[language]}</p>
           </div>
         </div>
         <div className="sport-chip-row sport-sheet-chips">
-          <span>вљЅ {meta.sportType || activity.activity[language]}</span>
+          <span> {meta.sportType || activity.activity[language]}</span>
           <span>рџЊ¤ {sportEnvironmentLabel(meta.environment, language)}</span>
           <span>вЏ± {meta.durationMinutes || 90} {t.minutesShort}</span>
         </div>
