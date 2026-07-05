@@ -61,14 +61,7 @@ stable
 security definer
 set search_path to 'public'
 as $$
-  select coalesce(
-    activity.ends_at,
-    activity.starts_at,
-    activity.created_at,
-    now()
-  ) + interval '24 hours'
-  from public.activities activity
-  where activity.id = p_activity_id;
+  select now() + interval '24 hours';
 $$;
 
 create or replace function public.go_irl_can_access_activity_chat(p_activity_id uuid)
