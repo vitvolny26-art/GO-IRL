@@ -5,6 +5,7 @@ import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
 import type { Activity, Language, SportMetadata } from "../types";
 import { getSportMetadata, sportEnvironmentLabel, sportEnvironments, sportFormatLabel, sportFormats, sportLevelLabel, sportLevels } from "./sport";
+import { CoachRequestPanel } from "../components/CoachRequestPanel";
 
 type SportCardProps = {
   activity: Activity;
@@ -252,7 +253,9 @@ export function SportActivitySheet({
             </div>
           </div>
         )}
-        <div className="sheet-actions">
+              <CoachRequestPanel activity={activity} userRole={userRole} />
+
+      <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
