@@ -5,6 +5,9 @@ export type ActivityType = "sport" | "dating" | "friends" | "food" | "travel" | 
 export type SportLevel = "beginner" | "intermediate" | "advanced";
 export type SportFormat = "casual" | "training" | "competition";
 export type SportEnvironment = "indoor" | "outdoor";
+export type CoachRequestType = "organizer_request" | "participant_interest";
+export type CoachRequestStatus = "pending" | "matched" | "confirmed" | "cancelled" | "completed" | "rejected";
+export type CoachPaymentMode = "organizer" | "split" | "free" | "unknown";
 
 export type SportMetadata = {
   sportType?: string;
@@ -69,4 +72,57 @@ export type NewActivity = Omit<Activity, "id" | "participants" | "members" | "or
   titleText: string;
   descriptionText: string;
   activityText: string;
+};
+
+export type CoachProfile = {
+  id: string;
+  userKey: string;
+  displayName: string;
+  city?: string;
+  bio?: string;
+  sports: string[];
+  languages: string[];
+  priceFrom?: number;
+  priceCurrency: string;
+  isVerified: boolean;
+  isActive: boolean;
+  ratingAvg: number;
+  ratingCount: number;
+  ratingWeighted: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CoachRequest = {
+  id: string;
+  activityId: string;
+  requesterUserKey: string;
+  coachProfileId?: string;
+  requestType: CoachRequestType;
+  sportType?: string;
+  goal?: string;
+  level?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  paymentMode: CoachPaymentMode;
+  status: CoachRequestStatus;
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CoachReview = {
+  id: string;
+  coachProfileId: string;
+  activityId: string;
+  reviewerUserKey: string;
+  overallRating: number;
+  communicationRating?: number;
+  punctualityRating?: number;
+  trainingQualityRating?: number;
+  beginnerFriendlinessRating?: number;
+  tags: string[];
+  comment?: string;
+  isPublic: boolean;
+  createdAt: string;
 };

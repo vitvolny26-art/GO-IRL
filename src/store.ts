@@ -11,7 +11,7 @@ import {
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
-import type { Activity, ActivityMetadata, ActivityType, AppView, Language, NewActivity, UserRole } from "./types";
+import type { Activity, ActivityMetadata, ActivityType, AppView, CoachRequest, CoachRequestType, Language, NewActivity, UserRole } from "./types";
 
 type JoinResult = "joined" | "pending" | "left" | "full" | "private";
 
