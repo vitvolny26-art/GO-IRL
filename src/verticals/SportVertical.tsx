@@ -5,6 +5,23 @@ import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
 import type { Activity, Language, SportMetadata } from "../types";
 import { getSportMetadata, sportEnvironmentLabel, sportEnvironments, sportFormatLabel, sportFormats, sportLevelLabel, sportLevels } from "./sport";
+import { CoachRequestPanel } from "../components/CoachRequestPanel";
+import { ActivityChatPanel } from "../components/ActivityChatPanel";
+
+const cleanSportLabel = (value: string | null | undefined) => {
+  const raw = String(value || "").trim();
+  return raw.replace(/^[^A-Za-zА-Яа-яЁё0-9]+\s*/u, "").trim() || raw || "Спорт";
+};
+
+const buildMapsQuery = (parts: Array<string | null | undefined>) =>
+  parts.filter(Boolean).map((part) => String(part).trim()).filter(Boolean).join(", ");
+
+const buildGoogleMapsSearchUrl = (query: string) =>
+  query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
+
+const buildGoogleMapsEmbedUrl = (query: string) =>
+  query ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : null;
+
 
 type SportCardProps = {
   activity: Activity;
@@ -86,7 +103,7 @@ function SportDetailsSkeleton() {
   );
 }
 
-export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMembers }: SportCardProps) {
+export function SportActivityCard({ activity, language, onOpen, onJoin }: SportCardProps) {
   const { joinedIds, pendingIds } = useAppStore();
   const t = getTranslation(language);
   const meta = getSportMetadata(activity);
@@ -96,40 +113,63 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
   const isOrganizer = activity.organizerKey === getUserKey();
   const full = activity.participants >= activity.capacity;
   const action = isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
+  const [membersPreviewOpen, setMembersPreviewOpen] = useState(false);
 
-  const openMembersFromCard = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
-    event.preventDefault();
-    event.stopPropagation();
-    (onOpenMembers ?? onOpen)(activity);
-  };
+  const joinedMembers = activity.members.filter(m => m.status === "joined");
 
   return (
     <article className="sport-card">
       <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || ""}</div>
+        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "🏆"}</div>
         <div>
-          <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} В· {sportEnvironmentLabel(meta.environment, language)}</span></div>
-          <h3>{activity.activity[language]}</h3>
+          <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} · {sportEnvironmentLabel(meta.environment, language)}</span></div>
+          <h3>{cleanSportLabel(activity.activity[language])}</h3>
           <p>{activity.title[language]}</p>
         </div>
         <ChevronRight className="card-arrow" size={18} />
       </button>
       <div className="sport-chip-row">
-        <span className="sport-card-chip"><Flag size={16} aria-hidden="true" /><span>{meta.sportType || activity.activity[language]}</span></span>
+        <span className="sport-card-chip"><Flag size={16} aria-hidden="true" /><span>{cleanSportLabel(meta.sportType || activity.activity[language])}</span></span>
         <button
           className="sport-card-participants-chip"
           type="button"
           aria-label={`${t.participants}: ${activity.participants} / ${activity.capacity}`}
-          onClick={openMembersFromCard}
+          aria-expanded={membersPreviewOpen}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setMembersPreviewOpen(prev => !prev);
+          }}
         >
           <UsersRound size={16} aria-hidden="true" />
           <span>{activity.participants} / {activity.capacity}</span>
         </button>
         <span className="sport-card-chip"><Clock3 size={16} aria-hidden="true" /><span>{meta.durationMinutes || 90} {t.minutesShort}</span></span>
-      </div>      <div className="activity-card-details sport-details-grid">
+      </div>
+      {membersPreviewOpen && (
+        <div className="sport-card-members-preview">
+          {joinedMembers.length > 0 ? (
+            joinedMembers.map((member) => (
+              <div key={member.userKey} className="sport-card-member-preview-row">
+                <span className="sport-card-member-avatar">
+                  {member.name?.slice(0, 2).toUpperCase() || "GO"}
+                </span>
+                <span className="sport-card-member-name">
+                  {member.name || "GO IRL User"}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="sport-card-members-empty">
+              {t.noParticipants || "Пока никого нет"}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="activity-card-details sport-details-grid">
         <div><MapPin /><span>{activity.address}</span></div>
         <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
-        <div><Ticket /><span>{activity.price ? `${activity.price} KДЌ` : t.free}</span></div>
+        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
         <div><ShieldCheck /><span>{sportFormatLabel(meta.format, language)}</span></div>
       </div>
       <div className="activity-card-footer">
@@ -140,7 +180,6 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
     </article>
   );
 }
-
 export function SportActivitySheet({
   activity,
   language,
@@ -170,6 +209,9 @@ export function SportActivitySheet({
   const joinedMembers = activity.members.filter((member) => member.status === "joined");
   const waitingMembers = activity.members.filter((member) => member.status === "waiting");
   const pendingMembers = activity.members.filter((member) => member.status === "pending");
+  const sportMapQuery = buildMapsQuery([activity.address, cityName]);
+  const sportMapEmbedUrl = buildGoogleMapsEmbedUrl(sportMapQuery);
+  const sportMapSearchUrl = buildGoogleMapsSearchUrl(sportMapQuery);
 
   useEffect(() => {
     setMembersOpen(initialMembersOpen);
@@ -189,15 +231,15 @@ export function SportActivitySheet({
         <div className="sport-sheet-hero">
           <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || ""}</div>
           <div>
-            <div className="sport-eyebrow"> {sportLevelLabel(meta.level, language)} В· {sportFormatLabel(meta.format, language)}</div>
+            <div className="sport-eyebrow">{sportLevelLabel(meta.level, language)} · {sportFormatLabel(meta.format, language)}</div>
             <h2>{activity.title[language]}</h2>
             <p>{activity.description[language]}</p>
           </div>
         </div>
         <div className="sport-chip-row sport-sheet-chips">
-          <span> {meta.sportType || activity.activity[language]}</span>
-          <span>рџЊ¤ {sportEnvironmentLabel(meta.environment, language)}</span>
-          <span>вЏ± {meta.durationMinutes || 90} {t.minutesShort}</span>
+          <span>{cleanSportLabel(meta.sportType || activity.activity[language])}</span>
+          <span>{sportEnvironmentLabel(meta.environment, language)}</span>
+          <span>{meta.durationMinutes || 90} {t.minutesShort}</span>
         </div>
         <div className="detail-list sport-detail-list">
           <div><Sparkles /><span>{t.sportLevel}</span><strong>{sportLevelLabel(meta.level, language)}</strong></div>
@@ -205,7 +247,7 @@ export function SportActivitySheet({
           <div><MapPin /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
           <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
-          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} KДЌ` : t.free}</strong></div>
+          <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
           <div><ShieldCheck /><span>{t.sportEquipmentNeeded}</span><strong>{meta.equipmentNeeded ? t.yes : t.no}</strong></div>
           {meta.equipment && <div><Sparkles /><span>{t.sportEquipment}</span><strong>{meta.equipment}</strong></div>}
           {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
@@ -213,6 +255,20 @@ export function SportActivitySheet({
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
           <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
         </div>
+        {sportMapEmbedUrl && sportMapSearchUrl && (
+          <section className="sport-map-preview" aria-label="Карта события">
+            <iframe
+              title="Карта события"
+              src={sportMapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            <a className="sport-map-link" href={sportMapSearchUrl} target="_blank" rel="noreferrer">
+              Открыть в Google Maps
+            </a>
+          </section>
+        )}
+
         <button className="detail-members-toggle" onClick={() => setMembersOpen((open: boolean) => !open)} type="button" aria-expanded={membersOpen}>
           <UsersRound />
           <span>{t.participants}</span>
@@ -230,7 +286,7 @@ export function SportActivitySheet({
                 </div>
               ))}
               {!joinedMembers.length && <p>{t.noParticipants}</p>}
-              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} В· {waitingMembers.length}</div>}
+              {waitingMembers.length > 0 && <div className="waiting-heading">{t.waitingList} · {waitingMembers.length}</div>}
               {waitingMembers.map((member) => (
                 <div className="member-row waiting-member" key={member.userKey}>
                   <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
@@ -238,7 +294,7 @@ export function SportActivitySheet({
                   <Clock3 />
                 </div>
               ))}
-              {canManageActivity && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} В· {pendingMembers.length}</div>}
+              {canManageActivity && pendingMembers.length > 0 && <div className="pending-heading">{t.requests} · {pendingMembers.length}</div>}
               {canManageActivity && pendingMembers.map((member) => (
                 <div className="member-row pending-member" key={member.userKey}>
                   <span className="member-avatar">{member.name.slice(0, 2).toUpperCase()}</span>
@@ -252,7 +308,11 @@ export function SportActivitySheet({
             </div>
           </div>
         )}
-        <div className="sheet-actions">
+              <CoachRequestPanel activity={activity} userRole={userRole} />
+      <ActivityChatPanel activity={activity} />
+
+
+      <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>

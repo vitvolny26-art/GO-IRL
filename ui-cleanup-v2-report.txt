@@ -1,0 +1,15 @@
+GO IRL UI cleanup v2 applied.
+
+Backups:
+C:\Users\lenovo\Documents\Codex\2026-05-28\go irl 0.9\_backups_ui_cleanup_v2
+
+Changed:
+src/App.tsx
+src/verticals/SportVertical.tsx
+src/styles.css
+
+This patch is intentionally conservative:
+- no SQL
+- no auth changes
+- no store/status/id translations
+- no joined/free/pending logic replacement

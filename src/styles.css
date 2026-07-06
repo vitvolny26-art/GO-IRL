@@ -73,11 +73,36 @@ button, input, textarea, select { letter-spacing: 0; }
 .sync-banner, .sync-loading { margin: 8px 0 12px; padding: 11px 12px; border-radius: 7px; font-size: 13px; }
 .sync-banner { border: 1px solid rgba(255,111,97,.45); background: rgba(255,111,97,.1); color: var(--coral); }
 .sync-loading { border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
-.home-hero { display: grid; gap: 13px; padding: 18px 0 16px; }
-.home-brand-logo { width: min(100%, 286px); height: auto; border: 1px solid rgba(201,255,61,.16); border-radius: 8px; box-shadow: 0 18px 44px rgba(0,0,0,.28); }
+.home-hero {
+  display: grid;
+  gap: 13px;
+  padding: 12px 0 16px;
+}
+.home-brand-logo {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 220px;
+  margin: 0;
+  border: 1px solid rgba(201,255,61,.16);
+  border-radius: 16px;
+  background: #05070a;
+  object-fit: contain !important;
+  object-position: center;
+  box-shadow: 0 18px 44px rgba(0,0,0,.28);
+  overflow: hidden;
+}
 .home-kicker { display: flex; align-items: center; gap: 6px; color: var(--lime); font-size: 11px; font-weight: 850; text-transform: uppercase; }
 .home-kicker svg { width: 15px; height: 15px; }
-.home-hero h1 { margin: 0; max-width: 9ch; font-size: 40px; line-height: .98; }
+.home-hero h1 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(30px, 8.5vw, 36px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
 .home-hero p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.45; }
 .home-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
 .home-stats div { display: grid; gap: 2px; min-width: 0; min-height: 62px; align-content: center; padding: 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
@@ -442,3 +467,483 @@ button, input, textarea, select { letter-spacing: 0; }
   width: 16px;
   height: 16px;
 }
+
+
+.coach-panel {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid rgba(190, 255, 46, 0.18);
+  border-radius: 18px;
+  background: rgba(190, 255, 46, 0.06);
+  display: grid;
+  gap: 12px;
+}
+
+.coach-panel-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.coach-panel-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(190, 255, 46, 0.12);
+  color: var(--accent, #bfff2e);
+  flex: 0 0 auto;
+}
+
+.coach-panel h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--text-primary, #f7f7f7);
+}
+
+.coach-panel p {
+  margin: 0;
+  color: var(--text-muted, #a5a8b3);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.coach-panel-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent, #bfff2e);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.coach-panel-button {
+  appearance: none;
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--accent, #bfff2e);
+  color: #10140d;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.coach-panel-button:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.coach-panel-message {
+  color: var(--text-muted, #a5a8b3);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.activity-chat-panel {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.activity-chat-toggle {
+  appearance: none;
+  width: 100%;
+  border: 1px solid rgba(190, 255, 46, 0.18);
+  border-radius: 18px;
+  background: rgba(190, 255, 46, 0.06);
+  color: inherit;
+  font: inherit;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.activity-chat-toggle-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: rgba(190, 255, 46, 0.12);
+  color: var(--accent, #bfff2e);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.activity-chat-toggle strong {
+  display: block;
+  font-weight: 900;
+  color: var(--text-primary, #f7f7f7);
+}
+
+.activity-chat-toggle small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted, #a5a8b3);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.activity-chat-box {
+  border: 1px solid rgba(190, 255, 46, 0.14);
+  border-radius: 18px;
+  background: rgba(8, 12, 10, 0.76);
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.activity-chat-messages {
+  max-height: 260px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.activity-chat-message {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 10px;
+}
+
+.activity-chat-message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-muted, #a5a8b3);
+  font-size: 12px;
+}
+
+.activity-chat-message-meta strong {
+  color: var(--accent, #bfff2e);
+}
+
+.activity-chat-message p {
+  margin: 6px 0 0;
+  color: var(--text-primary, #f7f7f7);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.activity-chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.activity-chat-form input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid rgba(190, 255, 46, 0.16);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text-primary, #f7f7f7);
+  font: inherit;
+  padding: 12px;
+}
+
+.activity-chat-form button {
+  appearance: none;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent, #bfff2e);
+  color: #10140d;
+  width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.activity-chat-form button:disabled {
+  opacity: 0.56;
+  cursor: default;
+}
+
+.activity-chat-muted {
+  color: var(--text-muted, #a5a8b3);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.activity-chat-error {
+  color: #ff7b7b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+
+.sport-card-members-preview {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid rgba(190, 255, 46, 0.16);
+  border-radius: 14px;
+  background: rgba(8, 12, 10, 0.72);
+  display: grid;
+  gap: 8px;
+}
+
+.sport-card-member-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sport-card-member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(190, 255, 46, 0.1);
+  color: #bfff2e;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.sport-card-member-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sport-card-members-empty {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+
+/* GO IRL targeted UI v3 */
+
+.home-brand-logo-wrap {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.home-brand-logo {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 220px;
+  margin: 0;
+  border: 1px solid rgba(201,255,61,.16);
+  border-radius: 16px;
+  background: #05070a;
+  object-fit: contain !important;
+  object-position: center;
+  box-shadow: 0 18px 44px rgba(0,0,0,.28);
+  overflow: hidden;
+}
+
+.home-hero h1 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(30px, 8.5vw, 36px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+
+.home-hero p {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+@media (max-width: 360px) {
+  .home-hero h1 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(30px, 8.5vw, 36px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+}
+
+.sport-card-main h3 {
+  margin-bottom: 4px;
+}
+
+.sport-card-main p {
+  line-height: 1.3;
+}
+
+.sport-chip-row {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sport-card-chip,
+.sport-card-participants-chip,
+.sport-sheet-chips span {
+  min-height: 36px;
+  padding: 8px 11px;
+  border-radius: 999px;
+}
+
+.sport-sheet-chips span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compact-sport-detail-list {
+  gap: 0;
+}
+
+.compact-sport-detail-list > div {
+  min-height: auto;
+  padding: 12px 0;
+}
+
+.compact-sport-detail-list strong {
+  line-height: 1.35;
+}
+
+.sport-map-preview {
+  margin: 14px 0 16px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(92, 225, 230, 0.26);
+  background:
+    linear-gradient(135deg, rgba(92, 225, 230, 0.12), rgba(190, 255, 46, 0.08)),
+    rgba(0, 0, 0, 0.24);
+}
+
+.sport-map-preview iframe {
+  display: block;
+  width: 100%;
+  min-height: 190px;
+  border: 0;
+}
+
+.sport-map-link {
+  display: block;
+  padding: 12px 14px;
+  text-align: center;
+  color: #5ce1e6;
+  text-decoration: none;
+  font-weight: 900;
+  border-top: 1px solid rgba(92, 225, 230, 0.2);
+}
+
+.sport-card-members-preview {
+  margin-top: 10px;
+}
+
+
+
+/* GO IRL logo hard fix */
+@media (max-width: 360px) {
+  .home-hero h1 {
+    white-space: normal;
+    font-size: 30px;
+  }
+}
+
+/* GO IRL hard hero logo fix v2 */
+.home-hero {
+  padding-top: 8px !important;
+}
+
+.go-irl-hero-logo-frame {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 230px !important;
+  aspect-ratio: 16 / 9 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(201,255,61,.18) !important;
+  border-radius: 18px !important;
+  background: #05070a !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.28) !important;
+}
+
+.go-irl-hero-logo-img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.home-hero h1 {
+  max-width: none !important;
+  font-size: clamp(30px, 8.5vw, 36px) !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+
+/* GO IRL header logo overflow fix */
+.app-header .header-brand,
+.header-brand {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  flex: 0 0 48px !important;
+  overflow: hidden !important;
+}
+
+.app-header .header-brand img,
+.header-brand img {
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  max-height: 46px !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: block !important;
+  border-radius: 8px !important;
+  transform: none !important;
+}
+
+/* Home hero logo must be wide, but only this exact class */
+.go-irl-hero-logo-frame {
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  max-height: 220px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(201,255,61,.18) !important;
+  border-radius: 18px !important;
+  background: #05070a !important;
+}
+
+.go-irl-hero-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+

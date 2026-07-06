@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -59,6 +59,7 @@ import {
   validateOptionalUrl,
   validateRequiredText,
 } from "./validation";
+import { ActivityChatPanel } from "./components/ActivityChatPanel";
 
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
@@ -160,36 +161,37 @@ function App() {
   const t = getTranslation(store.language);
 
   useEffect(() => {
-    readyMiniApp();
-    expandMiniApp();
-    void (async () => {
-      await initializeTrustedAuth();
-      await useAppStore.getState().initialize();
-    })();
+  readyMiniApp();
+  expandMiniApp();
+  const init = async () => {
+    await initializeTrustedAuth();
+    await useAppStore.getState().initialize();
+  };
+  init();
 
-    const handleVisibility = () => {
-      if (document.hidden) {
-        useAppStore.getState().disposeRealtime();
-      } else {
-        void (async () => {
-          await initializeTrustedAuth();
-          await useAppStore.getState().initialize();
-        })();
-      }
-    };
-
-    window.addEventListener("focus", handleVisibility);
-    window.addEventListener("blur", handleVisibility);
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      if (toastTimer.current) window.clearTimeout(toastTimer.current);
-      window.removeEventListener("focus", handleVisibility);
-      window.removeEventListener("blur", handleVisibility);
-      document.removeEventListener("visibilitychange", handleVisibility);
+  const handleVisibility = () => {
+    if (document.hidden) {
       useAppStore.getState().disposeRealtime();
-    };
-  }, []);
+    } else {
+      void (async () => {
+        await initializeTrustedAuth();
+        await useAppStore.getState().initialize();
+      })();
+    }
+  };
+
+  window.addEventListener("focus", handleVisibility);
+  window.addEventListener("blur", handleVisibility);
+  document.addEventListener("visibilitychange", handleVisibility);
+
+  return () => {
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    window.removeEventListener("focus", handleVisibility);
+    window.removeEventListener("blur", handleVisibility);
+    document.removeEventListener("visibilitychange", handleVisibility);
+    useAppStore.getState().disposeRealtime();
+  };
+}, []);
 
   useEffect(() => {
     if (selected || store.view !== "home") {
@@ -402,7 +404,9 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
   return (
     <>
       <section className="home-hero">
-        <img className="home-brand-logo" src="/brand/logo-wide.png" alt="GO IRL" />
+        <div className="go-irl-hero-logo-frame">
+          <img className="go-irl-hero-logo-img" src="/brand/logo-wide.png?v=logo-fix-2" alt="GO IRL" />
+        </div>
         <div className="home-kicker"><MapPin />{t.liveInCity} · {city.name[language]}</div>
         <h1>{t.homeTitle}</h1>
         <p>{t.homeSubtitle}</p>
@@ -1190,7 +1194,9 @@ function GenericActivitySheet({
         {!isOrganizer && (joined || waiting || pending) && <div className="status-banner">{joined ? <UserRoundCheck /> : <Clock3 />}<span>{joined ? t.joined : waiting ? t.waiting : t.requested}</span></div>}
         {!isOrganizer && activity.visibility === "private" && !joined && !waiting && !pending && <div className="status-banner neutral"><ShieldCheck /><span>{t.privateJoinInfo}</span></div>}
         {full && !joined && !waiting && !pending && !isOrganizer && <div className="status-banner danger"><UsersRound /><span>{t.eventFull}</span></div>}
-        <div className="sheet-actions">
+              <ActivityChatPanel activity={activity} />
+
+      <div className="sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !waiting && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
