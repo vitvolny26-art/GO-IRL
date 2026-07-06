@@ -19,10 +19,6 @@ const buildMapsQuery = (parts: Array<string | null | undefined>) =>
 const buildGoogleMapsSearchUrl = (query: string) =>
   query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
 
-const buildGoogleMapsEmbedUrl = (query: string) =>
-  query ? `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed` : null;
-
-
 type SportCardProps = {
   activity: Activity;
   language: Language;
@@ -210,7 +206,6 @@ export function SportActivitySheet({
   const waitingMembers = activity.members.filter((member) => member.status === "waiting");
   const pendingMembers = activity.members.filter((member) => member.status === "pending");
   const sportMapQuery = buildMapsQuery([activity.address, cityName]);
-  const sportMapEmbedUrl = buildGoogleMapsEmbedUrl(sportMapQuery);
   const sportMapSearchUrl = buildGoogleMapsSearchUrl(sportMapQuery);
 
   useEffect(() => {
@@ -255,14 +250,12 @@ export function SportActivitySheet({
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
           <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
         </div>
-        {sportMapEmbedUrl && sportMapSearchUrl && (
-          <section className="sport-map-preview" aria-label="Карта события">
-            <iframe
-              title="Карта события"
-              src={sportMapEmbedUrl}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+        {sportMapSearchUrl && (
+          <section className="sport-place-card" aria-label="Место события">
+            <div>
+              <span>Место</span>
+              <strong>{activity.address || cityName}</strong>
+            </div>
             <a className="sport-map-link" href={sportMapSearchUrl} target="_blank" rel="noreferrer">
               Открыть в Google Maps
             </a>

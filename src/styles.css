@@ -1082,4 +1082,30 @@ button, input, textarea, select { letter-spacing: 0; }
 .sport-detail-list > div > a {
   color: #67e8f9 !important;
 }
+/* GO IRL place card instead of embedded map */
+.sport-map-preview {
+  display: none !important;
+}
+
+.sport-place-card {
+  margin: 14px 0 16px !important;
+  padding: 14px !important;
+  display: grid !important;
+  gap: 12px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(92,225,230,.22) !important;
+  background: rgba(92,225,230,.06) !important;
+}
+
+.sport-place-card span {
+  display: block !important;
+  color: var(--muted) !important;
+  font-size: 13px !important;
+  margin-bottom: 4px !important;
+}
+
+.sport-place-card strong {
+  display: block !important;
+  font-size: 18px !important;
+}
 
