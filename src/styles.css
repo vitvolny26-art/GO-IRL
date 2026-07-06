@@ -946,4 +946,17 @@ button, input, textarea, select { letter-spacing: 0; }
   box-shadow: none !important;
   background: transparent !important;
 }
+/* GO IRL report bug action cleanup */
+.report-bug-action {
+  width: 100% !important;
+  min-height: 54px !important;
+  grid-column: 1 / -1 !important;
+  display: inline-flex !important;
+  gap: 10px !important;
+}
+
+.report-bug-action span {
+  display: inline !important;
+  font-weight: 800 !important;
+}
 

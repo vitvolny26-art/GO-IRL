@@ -1199,7 +1199,7 @@ function GenericActivitySheet({
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !waiting && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
-          <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Bug size={20} /></button>
+          <button className="square-action muted report-bug-action" type="button" aria-label={t.report} title={t.report}><Bug size={20} /><span>{t.report}</span></button>
         </div>
         {canDelete && (
           <button className="danger-action" onClick={() => onDelete(activity)} type="button">

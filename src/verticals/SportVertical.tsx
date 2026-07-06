@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
+import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Dumbbell, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
@@ -129,7 +129,7 @@ export function SportActivityCard({ activity, language, onOpen, onJoin }: SportC
         <ChevronRight className="card-arrow" size={18} />
       </button>
       <div className="sport-chip-row">
-        <span className="sport-card-chip"><Bug size={16} aria-hidden="true" /><span>{cleanSportLabel(meta.sportType || activity.activity[language])}</span></span>
+        <span className="sport-card-chip"><Dumbbell size={16} aria-hidden="true" /><span>{cleanSportLabel(meta.sportType || activity.activity[language])}</span></span>
         <button
           className="sport-card-participants-chip"
           type="button"
@@ -316,7 +316,7 @@ export function SportActivitySheet({
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <button className="square-action" onClick={() => void onShare(activity)} type="button" aria-label={t.share} title={t.share}><Share2 /></button>
           <button className="square-action" onClick={() => onCalendar(activity)} type="button" aria-label={t.addToGoogleCalendar} title={t.addToGoogleCalendar}><CalendarPlus /></button>
-          <button className="square-action muted" type="button" aria-label={t.report} title={t.report}><Bug size={20} /></button>
+          <button className="square-action muted report-bug-action" type="button" aria-label={t.report} title={t.report}><Bug size={20} /><span>{t.report}</span></button>
         </div>
         {canDelete && <button className="danger-action" onClick={() => onDelete(activity)} type="button"><Trash2 size={18} />{t.delete}</button>}
         <button className="telegram-close-button compact" onClick={onCloseMiniApp} type="button">{t.backToTelegram}</button>
