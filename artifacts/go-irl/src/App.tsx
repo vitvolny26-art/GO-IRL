@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Toaster, toast } from 'sonner';
 import {
   ArrowLeft,
   CalendarDays,
@@ -155,12 +156,7 @@ function App() {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [completion, setCompletion] = useState("");
   const [completionActivityId, setCompletionActivityId] = useState<string | null>(null);
-  const [notice, setNotice] = useState("");
-  const showNotice = (msg: string) => {
-    if (toastTimer.current) window.clearTimeout(toastTimer.current);
-    setNotice(msg);
-    toastTimer.current = window.setTimeout(() => setNotice(""), 2200);
-  };
+  const showNotice = (msg: string) => toast.success(msg);
   const invitationHandled = useRef(false);
   const toastTimer = useRef<number | null>(null);
   const t = getTranslation(store.language);
@@ -222,9 +218,7 @@ function App() {
   }, [store.activities]);
 
   const flash = (message: string) => {
-    setNotice(message);
-    if (toastTimer.current) window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setNotice(""), 2200);
+    toast.success(message);
   };
 
   const requestCloseMiniApp = () => {
@@ -391,7 +385,7 @@ function App() {
           onCloseMiniApp={requestCloseMiniApp}
         />
       )}
-      {notice && <div className="toast">{notice}</div>}
+      <Toaster position="bottom-center" richColors />
     </div>
   );
 }
