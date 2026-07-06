@@ -1042,4 +1042,44 @@ button, input, textarea, select { letter-spacing: 0; }
   line-height: 1.2 !important;
   text-align: right !important;
 }
+/* GO IRL compact detail grid readability fix */
+.sport-detail-list > div {
+  display: grid !important;
+  grid-template-columns: 26px 1fr !important;
+  grid-template-areas:
+    "icon label"
+    "icon value" !important;
+  column-gap: 10px !important;
+  row-gap: 5px !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  min-height: 86px !important;
+}
+
+.sport-detail-list > div > svg {
+  grid-area: icon !important;
+}
+
+.sport-detail-list > div > span {
+  grid-area: label !important;
+  min-width: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+}
+
+.sport-detail-list > div > strong,
+.sport-detail-list > div > a {
+  grid-area: value !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  text-align: left !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+.sport-detail-list > div > a {
+  color: #67e8f9 !important;
+}
 

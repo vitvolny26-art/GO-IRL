@@ -231,7 +231,7 @@ export function SportActivitySheet({
         <div className="sport-sheet-hero">
           <div className="sport-card-symbol large">{activity.activity[language].split(" ")[0] || ""}</div>
           <div>
-            <div className="sport-eyebrow">{sportLevelLabel(meta.level, language)} · {sportFormatLabel(meta.format, language)}</div>
+            <div className="sport-eyebrow">{sportLevelLabel(meta.level, language)} · {sportEnvironmentLabel(meta.environment, language)}</div>
             <h2>{activity.title[language]}</h2>
             <p>{activity.description[language]}</p>
           </div>
