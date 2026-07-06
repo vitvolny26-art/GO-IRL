@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -161,36 +161,37 @@ function App() {
   const t = getTranslation(store.language);
 
   useEffect(() => {
-    readyMiniApp();
-    expandMiniApp();
-    void (async () => {
-      await initializeTrustedAuth();
-      await useAppStore.getState().initialize();
-    })();
+  readyMiniApp();
+  expandMiniApp();
+  const init = async () => {
+    await initializeTrustedAuth();
+    await useAppStore.getState().initialize();
+  };
+  init();
 
-    const handleVisibility = () => {
-      if (document.hidden) {
-        useAppStore.getState().disposeRealtime();
-      } else {
-        void (async () => {
-          await initializeTrustedAuth();
-          await useAppStore.getState().initialize();
-        })();
-      }
-    };
-
-    window.addEventListener("focus", handleVisibility);
-    window.addEventListener("blur", handleVisibility);
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      if (toastTimer.current) window.clearTimeout(toastTimer.current);
-      window.removeEventListener("focus", handleVisibility);
-      window.removeEventListener("blur", handleVisibility);
-      document.removeEventListener("visibilitychange", handleVisibility);
+  const handleVisibility = () => {
+    if (document.hidden) {
       useAppStore.getState().disposeRealtime();
-    };
-  }, []);
+    } else {
+      void (async () => {
+        await initializeTrustedAuth();
+        await useAppStore.getState().initialize();
+      })();
+    }
+  };
+
+  window.addEventListener("focus", handleVisibility);
+  window.addEventListener("blur", handleVisibility);
+  document.addEventListener("visibilitychange", handleVisibility);
+
+  return () => {
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    window.removeEventListener("focus", handleVisibility);
+    window.removeEventListener("blur", handleVisibility);
+    document.removeEventListener("visibilitychange", handleVisibility);
+    useAppStore.getState().disposeRealtime();
+  };
+}, []);;
 
   useEffect(() => {
     if (selected || store.view !== "home") {
