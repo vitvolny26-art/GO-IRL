@@ -269,9 +269,7 @@ function App() {
   const shareActivity = async (activity: Activity) => {
     const url = activityInviteUrl(activity);
     const text = ShareTemplateService.buildPlainText(activity, store.language, url);
-    const telegramText = text.trim();
-    const previewUrl = "https://go-irl.vercel.app/";
-    const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(previewUrl)}&text=${encodeURIComponent(telegramText)}`;
+    const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
 
     const webApp = getTelegramWebApp();
     if (webApp?.openTelegramLink) {
@@ -1298,3 +1296,5 @@ function EventListSkeleton() {
 }
 
 export default App;
+
+
