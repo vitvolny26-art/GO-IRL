@@ -1,45 +1,49 @@
-# [Project name]
+# GO IRL
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Telegram Mini App для локальных real-life событий. Главный цикл: создать → поделиться → присоединиться → чат → пришли → повторили. Фокус на Оломоуц, спортивные события.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/go-irl run dev` — запустить фронтенд (Vite, port 22671)
+- `pnpm --filter @workspace/api-server run dev` — запустить API сервер (port 5000)
+- `pnpm run typecheck` — полная проверка типов
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- React + TypeScript + Vite + pnpm workspaces
+- Supabase (база + auth)
+- @tanstack/react-query, zustand
+- Telegram Mini App API
+- i18n: RU / UK / CS / EN
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/go-irl/src/` — весь frontend код (из github.com/vitvolny26-art/GO-IRL)
+- `artifacts/go-irl/src/App.tsx` — root component
+- `artifacts/go-irl/src/i18n.ts` — переводы RU/UK/CS/EN
+- `artifacts/go-irl/src/supabase.ts` — Supabase client
+- `artifacts/go-irl/src/styles.css` — глобальные стили
+- `artifacts/go-irl/public/brand/` — логотипы, brand assets
 
-## Architecture decisions
+## Env vars (shared)
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- `VITE_SUPABASE_URL` — Supabase project URL
+- `VITE_SUPABASE_PUBLISHABLE_KEY` — Supabase anon key
+- `VITE_TELEGRAM_BOT_USERNAME` — имя Telegram бота (без @)
 
-## Product
+## Задачи (приоритет)
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+1. Убрать встроенную Google карту → адрес + кнопка Google Maps
+2. Проверить переводы RU/UK/CS/EN
+3. Убрать технические слова (pending, Skill match, Indoor/Outdoor)
+4. Заменить window.alert на toast
+5. Сделать feedback form
+6. /join/:id landing page с Open Graph
+7. Проверить chat expiry (событие + 24ч)
+8. Тесты create/join/share/chat/coach
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Короткие ответы, без длинных объяснений
+- Минимальные патчи, не трогать много файлов
+- Всегда проверять lint/build после изменений
