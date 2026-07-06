@@ -1145,12 +1145,26 @@ function GenericActivitySheet({
           <div><Sparkles /><span>{t.category}</span><strong>{category.name[language]}</strong></div>
           <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
           <div><Compass /><span>{t.city}</span><strong>{cityName}</strong></div>
-          <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
+          <div><MapPin /><span>{t.address}</span><strong>{activity.address}</strong></div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
           {activity.participantNote && <div><Sparkles /><span>{t.participantNote}</span><strong>{activity.participantNote}</strong></div>}
           <div><CircleUserRound /><span>{t.organizer}</span><strong>{activity.organizer}</strong></div>
           <div><ShieldCheck /><span>{t.visibility}</span><strong>{accessLabel}</strong></div>
         </div>
+        {(activity.address || cityName) && (() => {
+          const mapsUrl = activity.locationUrl || (activity.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([activity.address, cityName].filter(Boolean).join(", "))}` : null);
+          return mapsUrl ? (
+            <section className="sport-place-card" aria-label="Место события">
+              <div>
+                <span><MapPin size={14} /></span>
+                <strong>{activity.address || cityName}</strong>
+              </div>
+              <a className="sport-map-link" href={mapsUrl} target="_blank" rel="noreferrer">
+                {t.openInMaps ?? "Открыть в Google Maps"}
+              </a>
+            </section>
+          ) : null;
+        })()}
         <button className="detail-members-toggle" onClick={() => setMembersOpen((open) => !open)} type="button">
           <UsersRound />
           <span>{t.participants}</span>
