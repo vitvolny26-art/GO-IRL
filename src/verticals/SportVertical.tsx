@@ -88,7 +88,7 @@ function SportDetailsSkeleton() {
   );
 }
 
-export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMembers }: SportCardProps) {
+export function SportActivityCard({ activity, language, onOpen, onJoin }: SportCardProps) {
   const { joinedIds, pendingIds } = useAppStore();
   const t = getTranslation(language);
   const meta = getSportMetadata(activity);
@@ -98,19 +98,16 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
   const isOrganizer = activity.organizerKey === getUserKey();
   const full = activity.participants >= activity.capacity;
   const action = isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
+  const [membersPreviewOpen, setMembersPreviewOpen] = useState(false);
 
-  const openMembersFromCard = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
-    event.preventDefault();
-    event.stopPropagation();
-    (onOpenMembers ?? onOpen)(activity);
-  };
+  const joinedMembers = activity.members.filter(m => m.status === "joined");
 
   return (
     <article className="sport-card">
       <button className="sport-card-main" onClick={() => onOpen(activity)} type="button">
-        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || ""}</div>
+        <div className="sport-card-symbol">{activity.activity[language].split(" ")[0] || "🏆"}</div>
         <div>
-          <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} В· {sportEnvironmentLabel(meta.environment, language)}</span></div>
+          <div className="sport-eyebrow"><Sparkles size={14} aria-hidden="true" /> <span>{sportLevelLabel(meta.level, language)} · {sportEnvironmentLabel(meta.environment, language)}</span></div>
           <h3>{activity.activity[language]}</h3>
           <p>{activity.title[language]}</p>
         </div>
@@ -122,16 +119,42 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
           className="sport-card-participants-chip"
           type="button"
           aria-label={`${t.participants}: ${activity.participants} / ${activity.capacity}`}
-          onClick={openMembersFromCard}
+          aria-expanded={membersPreviewOpen}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setMembersPreviewOpen(prev => !prev);
+          }}
         >
           <UsersRound size={16} aria-hidden="true" />
           <span>{activity.participants} / {activity.capacity}</span>
         </button>
         <span className="sport-card-chip"><Clock3 size={16} aria-hidden="true" /><span>{meta.durationMinutes || 90} {t.minutesShort}</span></span>
-      </div>      <div className="activity-card-details sport-details-grid">
+      </div>
+      {membersPreviewOpen && (
+        <div className="sport-card-members-preview">
+          {joinedMembers.length > 0 ? (
+            joinedMembers.map((member) => (
+              <div key={member.userKey} className="sport-card-member-preview-row">
+                <span className="sport-card-member-avatar">
+                  {member.name?.slice(0, 2).toUpperCase() || "GO"}
+                </span>
+                <span className="sport-card-member-name">
+                  {member.name || "GO IRL User"}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="sport-card-members-empty">
+              {t.noParticipants || "Пока никого нет"}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="activity-card-details sport-details-grid">
         <div><MapPin /><span>{activity.address}</span></div>
         <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
-        <div><Ticket /><span>{activity.price ? `${activity.price} KДЌ` : t.free}</span></div>
+        <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
         <div><ShieldCheck /><span>{sportFormatLabel(meta.format, language)}</span></div>
       </div>
       <div className="activity-card-footer">
@@ -142,7 +165,6 @@ export function SportActivityCard({ activity, language, onOpen, onJoin, onOpenMe
     </article>
   );
 }
-
 export function SportActivitySheet({
   activity,
   language,

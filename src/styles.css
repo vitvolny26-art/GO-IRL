@@ -655,3 +655,43 @@ button, input, textarea, select { letter-spacing: 0; }
   font-size: 13px;
   font-weight: 800;
 }
+
+
+.sport-card-members-preview {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid rgba(190, 255, 46, 0.16);
+  border-radius: 14px;
+  background: rgba(8, 12, 10, 0.72);
+  display: grid;
+  gap: 8px;
+}
+
+.sport-card-member-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sport-card-member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(190, 255, 46, 0.1);
+  color: #bfff2e;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.sport-card-member-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sport-card-members-empty {
+  color: var(--text-muted);
+  font-weight: 600;
+}
