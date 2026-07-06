@@ -191,7 +191,7 @@ function App() {
     document.removeEventListener("visibilitychange", handleVisibility);
     useAppStore.getState().disposeRealtime();
   };
-}, []);;
+}, []);
 
   useEffect(() => {
     if (selected || store.view !== "home") {
@@ -404,7 +404,7 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
   return (
     <>
       <section className="home-hero">
-        <img className="home-brand-logo" src="/brand/logo-wide.png" alt="GO IRL" />
+        <div className="home-brand-logo-wrap"><img className="home-brand-logo" src="/brand/logo-wide.png" alt="GO IRL" /></div>
         <div className="home-kicker"><MapPin />{t.liveInCity} · {city.name[language]}</div>
         <h1>{t.homeTitle}</h1>
         <p>{t.homeSubtitle}</p>
