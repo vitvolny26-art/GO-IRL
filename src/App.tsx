@@ -268,9 +268,9 @@ function App() {
 
   const shareActivity = async (activity: Activity) => {
     const url = activityInviteUrl(activity);
-    // Plain text cannot hide a URL behind a label. Rich hidden links need Bot API HTML/Markdown or an inline button.
     const text = ShareTemplateService.buildPlainText(activity, store.language, url);
-    const telegramShareUrl = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+    const telegramText = text.replace(url, "").trim();
+    const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(telegramText)}`;
 
     const webApp = getTelegramWebApp();
     if (webApp?.openTelegramLink) {
@@ -279,7 +279,7 @@ function App() {
     }
 
     if (navigator.share) {
-      await navigator.share({ title: "GO IRL", text });
+      await navigator.share({ title: "GO IRL", text: telegramText, url });
     } else {
       await navigator.clipboard?.writeText(text);
       flash(t.copied);
