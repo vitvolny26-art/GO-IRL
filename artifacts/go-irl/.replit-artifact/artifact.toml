@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "GO IRL"
+version = "1.0.0"
+id = "artifacts/go-irl"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22671
+
+[services.development]
+run = "pnpm --filter @workspace/go-irl run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/go-irl", "run", "build" ]
+publicDir = "artifacts/go-irl/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22671"
+BASE_PATH = "/"
