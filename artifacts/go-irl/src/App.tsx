@@ -156,6 +156,11 @@ function App() {
   const [completion, setCompletion] = useState("");
   const [completionActivityId, setCompletionActivityId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const showNotice = (msg: string) => {
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    setNotice(msg);
+    toastTimer.current = window.setTimeout(() => setNotice(""), 2200);
+  };
   const invitationHandled = useRef(false);
   const toastTimer = useRef<number | null>(null);
   const t = getTranslation(store.language);
@@ -281,7 +286,7 @@ function App() {
       await navigator.share({ title: "GO IRL", text, url });
     } else {
       await navigator.clipboard?.writeText(text);
-      window.alert(t.copied);
+      showNotice(t.copied);
     }
   };
 
@@ -359,6 +364,7 @@ function App() {
           }}
           onDelete={handleDelete}
           onCloseMiniApp={requestCloseMiniApp}
+          onNotice={showNotice}
           initialMembersOpen={selectedMembersOpen}
         />
       )}
@@ -1048,6 +1054,7 @@ type ActivitySheetProps = {
   onEdit: (activity: Activity) => void;
   onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
+  onNotice: (msg: string) => void;
   initialMembersOpen?: boolean;
 };
 
@@ -1073,6 +1080,7 @@ function GenericActivitySheet({
   onEdit,
   onDelete,
   onCloseMiniApp,
+  onNotice,
   initialMembersOpen = false,
 }: ActivitySheetProps) {
   const { joinedIds, waitingIds, pendingIds, reviewRequest, userRole } = useAppStore();
@@ -1216,7 +1224,7 @@ function GenericActivitySheet({
             <div className="event-more-menu">
               <button onClick={() => void onShare(activity)} type="button"><Share2 size={18} />{t.share}</button>
               <button onClick={() => onCalendar(activity)} type="button"><CalendarPlus size={18} />{t.addToGoogleCalendar}</button>
-              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); window.alert(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
+              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); onNotice(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
             </div>
           </details>
         </div>
