@@ -404,7 +404,9 @@ function HomeView({ language, onOpen, onJoin, onRandom, onCreate }: { language: 
   return (
     <>
       <section className="home-hero">
-        <img className="home-brand-logo" src="/brand/logo-wide.png" alt="GO IRL" />
+        <div className="go-irl-hero-logo-frame">
+          <img className="go-irl-hero-logo-img" src="/brand/logo-wide.png?v=logo-fix-2" alt="GO IRL" />
+        </div>
         <div className="home-kicker"><MapPin />{t.liveInCity} · {city.name[language]}</div>
         <h1>{t.homeTitle}</h1>
         <p>{t.homeSubtitle}</p>
