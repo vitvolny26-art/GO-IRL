@@ -959,4 +959,87 @@ button, input, textarea, select { letter-spacing: 0; }
   display: inline !important;
   font-weight: 800 !important;
 }
+/* GO IRL compact details and actions */
+.compact-sheet-actions {
+  grid-template-columns: 1fr 56px !important;
+  align-items: stretch !important;
+}
+
+.event-more-actions {
+  position: relative !important;
+}
+
+.event-more-actions summary {
+  list-style: none !important;
+  cursor: pointer !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+}
+
+.event-more-actions summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.event-more-menu {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 64px !important;
+  z-index: 50 !important;
+  min-width: 240px !important;
+  padding: 8px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 16px !important;
+  background: rgba(12,15,20,.98) !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45) !important;
+}
+
+.event-more-menu button {
+  width: 100% !important;
+  min-height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-weight: 800 !important;
+  text-align: left !important;
+}
+
+.sport-detail-list {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 0 !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.sport-detail-list > div {
+  min-height: 76px !important;
+  padding: 12px !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+
+.sport-detail-list > div:nth-child(odd) {
+  border-right: 1px solid rgba(255,255,255,.10) !important;
+}
+
+.sport-detail-list > div:nth-last-child(-n+2) {
+  border-bottom: 0 !important;
+}
+
+.sport-detail-list > div span {
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+
+.sport-detail-list > div strong,
+.sport-detail-list > div a {
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  text-align: right !important;
+}
 

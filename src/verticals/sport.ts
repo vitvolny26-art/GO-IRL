@@ -9,14 +9,14 @@ export const sportLevels: Array<{ id: SportLevel; label: Record<Language, string
 ];
 
 export const sportFormats: Array<{ id: SportFormat; label: Record<Language, string> }> = [
-  { id: "casual", label: { ru: "Casual", uk: "Casual", cs: "Casual", en: "Casual" } },
+  { id: "casual", label: { ru: "Любительский", uk: "Аматорський", cs: "Rekreační", en: "Casual" } },
   { id: "training", label: { ru: "Тренировка", uk: "Тренування", cs: "Trénink", en: "Training" } },
   { id: "competition", label: { ru: "Соревнование", uk: "Змагання", cs: "Soutěž", en: "Competition" } },
 ];
 
 export const sportEnvironments: Array<{ id: SportEnvironment; label: Record<Language, string> }> = [
-  { id: "indoor", label: { ru: "Indoor", uk: "Indoor", cs: "Indoor", en: "Indoor" } },
-  { id: "outdoor", label: { ru: "Outdoor", uk: "Outdoor", cs: "Outdoor", en: "Outdoor" } },
+  { id: "indoor", label: { ru: "В помещении", uk: "У приміщенні", cs: "Uvnitř", en: "Indoor" } },
+  { id: "outdoor", label: { ru: "На улице", uk: "На вулиці", cs: "Venku", en: "Outdoor" } },
 ];
 
 export const sportDemoBlueprints = [
