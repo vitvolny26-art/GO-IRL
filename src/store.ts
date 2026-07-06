@@ -74,6 +74,120 @@ type AppState = {
 
 let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 
+// go-irl-visual-demo-mode-v1
+const visualDemoStorageKey = "go-irl-visual-demo-activities-v1";
+const visualDemoUserKey = "demo-user";
+const isVisualDemoMode = () =>
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
+  !isTrustedAuthReady();
+
+const demoLocalized = (value: string) => ({ ru: value, uk: value, cs: value, en: value });
+
+const createSeedDemoActivities = (): Activity[] => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const nextWeek = new Date(today);
+  nextWeek.setDate(today.getDate() + 5);
+  const dateKey = (value: Date) => value.toISOString().slice(0, 10);
+
+  return [
+    {
+      id: "demo-volleyball",
+      type: "sport",
+      categoryId: "sport",
+      activity: demoLocalized("🏐 Волейбол"),
+      title: demoLocalized("Волейбол на песке"),
+      description: demoLocalized("Лёгкая игра для визуальной отладки карточек, участников, тренера и чата."),
+      date: dateKey(tomorrow),
+      time: "18:30",
+      cityId: defaultCityId,
+      address: "ZŠ Demlova, Olomouc",
+      locationUrl: "https://www.google.com/maps/search/?api=1&query=Z%C5%A0%20Demlova%20Olomouc",
+      participantNote: "Взять воду. Приходи за 10 минут.",
+      price: 0,
+      capacity: 8,
+      participants: 3,
+      members: [
+        { userKey: visualDemoUserKey, name: "Тест", status: "joined" },
+        { userKey: "demo-maks", name: "Maks", status: "joined" },
+        { userKey: "demo-vita", name: "Vita", status: "joined" },
+      ],
+      organizer: "Тест",
+      organizerKey: visualDemoUserKey,
+      visibility: "public",
+      urgent: true,
+      popular: true,
+      metadata: {
+        sport: {
+          sportType: "Волейбол",
+          level: "beginner",
+          format: "casual",
+          environment: "outdoor",
+          equipmentNeeded: false,
+          bring: "Вода · удобная обувь",
+          organizerTips: "Новичкам нормально, правила объясним",
+          durationMinutes: 90,
+        },
+      },
+    },
+    {
+      id: "demo-coffee",
+      type: "custom",
+      categoryId: "social",
+      activity: demoLocalized("☕ Кофе"),
+      title: demoLocalized("Кофе и прогулка"),
+      description: demoLocalized("Тестовое событие для проверки обычной карточки."),
+      date: dateKey(nextWeek),
+      time: "16:00",
+      cityId: defaultCityId,
+      address: "Horní náměstí, Olomouc",
+      locationUrl: "https://www.google.com/maps/search/?api=1&query=Horn%C3%AD%20n%C3%A1m%C4%9Bst%C3%AD%20Olomouc",
+      participantNote: "Без плана, просто познакомиться.",
+      price: 0,
+      capacity: 4,
+      participants: 1,
+      members: [{ userKey: visualDemoUserKey, name: "Тест", status: "joined" }],
+      organizer: "Тест",
+      organizerKey: visualDemoUserKey,
+      visibility: "public",
+      urgent: false,
+      popular: true,
+    },
+  ];
+};
+
+const readDemoActivities = () => {
+  try {
+    const stored = localStorage.getItem(visualDemoStorageKey);
+    if (stored) return JSON.parse(stored) as Activity[];
+  } catch {
+    // noop
+  }
+  const seeded = createSeedDemoActivities();
+  localStorage.setItem(visualDemoStorageKey, JSON.stringify(seeded));
+  return seeded;
+};
+
+const writeDemoActivities = (activities: Activity[]) => {
+  localStorage.setItem(visualDemoStorageKey, JSON.stringify(activities));
+};
+
+const syncDemoState = (setState: (state: Partial<AppState>) => void, activities: Activity[]) => {
+  setState({
+    activities: activities.map((activity) => ({
+      ...activity,
+      participants: activity.members.filter((member) => member.status === "joined").length,
+    })),
+    joinedIds: activities.filter((activity) => activity.members.some((member) => member.userKey === visualDemoUserKey && member.status === "joined")).map((activity) => activity.id),
+    waitingIds: activities.filter((activity) => activity.members.some((member) => member.userKey === visualDemoUserKey && member.status === "waiting")).map((activity) => activity.id),
+    pendingIds: activities.filter((activity) => activity.members.some((member) => member.userKey === visualDemoUserKey && member.status === "pending")).map((activity) => activity.id),
+    syncError: null,
+  });
+};
+
+
 class AuthNotReadyError extends Error {
   constructor() {
     super("Authentication is not ready yet");
@@ -245,6 +359,11 @@ const activityFromInput = (id: string, input: NewActivity, current: Activity): A
 
 export const useAppStore = create<AppState>((set, get) => {
   const reload = async () => {
+    if (isVisualDemoMode()) {
+      syncDemoState(set, readDemoActivities());
+      return;
+    }
+
     if (typeof document !== "undefined" && document.hidden) return;
     const userKey = getUserKey();
     const [activitiesResult, membersResult] = await Promise.all([
@@ -525,3 +644,6 @@ export const useAppStore = create<AppState>((set, get) => {
       await reload();
     } };
 });
+
+void writeDemoActivities;
+
