@@ -12,6 +12,18 @@ type CoachRequestPanelProps = {
   userRole: UserRole;
 };
 
+const coachStatusLabel = (status: CoachRequest["status"]) => {
+  switch (status) {
+    case "pending": return "ожидает подтверждения";
+    case "matched": return "тренер найден";
+    case "confirmed": return "тренер подтверждён";
+    case "completed": return "завершено";
+    case "rejected": return "отклонено";
+    case "cancelled": return "отменено";
+    default: return "в обработке";
+  }
+};
+
 export function CoachRequestPanel({ activity, userRole }: CoachRequestPanelProps) {
   const [requests, setRequests] = useState<CoachRequest[]>([]);
   const [currentUserKey, setCurrentUserKey] = useState<string | null>(null);
@@ -89,7 +101,7 @@ export function CoachRequestPanel({ activity, userRole }: CoachRequestPanelProps
       {organizerRequest ? (
         <div className="coach-panel-status">
           <UserCheck size={18} aria-hidden="true" />
-          <span>Тренер запрошен · статус: {organizerRequest.status}</span>
+          <span>Тренер запрошен · {coachStatusLabel(organizerRequest.status)}</span>
         </div>
       ) : null}
 
