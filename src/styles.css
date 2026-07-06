@@ -1108,4 +1108,16 @@ button, input, textarea, select { letter-spacing: 0; }
   display: block !important;
   font-size: 18px !important;
 }
+/* GO IRL map cleanup and address link */
+.sport-map-preview,
+.sport-map-preview iframe {
+  display: none !important;
+}
+
+.sport-address-link {
+  color: #67e8f9 !important;
+  font-weight: 900 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
 
