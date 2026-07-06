@@ -695,3 +695,167 @@ button, input, textarea, select { letter-spacing: 0; }
   color: var(--text-muted);
   font-weight: 600;
 }
+
+
+/* GO IRL UI cleanup v2 */
+
+/* Hero logo: шире и аккуратнее */
+.hero-logo,
+.home-logo,
+.logo-card,
+.hero-card,
+.home-hero-logo,
+.app-hero-logo {
+  width: calc(100% - 56px);
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-logo img,
+.home-logo img,
+.logo-card img,
+.hero-card img,
+.home-hero-logo img,
+.app-hero-logo img,
+img[alt*="GO IRL"],
+img[src*="logo"] {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Главный заголовок: меньше, в одну строку на обычном телефоне */
+.home-hero-title,
+.hero-title,
+.main-title,
+h1 {
+  font-size: clamp(30px, 8vw, 36px);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.home-hero-title,
+.hero-title,
+.main-title {
+  white-space: nowrap;
+}
+
+@media (max-width: 360px) {
+  .home-hero-title,
+  .hero-title,
+  .main-title {
+    white-space: normal;
+    font-size: 30px;
+  }
+}
+
+/* Главная карточка события: меньше вертикального раздутия */
+.sport-card,
+.activity-card {
+  gap: 12px;
+}
+
+.sport-card .card-title,
+.activity-card .card-title,
+.sport-card h2,
+.activity-card h2,
+.sport-card h3,
+.activity-card h3 {
+  line-height: 1.08;
+}
+
+/* Прячем лишние emoji-дубли внутри текстовых строк, но не трогаем основную картинку */
+.sport-card .sport-card-subtitle .emoji,
+.sport-card .card-subtitle .emoji,
+.activity-card .card-subtitle .emoji,
+.sport-card [data-duplicate-emoji="true"],
+.activity-card [data-duplicate-emoji="true"] {
+  display: none;
+}
+
+/* Чипы компактнее */
+.sport-card .chip,
+.activity-card .chip,
+.sport-chip,
+.activity-chip {
+  min-height: 38px;
+  padding: 8px 12px;
+  gap: 7px;
+}
+
+/* Preview участников на главной карточке */
+.sport-card-members-preview,
+.members-preview,
+.activity-members-preview {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(190, 255, 46, 0.12);
+}
+
+.sport-card-members-preview h4,
+.members-preview h4,
+.activity-members-preview h4 {
+  margin: 0 0 8px;
+  color: var(--text-muted, #a5a8b3);
+  font-size: 13px;
+}
+
+/* Деталка: визуально компактнее без ломания JSX */
+.sheet-details,
+.activity-details,
+.sport-details {
+  gap: 0;
+}
+
+.sheet-details > div,
+.activity-details > div,
+.sport-details > div {
+  min-height: 58px;
+}
+
+/* Карта события: стили для iframe/preview, если блок уже есть или будет добавлен */
+.sport-map-preview,
+.activity-map-preview,
+.event-map-preview {
+  margin: 14px 0;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(92, 225, 230, 0.24);
+  background:
+    linear-gradient(135deg, rgba(92, 225, 230, 0.12), rgba(190, 255, 46, 0.08)),
+    rgba(0, 0, 0, 0.24);
+}
+
+.sport-map-preview iframe,
+.activity-map-preview iframe,
+.event-map-preview iframe {
+  display: block;
+  width: 100%;
+  min-height: 180px;
+  border: 0;
+}
+
+.sport-map-link,
+.activity-map-link,
+.event-map-link {
+  display: block;
+  padding: 12px 14px;
+  color: #5ce1e6;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  border-top: 1px solid rgba(92, 225, 230, 0.18);
+}
+
+/* Битые кракозябры не лечатся CSS, но хотя бы не раздувают layout */
+.sport-card,
+.activity-card,
+.sheet-content,
+.sport-sheet {
+  overflow-wrap: anywhere;
+}
