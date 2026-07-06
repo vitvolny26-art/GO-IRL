@@ -377,7 +377,7 @@ export const useAppStore = create<AppState>((set, get) => {
     const rows = ((activitiesResult.data || []) as DbActivity[]).filter((row) => !isDeletedActivityRow(row));
     const members = (membersResult.data || []) as DbMember[];
     const invitedActivityId = getCurrentStartParam();
-    const visibleRows = rows.filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
+    const visibleRows = rows.filter(isActivityStillVisible).filter((row) => row.visibility === "public" || row.organizer_key === userKey || row.id === invitedActivityId);
     const visibleMembers = members;
 
     set({
@@ -647,3 +647,10 @@ export const useAppStore = create<AppState>((set, get) => {
 
 void writeDemoActivities;
 
+
+function isActivityStillVisible(row: DbActivity) {
+  const start = new Date(`${row.event_date}T${String(row.event_time || "00:00").slice(0, 5)}:00`).getTime();
+  const meta = (row.metadata || {}) as { durationMinutes?: number; duration?: number };
+  const duration = typeof meta.durationMinutes === "number" ? meta.durationMinutes : typeof meta.duration === "number" ? meta.duration : 120;
+  return Number.isNaN(start) || Date.now() <= start + (duration + 60) * 60000;
+}
