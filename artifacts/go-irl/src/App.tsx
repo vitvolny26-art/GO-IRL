@@ -64,7 +64,7 @@ import { ActivityChatPanel } from "./components/ActivityChatPanel";
 const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
 const activityInviteUrl = (activity: Activity) =>
-  `https://t.me/${BOT_USERNAME}?startapp=${encodeURIComponent(activity.id)}`;
+  `${window.location.origin}/join/${encodeURIComponent(activity.id)}`;
 
 const LazySportActivityCard = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivityCard })));
 const LazySportActivitySheet = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivitySheet })));
