@@ -269,8 +269,9 @@ function App() {
   const shareActivity = async (activity: Activity) => {
     const url = activityInviteUrl(activity);
     const text = ShareTemplateService.buildPlainText(activity, store.language, url);
-    const telegramText = text.replace(url, "").trim();
-    const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(telegramText)}`;
+    const telegramText = text.trim();
+    const previewUrl = "https://go-irl.vercel.app/";
+    const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(previewUrl)}&text=${encodeURIComponent(telegramText)}`;
 
     const webApp = getTelegramWebApp();
     if (webApp?.openTelegramLink) {
@@ -279,7 +280,7 @@ function App() {
     }
 
     if (navigator.share) {
-      await navigator.share({ title: "GO IRL", text: telegramText, url });
+      await navigator.share({ title: "GO IRL", text, url });
     } else {
       await navigator.clipboard?.writeText(text);
       flash(t.copied);
