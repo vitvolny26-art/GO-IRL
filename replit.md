@@ -33,12 +33,12 @@ Telegram Mini App для локальных real-life событий. Главн
 
 ## Задачи (приоритет)
 
-1. Убрать встроенную Google карту → адрес + кнопка Google Maps
-2. Проверить переводы RU/UK/CS/EN
-3. Убрать технические слова (pending, Skill match, Indoor/Outdoor)
-4. Заменить window.alert на toast
+1. ✅ Убрать встроенную Google карту → адрес + кнопка Google Maps
+2. ✅ Проверить переводы RU/UK/CS/EN — найден и исправлен баг: `sportSkillMatch` во всех 4 языках был русский текст
+3. ✅ Убрать технические слова — `pending` только в коде, `Skill match` удалён, `Indoor/Outdoor` локализованы
+4. ✅ Заменить window.alert на toast — `showNotice()` + `onNotice` prop в ActivitySheet/SportActivitySheet
 5. Сделать feedback form
-6. /join/:id landing page с Open Graph
+6. ✅ /join/:id landing page с Open Graph — API сервер `/join/:id`, OG теги, редирект в Telegram
 7. Проверить chat expiry (событие + 24ч)
 8. Тесты create/join/share/chat/coach
 

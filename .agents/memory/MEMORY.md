@@ -1,0 +1,3 @@
+- [Join landing page](join-landing-page.md) — /join/:id на API сервере с OG тегами; activityInviteUrl теперь origin/join/:id
+- [Toast pattern](toast-pattern.md) — showNotice() хелпер в App.tsx; внешние компоненты получают onNotice prop
+- [i18n completeness](i18n-completeness.md) — все ключи i18n нужно проверять во всех 4 языках (RU/UK/CS/EN)
