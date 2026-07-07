@@ -865,11 +865,11 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
           <p>{profile.bio || t.profileBioFallback}</p>
           <small>{t.registeredAt}: {registeredLabel}</small>
         </div>
-        <button className="profile-edit-button" onClick={() => setEditing((value) => !value)} type="button"><Pencil size={18} />{editing ? t.close : t.editProfile}</button>
+        <button className="profile-edit-button" onClick={() => { if (!editing) setEditing(true); }} type={editing ? "submit" : "button"} form={editing ? "profile-edit-form" : undefined}><Pencil size={18} />{editing ? t.save : t.editProfile}</button>
       </div>
 
       {editing && (
-        <form className="profile-edit-form" onSubmit={saveProfile}>
+        <form id="profile-edit-form" className="profile-edit-form" onSubmit={saveProfile}>
           <label><span>{t.name}</span><input name="profileName" defaultValue={profile.name} required /></label>
           <label><span>{t.shortBio}</span><textarea name="profileBio" rows={3} defaultValue={profile.bio} placeholder={t.profileBioPlaceholder} /></label>
           <label><span>{t.city}</span><select name="profileCity" defaultValue={profile.cityId}>{cities.map((item) => <option key={item.id} value={item.id}>{item.name[language]}</option>)}</select></label>
