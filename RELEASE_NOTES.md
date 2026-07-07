@@ -61,3 +61,37 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Apply and verify `supabase/migration_v2_backend_foundation.sql` before enabling public moderation/admin tools.
 - Apply and verify `supabase/migration_v3_security_hardening.sql`.
 - Do not launch publicly until trusted Telegram auth is deployed, v4 migration is applied, and smoke tests pass.
+
+<!-- GO_IRL_STABILIZATION_TASKS_5_8 -->
+## Stabilization update: Tasks 5-8
+
+Date: 2026-07-07
+
+Closed stabilization scope:
+- Task 5 Profile Fix
+  - Profile edit action now saves user changes instead of acting like a close button.
+  - Local avatar upload is supported.
+- Task 6 Bug Report Fix
+  - Bug report action opens support link.
+  - Removed alert/copy-share behavior from bug reporting.
+- Task 7 Weather Widget
+  - Sport event details show Open-Meteo based weather summary and details.
+  - Future events outside forecast range show a safe availability message.
+- Task 8 Share Fix
+  - Share links use Telegram Mini App startapp deep links.
+  - Browser /join/:id opens the target activity.
+  - Vercel SPA rewrite and Open Graph metadata are present.
+
+Verification:
+- pnpm run lint: PASS
+- pnpm run build: PASS
+- pnpm run test: PASS, 10 files / 51 tests
+
+Related commits:
+- cc67706 fix: save profile from edit button
+- a021e10 fix: support local profile avatar upload
+- dee51af fix: open bug report support link
+- a61947d fix: show weather summary in sport sheet
+- 7087b86 fix: show weather details in sport sheet
+- e44152d fix: use telegram mini app share link
+- ea63432 fix: open join route activity
