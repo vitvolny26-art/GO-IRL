@@ -29,6 +29,7 @@ import {
 import { activityOptions, categories } from "./data";
 import { AppHeader } from "./components/AppHeader";
 import { buildGoogleCalendarUrl } from "./calendar/googleCalendar";
+import { openBugReport } from "./bugReport";
 import { initializeTrustedAuth } from "./authSession";
 import { cities, getCity } from "./config/cities";
 import { getTranslation, localeByLanguage } from "./i18n";
@@ -1083,7 +1084,6 @@ function GenericActivitySheet({
   onEdit,
   onDelete,
   onCloseMiniApp,
-  onNotice,
   initialMembersOpen = false,
 }: ActivitySheetProps) {
   const { joinedIds, waitingIds, pendingIds, reviewRequest, userRole } = useAppStore();
@@ -1213,7 +1213,7 @@ function GenericActivitySheet({
             <div className="event-more-menu">
               <button onClick={() => void onShare(activity)} type="button"><Share2 size={18} />{t.share}</button>
               <button onClick={() => onCalendar(activity)} type="button"><CalendarPlus size={18} />{t.addToGoogleCalendar}</button>
-              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); onNotice(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
+              <button onClick={() => openBugReport(activity, language)} type="button"><Bug size={18} />{t.report}</button>
             </div>
           </details>
         </div>

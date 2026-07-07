@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Dumbbell, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
+import { openBugReport } from "../bugReport";
 import { formatEventTime } from "../eventTime";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
@@ -315,7 +316,7 @@ export function SportActivitySheet({
             <div className="event-more-menu">
               <button onClick={() => void onShare(activity)} type="button"><Share2 size={18} />{t.share}</button>
               <button onClick={() => onCalendar(activity)} type="button"><CalendarPlus size={18} />{t.addToGoogleCalendar}</button>
-              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); window.alert(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
+              <button onClick={() => openBugReport(activity, language)} type="button"><Bug size={18} />{t.report}</button>
             </div>
           </details>
         </div>
