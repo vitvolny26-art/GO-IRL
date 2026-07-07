@@ -78,6 +78,7 @@ let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 const visualDemoStorageKey = "go-irl-visual-demo-activities-v1";
 const visualDemoUserKey = "telegram:999999";
 const visualDemoUserName = "Vit_Test";
+const visualDemoNotice = "\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b (\u0414\u0435\u043c\u043e-\u0440\u0435\u0436\u0438\u043c)";
 const isVisualDemoMode = () =>
   typeof window !== "undefined" &&
   /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
@@ -252,6 +253,12 @@ const syncDemoState = (setState: (state: Partial<AppState>) => void, activities:
   });
 };
 
+
+const applyDemoActivities = (setState: (state: Partial<AppState>) => void, activities: Activity[], extra: Partial<AppState> = {}) => {
+  writeDemoActivities(activities);
+  syncDemoState(setState, activities);
+  setState({ ...extra, syncError: visualDemoNotice });
+};
 
 class AuthNotReadyError extends Error {
   constructor() {
@@ -514,6 +521,27 @@ export const useAppStore = create<AppState>((set, get) => {
     setCategory: (selectedCategory) => set({ selectedCategory, view: "explore" }),
 
     toggleJoin: async (id) => {
+      if (isVisualDemoMode()) {
+        const activities = readDemoActivities();
+        const activity = activities.find((item) => item.id === id);
+        if (!activity) throw new Error("Activity not found");
+
+        const existing = activity.members.find((member) => member.userKey === visualDemoUserKey);
+        if (existing) {
+          activity.members = activity.members.filter((member) => member.userKey !== visualDemoUserKey);
+          applyDemoActivities(set, activities);
+          return "left";
+        }
+
+        if (activity.visibility === "private") return "private";
+        if (activity.members.filter((member) => member.status === "joined").length >= activity.capacity) return "full";
+
+        const status = activity.visibility === "invite" ? "pending" : "joined";
+        activity.members.push({ userKey: visualDemoUserKey, name: visualDemoUserName, status });
+        applyDemoActivities(set, activities);
+        return status;
+      }
+
       await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const { joinedIds, waitingIds, pendingIds, activities } = get();
@@ -543,6 +571,38 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     createActivity: async (input) => {
+      if (isVisualDemoMode()) {
+        const activities = readDemoActivities();
+        const id = `demo-${Date.now()}`;
+        const activity = activityFromInput(id, input, {
+          id,
+          type: input.type || inferActivityType(input.categoryId),
+          categoryId: normalizeCategoryId(input.categoryId),
+          activity: demoLocalized(input.activityText),
+          title: demoLocalized(input.titleText),
+          description: demoLocalized(input.descriptionText),
+          date: input.date,
+          time: input.time,
+          cityId: input.cityId,
+          address: input.address,
+          locationUrl: input.locationUrl,
+          participantNote: input.participantNote,
+          price: input.price,
+          capacity: input.capacity,
+          participants: 1,
+          members: [{ userKey: visualDemoUserKey, name: visualDemoUserName, status: "joined" }],
+          organizer: visualDemoUserName,
+          organizerKey: visualDemoUserKey,
+          visibility: input.visibility,
+          urgent: false,
+          popular: false,
+          metadata: input.metadata,
+        });
+        activities.unshift(activity);
+        applyDemoActivities(set, activities, { view: "home" });
+        return id;
+      }
+
       await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const organizer = getCurrentDisplayName(getTranslation(get().language).guestName);
@@ -600,6 +660,16 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     updateActivity: async (id, input) => {
+      if (isVisualDemoMode()) {
+        const activities = readDemoActivities();
+        const current = activities.find((item) => item.id === id);
+        if (!current || current.organizerKey !== visualDemoUserKey) throw new Error("Only organizer can edit activity");
+
+        const next = activities.map((activity) => activity.id === id ? activityFromInput(id, input, current) : activity);
+        applyDemoActivities(set, next, { view: "home" });
+        return id;
+      }
+
       await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const current = get().activities.find((item) => item.id === id);
@@ -651,6 +721,16 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     deleteActivity: async (id) => {
+      if (isVisualDemoMode()) {
+        const activities = readDemoActivities();
+        const current = activities.find((item) => item.id === id);
+        if (!current || current.organizerKey !== visualDemoUserKey) throw new Error("Only organizer can delete activity");
+
+        removeActivityOverride(id);
+        applyDemoActivities(set, activities.filter((activity) => activity.id !== id), { view: "home" });
+        return;
+      }
+
       await ensureTrustedAuthForWrite();
       const userKey = getUserKey();
       const current = get().activities.find((item) => item.id === id);
@@ -690,6 +770,22 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     reviewRequest: async (activityId, memberKey, approved) => {
+      if (isVisualDemoMode()) {
+        const activities = readDemoActivities();
+        const activity = activities.find((item) => item.id === activityId);
+        if (!activity || activity.organizerKey !== visualDemoUserKey) throw new Error("Only organizer can review requests");
+
+        if (!approved) {
+          activity.members = activity.members.filter((member) => member.userKey !== memberKey);
+        } else {
+          const status = activity.members.filter((member) => member.status === "joined").length >= activity.capacity ? "waiting" : "joined";
+          activity.members = activity.members.map((member) => member.userKey === memberKey ? { ...member, status } : member);
+        }
+
+        applyDemoActivities(set, activities);
+        return;
+      }
+
       await ensureTrustedAuthForWrite();
       const activity = get().activities.find((item) => item.id === activityId);
       if (!activity || activity.organizerKey !== getUserKey()) throw new Error("Only organizer can review requests");
@@ -710,7 +806,6 @@ export const useAppStore = create<AppState>((set, get) => {
     } };
 });
 
-void writeDemoActivities;
 
 
 function isActivityStillVisible(row: DbActivity) {

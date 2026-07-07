@@ -314,7 +314,7 @@ function App() {
       />
 
       <main>
-        {store.syncError && <div className="sync-banner">{t.databaseError}</div>}
+        {store.syncError && <div className="sync-banner">{store.syncError === "database_unavailable" ? t.databaseError : store.syncError}</div>}
         {store.loading && <div className="sync-loading">{t.loadingEvents}</div>}
         {store.view === "home" && (
           <HomeView
