@@ -64,8 +64,13 @@ import {
 import { ActivityChatPanel } from "./components/ActivityChatPanel";
 
 
-const activityInviteUrl = (activity: Activity) =>
-  `${window.location.origin}/join/${encodeURIComponent(activity.id)}`;
+const telegramBotUsername = String(import.meta.env.VITE_GO_IRL_BOT_USERNAME || "GOirl_bot").replace(/^@/, "");
+const telegramAppName = String(import.meta.env.VITE_GO_IRL_APP_NAME || "").replace(/^\//, "");
+
+const activityInviteUrl = (activity: Activity) => {
+  const path = telegramAppName ? `/${telegramAppName}` : "";
+  return `https://t.me/${telegramBotUsername}${path}?startapp=${encodeURIComponent(activity.id)}`;
+};
 
 const LazySportActivityCard = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivityCard })));
 const LazySportActivitySheet = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivitySheet })));
