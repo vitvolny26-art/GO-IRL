@@ -40,6 +40,7 @@ type SportSheetProps = {
   onEdit: (activity: Activity) => void;
   onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
+  onNotice: (msg: string) => void;
   initialMembersOpen?: boolean;
 };
 
@@ -189,6 +190,7 @@ export function SportActivitySheet({
   onEdit,
   onDelete,
   onCloseMiniApp,
+  onNotice,
   initialMembersOpen = false,
 }: SportSheetProps) {
   const { joinedIds, pendingIds, userRole, reviewRequest } = useAppStore();
@@ -312,7 +314,7 @@ export function SportActivitySheet({
             <div className="event-more-menu">
               <button onClick={() => void onShare(activity)} type="button"><Share2 size={18} />{t.share}</button>
               <button onClick={() => onCalendar(activity)} type="button"><CalendarPlus size={18} />{t.addToGoogleCalendar}</button>
-              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); window.alert(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
+              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); onNotice(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
             </div>
           </details>
         </div>
