@@ -76,7 +76,8 @@ let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 
 // go-irl-visual-demo-mode-v1
 const visualDemoStorageKey = "go-irl-visual-demo-activities-v1";
-const visualDemoUserKey = "demo-user";
+const visualDemoUserKey = "telegram:999999";
+const visualDemoUserName = "Vit_Test";
 const isVisualDemoMode = () =>
   typeof window !== "undefined" &&
   /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
@@ -110,11 +111,11 @@ const createSeedDemoActivities = (): Activity[] => {
       capacity: 8,
       participants: 3,
       members: [
-        { userKey: visualDemoUserKey, name: "Тест", status: "joined" },
+        { userKey: visualDemoUserKey, name: visualDemoUserName, status: "joined" },
         { userKey: "demo-maks", name: "Maks", status: "joined" },
         { userKey: "demo-vita", name: "Vita", status: "joined" },
       ],
-      organizer: "Тест",
+      organizer: visualDemoUserName,
       organizerKey: visualDemoUserKey,
       visibility: "public",
       urgent: true,
@@ -148,8 +149,8 @@ const createSeedDemoActivities = (): Activity[] => {
       price: 0,
       capacity: 4,
       participants: 1,
-      members: [{ userKey: visualDemoUserKey, name: "Тест", status: "joined" }],
-      organizer: "Тест",
+      members: [{ userKey: visualDemoUserKey, name: visualDemoUserName, status: "joined" }],
+      organizer: visualDemoUserName,
       organizerKey: visualDemoUserKey,
       visibility: "public",
       urgent: false,
