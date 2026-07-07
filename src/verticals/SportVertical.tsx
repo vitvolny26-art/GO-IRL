@@ -5,6 +5,8 @@ import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
 import type { Activity, Language, SportMetadata } from "../types";
 import { getSportMetadata, sportEnvironmentLabel, sportEnvironments, sportFormatLabel, sportFormats, sportLevelLabel, sportLevels } from "./sport";
+import { ActivityChatPanel } from "../components/ActivityChatPanel";
+import { CoachRequestPanel } from "../components/CoachRequestPanel";
 
 const cleanSportLabel = (value: string | null | undefined) => {
   const raw = String(value || "").trim();
@@ -260,6 +262,10 @@ export function SportActivitySheet({
             </a>
           </section>
         )}
+
+        <CoachRequestPanel activity={activity} userRole={userRole} />
+
+        <ActivityChatPanel activity={activity} />
 
         <button className="detail-members-toggle" onClick={() => setMembersOpen((open: boolean) => !open)} type="button" aria-expanded={membersOpen}>
           <UsersRound />
