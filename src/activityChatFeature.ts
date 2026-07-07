@@ -1,4 +1,4 @@
-import { initializeTrustedAuth, getCurrentAuthSession } from "./authSession";
+import { initializeTrustedAuth, getCurrentAuthSession, isTrustedAuthReady } from "./authSession";
 import { supabase } from "./supabase";
 import type { ActivityChat, ActivityChatMessage } from "./types";
 
@@ -23,7 +23,39 @@ const readDisplayName = (identity: unknown) => {
   return auth?.user?.firstName || auth?.user?.username || auth?.firstName || auth?.username || "GO IRL User";
 };
 
+const demoUserKey = "telegram:999999";
+const demoDisplayName = "Vit_Test";
+const demoChatStorageKey = "go-irl-demo-activity-chat-v1";
+
+type DemoChatState = {
+  chats: ActivityChat[];
+  messages: ActivityChatMessage[];
+};
+
+const isBrowserDemoMode = () =>
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
+  !isTrustedAuthReady();
+
+const readDemoChatState = (): DemoChatState => {
+  try {
+    return JSON.parse(localStorage.getItem(demoChatStorageKey) || "{\"chats\":[],\"messages\":[]}") as DemoChatState;
+  } catch {
+    return { chats: [], messages: [] };
+  }
+};
+
+const writeDemoChatState = (state: DemoChatState) => {
+  localStorage.setItem(demoChatStorageKey, JSON.stringify(state));
+};
+
+const demoChatExpiry = () => new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+
 export async function getCurrentChatIdentity() {
+  if (isBrowserDemoMode()) {
+    return { userKey: demoUserKey, displayName: demoDisplayName };
+  }
+
   const existing = getCurrentAuthSession();
   const existingUserKey = readAuthUserKey(existing);
 
@@ -43,6 +75,27 @@ export async function getCurrentChatIdentity() {
 }
 
 export async function ensureActivityChat(activityId: string) {
+  if (isBrowserDemoMode()) {
+    const state = readDemoChatState();
+    const existing = state.chats.find((chat) => chat.activityId === activityId);
+    if (existing) return existing.id;
+
+    const now = new Date().toISOString();
+    const chat: ActivityChat = {
+      id: `demo-chat-${activityId}`,
+      activityId,
+      createdByUserKey: demoUserKey,
+      status: "active",
+      expiresAt: demoChatExpiry(),
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    state.chats.push(chat);
+    writeDemoChatState(state);
+    return chat.id;
+  }
+
   const { data, error } = await supabase.rpc("go_irl_ensure_activity_chat", {
     p_activity_id: activityId,
   });
@@ -53,6 +106,11 @@ export async function ensureActivityChat(activityId: string) {
 }
 
 export async function loadActivityChat(activityId: string) {
+  if (isBrowserDemoMode()) {
+    const state = readDemoChatState();
+    return state.chats.find((chat) => chat.activityId === activityId) || null;
+  }
+
   const { data, error } = await supabase
     .from("activity_chats")
     .select("*")
@@ -74,6 +132,13 @@ export async function loadActivityChat(activityId: string) {
 }
 
 export async function loadActivityChatMessages(activityId: string) {
+  if (isBrowserDemoMode()) {
+    const state = readDemoChatState();
+    return state.messages
+      .filter((message) => message.activityId === activityId && message.status === "visible")
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }
+
   const { data, error } = await supabase
     .from("activity_chat_messages")
     .select("*")
@@ -117,6 +182,25 @@ export async function sendActivityChatMessage(activityId: string, body: string) 
 
   const chatId = await ensureActivityChat(activityId);
 
+  if (isBrowserDemoMode()) {
+    const state = readDemoChatState();
+    const now = new Date().toISOString();
+    state.messages.push({
+      id: `demo-message-${Date.now()}`,
+      chatId,
+      activityId,
+      senderUserKey: identity.userKey,
+      senderDisplayName: identity.displayName,
+      body: trimmed,
+      status: "visible",
+      createdAt: now,
+      editedAt: null,
+      deletedAt: null,
+    });
+    writeDemoChatState(state);
+    return;
+  }
+
   const { error } = await supabase
     .from("activity_chat_messages")
     .insert({
@@ -132,6 +216,15 @@ export async function sendActivityChatMessage(activityId: string, body: string) 
 }
 
 export async function hideOwnActivityChatMessage(messageId: string) {
+  if (isBrowserDemoMode()) {
+    const state = readDemoChatState();
+    state.messages = state.messages.map((message) =>
+      message.id === messageId ? { ...message, status: "deleted", deletedAt: new Date().toISOString() } : message,
+    );
+    writeDemoChatState(state);
+    return;
+  }
+
   const { error } = await supabase
     .from("activity_chat_messages")
     .update({

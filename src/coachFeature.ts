@@ -1,4 +1,4 @@
-import { initializeTrustedAuth, getCurrentAuthSession } from "./authSession";
+import { initializeTrustedAuth, getCurrentAuthSession, isTrustedAuthReady } from "./authSession";
 import { supabase } from "./supabase";
 import type { Activity, CoachRequest, CoachRequestType } from "./types";
 
@@ -14,7 +14,29 @@ const readAuthUserKey = (identity: unknown) => {
   return auth?.user?.userKey || auth?.userKey || null;
 };
 
+const demoUserKey = "telegram:999999";
+const demoCoachStorageKey = "go-irl-demo-coach-requests-v1";
+
+const isBrowserDemoMode = () =>
+  typeof window !== "undefined" &&
+  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
+  !isTrustedAuthReady();
+
+const readDemoCoachRequests = () => {
+  try {
+    return JSON.parse(localStorage.getItem(demoCoachStorageKey) || "[]") as CoachRequest[];
+  } catch {
+    return [] as CoachRequest[];
+  }
+};
+
+const writeDemoCoachRequests = (requests: CoachRequest[]) => {
+  localStorage.setItem(demoCoachStorageKey, JSON.stringify(requests));
+};
+
 export async function getCurrentCoachUserKey() {
+  if (isBrowserDemoMode()) return demoUserKey;
+
   const existing = getCurrentAuthSession();
   const existingKey = readAuthUserKey(existing);
   if (existingKey) return existingKey;
@@ -24,6 +46,10 @@ export async function getCurrentCoachUserKey() {
 }
 
 export async function loadCoachRequestsForActivity(activityId: string) {
+  if (isBrowserDemoMode()) {
+    return readDemoCoachRequests().filter((request) => request.activityId === activityId);
+  }
+
   const { data, error } = await supabase
     .from("coach_requests")
     .select("*")
@@ -61,6 +87,30 @@ export async function requestCoachForActivity(
     throw new Error("auth_required");
   }
 
+  if (isBrowserDemoMode()) {
+    const requests = readDemoCoachRequests();
+    const now = new Date().toISOString();
+    const id = `demo-coach-${activity.id}-${userKey}-${requestType}`;
+    const next: CoachRequest = {
+      id,
+      activityId: activity.id,
+      requesterUserKey: userKey,
+      requestType,
+      sportType: activity.categoryId || "sport",
+      level: undefined,
+      paymentMode: "split",
+      status: "pending",
+      createdAt: requests.find((request) => request.id === id)?.createdAt || now,
+      updatedAt: now,
+    };
+
+    writeDemoCoachRequests([
+      next,
+      ...requests.filter((request) => request.id !== id),
+    ]);
+    return;
+  }
+
   const { error } = await supabase
     .from("coach_requests")
     .upsert({
@@ -80,6 +130,14 @@ export async function requestCoachForActivity(
 }
 
 export async function cancelCoachRequest(requestId: string) {
+  if (isBrowserDemoMode()) {
+    const requests = readDemoCoachRequests();
+    writeDemoCoachRequests(requests.map((request) =>
+      request.id === requestId ? { ...request, status: "cancelled", updatedAt: new Date().toISOString() } : request,
+    ));
+    return;
+  }
+
   const { error } = await supabase
     .from("coach_requests")
     .update({ status: "cancelled", updated_at: new Date().toISOString() })
