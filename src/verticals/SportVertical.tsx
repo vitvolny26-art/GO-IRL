@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Dumbbell, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { openBugReport } from "../bugReport";
+import { getEventWeather } from "../services/weather";
 import { formatEventTime } from "../eventTime";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
@@ -197,6 +198,7 @@ export function SportActivitySheet({
   const { joinedIds, pendingIds, userRole, reviewRequest } = useAppStore();
   const [membersOpen, setMembersOpen] = useState(initialMembersOpen);
   const t = getTranslation(language);
+  const [weatherText, setWeatherText] = useState(t.weatherPlaceholder);
   const meta = getSportMetadata(activity);
   const isOrganizer = activity.organizerKey === getUserKey();
   const canDelete = isOrganizer || userRole === "admin";
@@ -214,6 +216,26 @@ export function SportActivitySheet({
   useEffect(() => {
     setMembersOpen(initialMembersOpen);
   }, [activity.id, initialMembersOpen]);
+
+  useEffect(() => {
+    let active = true;
+    const days = Math.round((new Date(`${activity.date}T12:00:00`).getTime() - new Date(new Date().setHours(12, 0, 0, 0)).getTime()) / 86400000);
+
+    if (days > 7) {
+      setWeatherText(t.weatherAvailableSoon);
+      return;
+    }
+
+    setWeatherText(t.weatherLoading);
+    void getEventWeather({ date: activity.date, time: activity.time, address: activity.address, city: cityName })
+      .then((weather) => {
+        if (active) setWeatherText(weather?.text || t.weatherUnavailable);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [activity.id, activity.date, activity.time, activity.address, cityName, t.weatherAvailableSoon, t.weatherLoading, t.weatherUnavailable]);
 
   const handleReview = async (memberKey: string, approved: boolean) => {
     await reviewRequest(activity.id, memberKey, approved);
@@ -251,7 +273,7 @@ export function SportActivitySheet({
           {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
           {meta.requirements && <div><ShieldCheck /><span>{t.sportRequirements}</span><strong>{meta.requirements}</strong></div>}
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
-          <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
+          <div><Sparkles /><span>{t.weatherHint}</span><strong>{weatherText}</strong></div>
         </div>
         {sportMapSearchUrl && (
           <section className="sport-place-card" aria-label="Место события">
