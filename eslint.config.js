@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 
 export default [
   {
-    ignores: [
+    ignores: ["**/*.cjs", "project-audit/**",
       "dist/**",
       "node_modules/**",
       "old/**",
@@ -44,3 +44,4 @@ export default [
     },
   },
 ];
+

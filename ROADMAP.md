@@ -155,3 +155,23 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 - Generic Activity/Event remains as fallback until a vertical-specific experience is implemented.
 - Friends, Travel, and Dating are deferred by strategy and must not be implemented before the infrastructure, performance, n8n, and AI discovery layers are stable.
 - Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.
+
+<!-- GO_IRL_MVP_STABILIZATION_PHASE -->
+## MVP Stabilization Phase
+
+Priority before Closed Beta:
+
+1. Restore Coach + Activity Chat with Weather enabled.
+2. Add Browser Demo / MockAuth mode.
+3. Fix event card time rendering.
+4. Fix profile save and avatar upload.
+5. Replace bug-report clipboard/alert flow.
+6. Add safe Open-Meteo weather widget.
+7. Fix Telegram share links and prepare /join/:id OG previews.
+
+Definition of done:
+- lint/build/test pass;
+- no broken Telegram auth;
+- demo mode works in browser;
+- no technical labels leak into UI;
+- README and roadmap updated after each milestone.

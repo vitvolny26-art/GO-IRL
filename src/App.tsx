@@ -61,7 +61,6 @@ import {
 } from "./validation";
 import { ActivityChatPanel } from "./components/ActivityChatPanel";
 
-const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || "GOirl_bot";
 
 const activityInviteUrl = (activity: Activity) =>
   `${window.location.origin}/join/${encodeURIComponent(activity.id)}`;
@@ -1309,6 +1308,7 @@ function EventListSkeleton() {
 }
 
 export default App;
+
 
 
 

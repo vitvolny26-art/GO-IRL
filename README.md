@@ -115,3 +115,15 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `docs/reputation.md` - RLI, Trust Score, Community Contribution, attendance confirmation, and reputation privacy
 - `docs/EventLifecycle.md` - Activity lifecycle from creation to archive
 - `docs/UserLifecycle.md` - user lifecycle from registration to deletion
+
+<!-- GO_IRL_STABILIZATION_LINKS -->
+## MVP stabilization
+
+- [MVP stabilization plan](docs/MVP_STABILIZATION_PLAN.md)
+- [Development protocol](docs/DEVELOPMENT_PROTOCOL.md)
+
+Run a local health audit:
+
+```bash
+node scripts/go-irl-health-audit.cjs
+```
