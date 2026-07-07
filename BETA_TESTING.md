@@ -1,15 +1,17 @@
 # Beta Testing Quick Start
 
-## Automated Checks
+## Local Helper Checks
 ```bash
-node beta-test.js
+node beta-test.cjs
 ```
 
-This verifies:
-- ✓ Environment variables configured
-- ✓ Source files present
-- ✓ Supabase tables exist
-- ✓ Demo mode links work
+This local helper verifies:
+- ✓ Required environment variable names are present in `.env.local`
+- ✓ Required source files exist
+- ✓ Manual Supabase table checklist is printed
+- ✓ Demo mode links are printed
+
+**Important:** this script does not call Vercel, Telegram, or Supabase APIs. Those checks remain manual and must be completed through the dashboards/devices listed below.
 
 ---
 
@@ -20,7 +22,11 @@ This verifies:
 pnpm run dev
 ```
 
-Opens browser to `http://localhost:5178`
+The dev server is pinned to:
+
+```text
+http://localhost:5178
+```
 
 ### 2. Test Normal Mode
 - [ ] View activity list
@@ -63,7 +69,7 @@ https://t.me/[BOT_NAME]?startapp=[ACTIVITY_ID]
 ### 6. Supabase Verification
 1. Open Supabase dashboard
 2. Check `Tables` section → verify all tables exist
-3. Check `SQL Editor` → run verification queries
+3. Check `SQL Editor` → run verification queries if needed
 4. **DO NOT modify RLS policies** (just verify they're there)
 
 ---
@@ -96,10 +102,8 @@ If you find a bug:
 
 ## Ready to Test?
 
-1. ✓ Run `node beta-test.js`
+1. ✓ Run `node beta-test.cjs`
 2. ✓ Start `pnpm run dev`
 3. ✓ Open `BETA_CHECKLIST.md`
 4. ✓ Go through each test systematically
 5. ✓ Document any issues
-
-**Let me know when you find issues!** 🚀
