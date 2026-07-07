@@ -1,5 +1,20 @@
 # Manual Beta Checklist
 
+## 0. Local Helper Check
+- [ ] Run local helper:
+
+```bash
+node beta-test.cjs
+```
+
+- [ ] Confirm required source files are present
+- [ ] Confirm local `.env.local` contains required Supabase variable names if Supabase-backed flows are being tested
+- [ ] Continue with the manual checks below
+
+**Expected:** Helper completes without runtime errors. Dashboard/device checks are still manual.
+
+---
+
 ## 1. Vercel: Latest Deployment
 - [ ] Go to https://vercel.com/vitvolny26-art/go-irl
 - [ ] Check that latest deployment from `main` is **READY** (green checkmark)
@@ -44,6 +59,12 @@
 ---
 
 ## 5. Browser: Demo Mode
+- [ ] Start dev server:
+
+```bash
+pnpm run dev
+```
+
 - [ ] Open: `http://localhost:5178?demo=true`
 - [ ] Check that demo user is loaded (should see demo activities)
 - [ ] Try to join an activity (POST)
@@ -52,7 +73,7 @@
 
 **Demo write tests:**
 - [ ] Try to create activity → should fail
-- [ ] Try to join activity → should fail  
+- [ ] Try to join activity → should fail
 - [ ] Try to delete activity → should fail
 - [ ] Chat/coach features → should fail
 
