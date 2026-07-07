@@ -1,13 +1,10 @@
-﻿import { useEffect, useState } from "react";
-import { getEventWeather } from "../services/weather";
+import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Dumbbell, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
 import type { Activity, Language, SportMetadata } from "../types";
 import { getSportMetadata, sportEnvironmentLabel, sportEnvironments, sportFormatLabel, sportFormats, sportLevelLabel, sportLevels } from "./sport";
-import { CoachRequestPanel } from "../components/CoachRequestPanel";
-import { ActivityChatPanel } from "../components/ActivityChatPanel";
 
 const cleanSportLabel = (value: string | null | undefined) => {
   const raw = String(value || "").trim();
@@ -41,7 +38,6 @@ type SportSheetProps = {
   onEdit: (activity: Activity) => void;
   onDelete: (activity: Activity) => void;
   onCloseMiniApp: () => void;
-  onNotice: (msg: string) => void;
   initialMembersOpen?: boolean;
 };
 
@@ -178,6 +174,7 @@ export function SportActivityCard({ activity, language, onOpen, onJoin }: SportC
     </article>
   );
 }
+
 export function SportActivitySheet({
   activity,
   language,
@@ -191,7 +188,6 @@ export function SportActivitySheet({
   onEdit,
   onDelete,
   onCloseMiniApp,
-  onNotice,
   initialMembersOpen = false,
 }: SportSheetProps) {
   const { joinedIds, pendingIds, userRole, reviewRequest } = useAppStore();
@@ -210,24 +206,6 @@ export function SportActivitySheet({
   const pendingMembers = activity.members.filter((member) => member.status === "pending");
   const sportMapQuery = buildMapsQuery([activity.address, cityName]);
   const sportMapSearchUrl = buildGoogleMapsSearchUrl(sportMapQuery);
-
-  useEffect(() => {
-    let active = true;
-    setWeatherText(null);
-
-    getEventWeather({
-      date: activity.date,
-      time: activity.time,
-      address: activity.address,
-      city: cityName,
-    }).then((result) => {
-      if (active) setWeatherText(result?.text || null);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [activity.date, activity.time, activity.address, cityName]);
 
   useEffect(() => {
     setMembersOpen(initialMembersOpen);
@@ -269,7 +247,7 @@ export function SportActivitySheet({
           {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
           {meta.requirements && <div><ShieldCheck /><span>{t.sportRequirements}</span><strong>{meta.requirements}</strong></div>}
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
-          <div><Sparkles /><span>{t.weatherHint}</span><strong>{weatherText || t.weatherPlaceholder}</strong></div>
+          <div><Sparkles /><span>{t.weatherHint}</span><strong>{t.weatherPlaceholder}</strong></div>
         </div>
         {sportMapSearchUrl && (
           <section className="sport-place-card" aria-label="Место события">
@@ -322,18 +300,15 @@ export function SportActivitySheet({
             </div>
           </div>
         )}
-              <CoachRequestPanel activity={activity} userRole={userRole} />
-      <ActivityChatPanel activity={activity} />
 
-
-      <div className="sheet-actions compact-sheet-actions">
+        <div className="sheet-actions compact-sheet-actions">
           <button className="main-action" onClick={() => isOrganizer ? onEdit(activity) : onJoin(activity)} type="button" disabled={!isOrganizer && full && !joined && !pending}>{isOrganizer && <Pencil size={18} />}{action}</button>
           <details className="event-more-actions">
             <summary className="square-action" aria-label="Еще" title="Еще">⋯</summary>
             <div className="event-more-menu">
               <button onClick={() => void onShare(activity)} type="button"><Share2 size={18} />{t.share}</button>
               <button onClick={() => onCalendar(activity)} type="button"><CalendarPlus size={18} />{t.addToGoogleCalendar}</button>
-              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); onNotice(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
+              <button onClick={() => { void navigator.clipboard?.writeText(`GO IRL bug report\nEvent: ${activity.id}\nTitle: ${activity.title[language]}\nTime: ${activity.date} ${activity.time}`); window.alert(t.copied); }} type="button"><Bug size={18} />{t.report}</button>
             </div>
           </details>
         </div>
@@ -343,4 +318,3 @@ export function SportActivitySheet({
     </div>
   );
 }
-
