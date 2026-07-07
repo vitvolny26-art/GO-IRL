@@ -823,6 +823,7 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
   const tgUser = getTelegramWebApp()?.initDataUnsafe?.user;
   const fallbackName = [tgUser?.first_name, tgUser?.last_name].filter(Boolean).join(" ") || t.guestName;
   const [profile, setProfile] = useState(() => loadProfile(fallbackName, selectedCityId));
+  const [avatarDraft, setAvatarDraft] = useState(profile.avatar);
   const userKey = getUserKey();
   const city = getCity(profile.cityId);
   const today = new Date().toISOString().slice(0, 10);
@@ -842,12 +843,13 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
       name: String(data.get("profileName") || fallbackName).trim() || fallbackName,
       bio: String(data.get("profileBio") || "").trim(),
       cityId: String(data.get("profileCity") || selectedCityId),
-      avatar: String(data.get("profileAvatar") || "GI"),
+      avatar: avatarDraft || String(data.get("profileAvatar") || "GI"),
       registeredAt: profile.registeredAt,
       favoriteActivities: data.getAll("favoriteActivities").map(String),
     };
     localStorage.setItem("go-irl-profile", JSON.stringify(nextProfile));
     setProfile(nextProfile);
+    setAvatarDraft(nextProfile.avatar);
     setSelectedCity(nextProfile.cityId);
     setEditing(false);
     notifyTelegram("success");
@@ -858,7 +860,7 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
       {loading && <ProfileSkeleton />}
       {syncError && <div className="details-error profile-error"><ShieldCheck /><span>{t.databaseError}</span></div>}
       <div className="profile-hero">
-        <div className="profile-avatar">{profile.avatar}</div>
+        <div className="profile-avatar">{profile.avatar.startsWith("data:image/") ? <img src={profile.avatar} alt={t.avatar} /> : profile.avatar}</div>
         <div className="profile-main">
           <div className="profile-kicker"><MapPin />{city.name[language]}</div>
           <h1>{profile.name}</h1>
@@ -888,11 +890,12 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
           <div className="avatar-picker" role="radiogroup" aria-label={t.avatar}>
             {avatarOptions.map((avatar) => (
               <label key={avatar}>
-                <input name="profileAvatar" type="radio" value={avatar} defaultChecked={profile.avatar === avatar} />
+                <input name="profileAvatar" type="radio" value={avatar} defaultChecked={profile.avatar === avatar} onChange={() => setAvatarDraft(avatar)} />
                 <span>{avatar}</span>
               </label>
             ))}
           </div>
+          <label><span>{t.avatar}</span><input type="file" accept="image/*" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => setAvatarDraft(String(reader.result || "")); reader.readAsDataURL(file); }} /></label>
           <button className="publish-button" type="submit"><Pencil size={18} />{t.save}</button>
         </form>
       )}
