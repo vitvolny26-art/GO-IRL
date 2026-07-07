@@ -32,6 +32,7 @@ import { buildGoogleCalendarUrl } from "./calendar/googleCalendar";
 import { initializeTrustedAuth } from "./authSession";
 import { cities, getCity } from "./config/cities";
 import { getTranslation, localeByLanguage } from "./i18n";
+import { formatEventTime } from "./eventTime";
 import {
   applyDiscoverFilters,
   matchesActivityInterest,
@@ -586,7 +587,7 @@ function DiscoverActivityCard({ activity, language, onOpen, onJoin }: { activity
       </button>
       <div className="discover-card-meta">
         <span><CalendarDays />{compactDateLabel(activity.date, language)}</span>
-        <span><Clock3 />{activity.time}</span>
+        {formatEventTime(activity.time) ? <span><Clock3 />{formatEventTime(activity.time)}</span> : null}
         <span><MapPin />{getCity(activity.cityId).name[language]}</span>
         <span><UsersRound />{Math.max(activity.capacity - activity.participants, 0)} {t.left}</span>
       </div>
@@ -1020,7 +1021,7 @@ function GenericActivityCard({ activity, language, onOpen, onJoin }: { activity:
 
       <div className="activity-card-details">
         <div><CalendarDays /><span>{compactDateLabel(activity.date, language)}</span></div>
-        <div><Clock3 /><span>{activity.time}</span></div>
+        {formatEventTime(activity.time) ? <div><Clock3 /><span>{formatEventTime(activity.time)}</span></div> : null}
         <div><MapPin /><span>{activity.address}</span></div>
         <div><UsersRound /><span>{activity.participants} / {activity.capacity}</span></div>
         <div><Ticket /><span>{activity.price ? `${activity.price} Kč` : t.free}</span></div>
@@ -1150,7 +1151,7 @@ function GenericActivitySheet({
         </div>
         <div className="detail-list">
           <div><Sparkles /><span>{t.category}</span><strong>{category.name[language]}</strong></div>
-          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
+          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span>{formatEventTime(activity.time) ? <strong>{formatEventTime(activity.time)}</strong> : null}</div>
           <div><Compass /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span>{activity.locationUrl ? <a href={activity.locationUrl} target="_blank" rel="noreferrer">{activity.address}</a> : <strong>{activity.address}</strong>}</div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>

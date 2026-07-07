@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Dumbbell, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
+import { formatEventTime } from "../eventTime";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
 import type { Activity, Language, SportMetadata } from "../types";
@@ -242,7 +243,7 @@ export function SportActivitySheet({
           <div><ShieldCheck /><span>{t.sportFormat}</span><strong>{sportFormatLabel(meta.format, language)}</strong></div>
           <div><MapPin /><span>{t.city}</span><strong>{cityName}</strong></div>
           <div><MapPin /><span>{t.address}</span><a className="sport-address-link" href={activity.locationUrl || sportMapSearchUrl || "#"} target="_blank" rel="noreferrer">{activity.address || cityName}</a></div>
-          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span><strong>{activity.time}</strong></div>
+          <div><CalendarDays /><span>{dateLabel(activity.date, language)}</span>{formatEventTime(activity.time) ? <strong>{formatEventTime(activity.time)}</strong> : null}</div>
           <div><Ticket /><span>{t.price}</span><strong>{activity.price ? `${activity.price} Kč` : t.free}</strong></div>
           <div><ShieldCheck /><span>{t.sportEquipmentNeeded}</span><strong>{meta.equipmentNeeded ? t.yes : t.no}</strong></div>
           {meta.equipment && <div><Sparkles /><span>{t.sportEquipment}</span><strong>{meta.equipment}</strong></div>}
