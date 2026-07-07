@@ -8,7 +8,7 @@
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "test": "vitest run",
-    "build": "PORT=5173 BASE_PATH=/ pnpm --filter @workspace/go-irl run typecheck && PORT=5173 BASE_PATH=/ pnpm --filter @workspace/go-irl run build",
+    "build": "vite build",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
