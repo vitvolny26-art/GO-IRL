@@ -72,6 +72,12 @@ const activityInviteUrl = (activity: Activity) => {
   return `https://t.me/${telegramBotUsername}${path}?startapp=${encodeURIComponent(activity.id)}`;
 };
 
+const activityIdFromJoinPath = () => {
+  if (typeof window === "undefined") return "";
+  const match = window.location.pathname.match(/^\/join\/([^/?#]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+};
+
 const LazySportActivityCard = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivityCard })));
 const LazySportActivitySheet = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportActivitySheet })));
 const LazySportCreateFields = lazy(() => import("./verticals/SportVertical").then((module) => ({ default: module.SportCreateFields })));
@@ -217,12 +223,15 @@ function App() {
   useEffect(() => {
     if (invitationHandled.current) return;
     const tg = getTelegramWebApp();
-    const startParam = tg?.initDataUnsafe?.start_param;
-    if (startParam) {
-      const invitedActivity = store.activities.find((item) => item.id === startParam);
+    const invitedId = tg?.initDataUnsafe?.start_param || activityIdFromJoinPath();
+    if (invitedId) {
+      const invitedActivity = store.activities.find((item) => item.id === invitedId);
       if (invitedActivity) {
         invitationHandled.current = true;
         setSelected(invitedActivity);
+        if (window.location.pathname.startsWith("/join/")) {
+          window.history.replaceState({}, "", "/");
+        }
       }
     }
   }, [store.activities]);
