@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CalendarDays, CalendarPlus, Check, ChevronRight, CircleUserRound, Clock3, Dumbbell, Bug, MapPin, Pencil, Share2, ShieldCheck, Sparkles, Ticket, Trash2, UsersRound, X } from "lucide-react";
 import { getTranslation, localeByLanguage } from "../i18n";
 import { openBugReport } from "../bugReport";
-import { getEventWeather } from "../services/weather";
+import { getEventWeather, type WeatherHour } from "../services/weather";
 import { formatEventTime } from "../eventTime";
 import { useAppStore } from "../store";
 import { getUserKey } from "../supabase";
@@ -199,6 +199,8 @@ export function SportActivitySheet({
   const [membersOpen, setMembersOpen] = useState(initialMembersOpen);
   const t = getTranslation(language);
   const [weatherText, setWeatherText] = useState(t.weatherPlaceholder);
+  const [weatherHours, setWeatherHours] = useState<WeatherHour[]>([]);
+  const [weatherDetailsOpen, setWeatherDetailsOpen] = useState(false);
   const meta = getSportMetadata(activity);
   const isOrganizer = activity.organizerKey === getUserKey();
   const canDelete = isOrganizer || userRole === "admin";
@@ -223,13 +225,17 @@ export function SportActivitySheet({
 
     if (days > 7) {
       setWeatherText(t.weatherAvailableSoon);
+      setWeatherHours([]);
       return;
     }
 
     setWeatherText(t.weatherLoading);
+    setWeatherHours([]);
     void getEventWeather({ date: activity.date, time: activity.time, address: activity.address, city: cityName })
       .then((weather) => {
-        if (active) setWeatherText(weather?.text || t.weatherUnavailable);
+        if (!active) return;
+        setWeatherText(weather?.text || t.weatherUnavailable);
+        setWeatherHours(weather?.hours || []);
       });
 
     return () => {
@@ -273,8 +279,29 @@ export function SportActivitySheet({
           {meta.bring && <div><Sparkles /><span>{t.sportBring}</span><strong>{meta.bring}</strong></div>}
           {meta.requirements && <div><ShieldCheck /><span>{t.sportRequirements}</span><strong>{meta.requirements}</strong></div>}
           {meta.organizerTips && <div><CircleUserRound /><span>{t.sportOrganizerTips}</span><strong>{meta.organizerTips}</strong></div>}
-          <div><Sparkles /><span>{t.weatherHint}</span><strong>{weatherText}</strong></div>
+          <button className="weather-detail-toggle" onClick={() => setWeatherDetailsOpen((open) => !open)} type="button"><Sparkles /><span>{t.weatherHint}</span><strong>{weatherText}</strong></button>
         </div>
+        {weatherDetailsOpen && weatherHours.length > 0 && (
+          <section className="weather-detail-card" aria-label={t.weatherDetails}>
+            <div className="weather-detail-head">
+              <span>{t.weatherDetails}</span>
+              <strong>{weatherText}</strong>
+            </div>
+            <div className="weather-bars">
+              {weatherHours.map((hour) => (
+                <div className="weather-bar-row" key={hour.time}>
+                  <span>{hour.time.slice(11, 16)}</span>
+                  <meter min="-20" max="40" value={hour.temperature} />
+                  <strong>{hour.temperature}°C</strong>
+                </div>
+              ))}
+            </div>
+            <div className="weather-detail-grid">
+              <span>{t.weatherRain}: {Math.max(...weatherHours.map((hour) => hour.rain))}%</span>
+              <span>{t.weatherWind}: {Math.max(...weatherHours.map((hour) => hour.wind))} km/h</span>
+            </div>
+          </section>
+        )}
         {sportMapSearchUrl && (
           <section className="sport-place-card" aria-label="Место события">
             <div>

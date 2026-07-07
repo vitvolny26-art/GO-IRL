@@ -1,5 +1,16 @@
+export type WeatherHour = {
+  time: string;
+  temperature: number;
+  rain: number;
+  wind: number;
+};
+
 type WeatherResult = {
   text: string;
+  temperature: number;
+  rain: number;
+  wind: number;
+  hours: WeatherHour[];
 };
 
 const geoCache = new Map<string, Promise<{ lat: number; lon: number } | null>>();
@@ -94,8 +105,23 @@ export async function getEventWeather(input: {
 
     if (Number.isNaN(temp)) return null;
 
+    const hours = times
+      .map((time, current) => ({
+        time,
+        temperature: Math.round(data.hourly.temperature_2m?.[current]),
+        rain: Number(data.hourly.precipitation_probability?.[current] ?? 0),
+        wind: Math.round(data.hourly.wind_speed_10m?.[current] ?? 0),
+      }))
+      .filter((hour) => hour.time.startsWith(input.date) && !Number.isNaN(hour.temperature))
+      .filter((_, current) => current % 2 === 0)
+      .slice(0, 12);
+
     return {
       text: `${codeIcon(code)} ${temp}°C · ☔ ${rain ?? 0}% · 💨 ${wind || 0} km/h`,
+      temperature: temp,
+      rain: rain ?? 0,
+      wind: wind || 0,
+      hours,
     };
   })();
 
