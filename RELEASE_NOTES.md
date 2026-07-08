@@ -4,14 +4,22 @@
 
 ### Public Release Blocker
 
-GO IRL is still an internal/demo Mini App until trusted Telegram auth is deployed and verified in production. The legacy Supabase RLS model reads `x-go-irl-user-key` from frontend-controlled request headers derived from Telegram `initDataUnsafe` or guest storage. This can be forged and is not safe for public release.
+GO IRL has trusted Telegram auth implemented in code, but public release is still blocked until that path is deployed, configured, migrated, and verified in production.
+
+Current status split:
+
+- Implemented in repository: `verifyTelegramInitData` Edge Function, trusted JWT flow, frontend `accessToken` flow, and migration v4 for verified-claim RLS.
+- Still required before public release: deploy/configure Edge Function secrets, apply and verify migration v4, confirm trusted-auth smoke tests with real Telegram accounts, and remove reliance on legacy frontend-controlled identity.
+
+The legacy Supabase RLS model reads `x-go-irl-user-key` from frontend-controlled request headers derived from Telegram `initDataUnsafe` or guest storage. This can be forged and is not safe for public release.
 
 Public release requires:
 
 - deployed `verifyTelegramInitData` Supabase Edge Function;
+- configured Edge Function secrets, including `GO_IRL_JWT_SECRET`;
 - RLS based on verified JWT claims;
 - removal of `VITE_GO_IRL_ADMIN_KEYS` from the production security model;
-- production verification of security hardening migrations.
+- production verification of security hardening and trusted-auth migrations.
 
 GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 
