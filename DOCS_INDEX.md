@@ -7,6 +7,8 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 ## Rules
 
 - `docs/GO_IRL_CONSTITUTION.md` is the product and architecture source of truth.
+- `docs/MARKET_POSITIONING.md` is the market positioning source of truth and MVP feature filter.
+- `docs/COMPETITOR_WATCH.md` tracks competitor signals and what GO IRL should or should not borrow.
 - Product philosophy and Bible files are preserved historical/product sources. Do not delete, overwrite, or rewrite them during code refactors.
 - Prefer current operational docs for daily development: `README.md`, `ROADMAP.md`, `docs/DEVELOPMENT_PROTOCOL.md`, `docs/MVP_STABILIZATION_PLAN.md`, and `BETA_TESTING.md`.
 - Historical reports and snapshots may be archived later, but only after their useful content is copied into current docs.
@@ -18,6 +20,8 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | Area | Source of truth | Notes |
 |---|---|---|
 | Product and architecture principles | `docs/GO_IRL_CONSTITUTION.md` | Primary decision document. |
+| Market positioning and MVP feature filter | `docs/MARKET_POSITIONING.md` | Defines who GO IRL is, who it is not, beta categories, and forbidden MVP complexity. |
+| Competitor monitoring | `docs/COMPETITOR_WATCH.md` | Tracks competitors, product signals, and feature import queue. |
 | Current app entry point | `README.md` | Stack, setup, implemented scope, trusted auth status. |
 | Current priorities | `ROADMAP.md` | Stabilization, beta readiness, Sport Coach 1.1. |
 | Confirmed task queue | `BACKLOG.md` | Deferred and known work. |
@@ -55,6 +59,8 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `docs/DOCUMENTATION_AUDIT.md` | Audit | current | Documentation-wide audit, missing sections, risks, commit plan. | Must be updated after major doc cleanup. | Keep current. |
 | `docs/PRODUCT_PHILOSOPHY.md` | Product | current | Mission and manifesto. | Should not be rewritten during cleanup. | Keep. |
 | `docs/GO_IRL_CONSTITUTION.md` | Product / Architecture | current | Main product and architecture principles. | Other docs must link to it consistently. | Keep as source of truth. |
+| `docs/MARKET_POSITIONING.md` | Product / Market | current | Market positioning, competitive map, MVP feature filter, beta categories, expansion strategy. | Must stay aligned with roadmap before adding new feature categories. | Keep as market source of truth. |
+| `docs/COMPETITOR_WATCH.md` | Product / Market | current | Competitor list, monitoring rules, feature import queue, red lines. | Weekly monitoring can update this if competitor signals change strategy. | Keep current. |
 | `docs/GO_IRL_1_1_STABILIZATION.md` | Product / Snapshot | partly current | 1.1 stabilization ledger. | Task statuses can become historical. | Keep; mark snapshot sections. |
 | `docs/MVP_STABILIZATION_PLAN.md` | Product | partly current | Closed beta readiness plan. | May overlap with 1.1 stabilization doc. | Keep; reconcile later. |
 | `docs/DEVELOPMENT_PROTOCOL.md` | Operations | current | Development safety rules. | No major conflict found. | Keep. |
@@ -100,7 +106,7 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | Trusted auth status can read as both implemented and blocker. | `README.md`, `RELEASE_NOTES.md`, `docs/Security.md`, `supabase/README.md` | Partly resolved: implemented in repo, still blocked for public release until deploy/secrets/v4/smoke tests. |
 | Sport Coach 1.1 doc is broader than visible current UI. | `docs/SPORT_COACH_MVP.md`, `src/components/CoachRequestPanel.tsx` | Split shipped MVP behavior from planned 1.1/1.2 scope. |
 | Event chat current behavior vs future retention/moderation/notifications. | `README.md`, `BACKLOG.md`, `src/components/ActivityChatPanel.tsx` | Mark advanced chat lifecycle as backlog/future. |
-| Multi-vertical vision vs Sport-first MVP. | `ROADMAP.md`, `docs/vertical-experiences.md`, `src/types.ts`, `src/verticals/` | Mark broad verticals as future-compatible architecture. |
+| Multi-vertical vision vs Sport-first MVP. | `ROADMAP.md`, `docs/vertical-experiences.md`, `docs/MARKET_POSITIONING.md`, `src/types.ts`, `src/verticals/` | Keep six beta categories and mark broad verticals as future-compatible architecture. |
 | Historical Netlify references vs current Vercel beta flow. | `SPRINT0_STATUS.md`, `DEPLOYMENT.md`, `BETA_CHECKLIST.md` | Partly resolved: Vercel primary in `DEPLOYMENT.md`, Sprint 0 historical. |
 | Generated snapshot docs vs current source of truth. | `GO_IRL_DOCUMENTATION.md`, `PATCH_REPORT.md`, `project-audit/*` | Partly resolved through audit docs and snapshot markers. |
 
@@ -115,6 +121,7 @@ Do not mark GO IRL Bible as final until these sections are completed or explicit
 - Telegram Mini App constraints.
 - Browser Demo Mode.
 - Olomouc beta scope.
+- Market positioning and competitor boundaries.
 - Supabase trusted auth reality.
 - Sport Coach MVP boundaries.
 - Activity Chat boundaries.
@@ -140,6 +147,8 @@ GO IRL Documentation
 │   └── docs/
 │       ├── PRODUCT_PHILOSOPHY.md
 │       ├── GO_IRL_CONSTITUTION.md
+│       ├── MARKET_POSITIONING.md
+│       ├── COMPETITOR_WATCH.md
 │       ├── MVP_STABILIZATION_PLAN.md
 │       ├── GO_IRL_1_1_STABILIZATION.md
 │       ├── DEVELOPMENT_PROTOCOL.md
@@ -229,6 +238,7 @@ Do not use `npm`. Do not commit `package-lock.json`, `node_modules`, `dist`, or 
 Update this index when:
 
 - a new documentation file is added;
+- market positioning or competitor scope changes;
 - a root-level historical document is archived;
 - `docs/` gets a new architecture file;
 - beta workflow changes;
