@@ -22,6 +22,47 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-      <button id="beta-build-marker" type="button" title="Reload latest build" onclick="(async()=>{try{sessionStorage.clear();if('caches'in window){const keys=await caches.keys();await Promise.all(keys.map((key)=>caches.delete(key)));}if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map((reg)=>reg.unregister()));}}catch(e){}const url=new URL(window.location.href);url.searchParams.set('refresh',String(Date.now()));window.location.replace(url.toString());})()" style="position:fixed;left:60px;top:24px;z-index:99999;font-size:12px;font-weight:700;line-height:1;background:#2563eb;color:#fff;padding:5px 10px;border:0;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.28);cursor:pointer;user-select:none">BETA effca37</button>
+  
+    <button id="beta-build-marker" type="button" style="position:fixed;left:60px;top:24px;z-index:99999;font-size:12px;font-weight:700;line-height:1;background:#2563eb;color:#fff;padding:5px 10px;border:0;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.28);cursor:pointer;user-select:none">BETA d745ff1</button>
+    <script>
+      (() => {
+        const commit = "d745ff1";
+        const builtAt = "2026-07-08T00:15:11.274Z";
+        const badge = document.getElementById("beta-build-marker");
+
+        const reload = () => {
+          const url = new URL(window.location.href);
+          url.searchParams.set("refresh", String(Date.now()));
+          window.location.replace(url.toString());
+        };
+
+        const copy = async (text) => {
+          try { await navigator.clipboard.writeText(text); } catch {}
+        };
+
+        badge?.addEventListener("click", async () => {
+          const action = window.prompt(
+            "GO IRL Developer\n\n" +
+            "Commit: " + commit + "\n" +
+            "Built: " + builtAt + "\n\n" +
+            "1 - Reload latest build\n" +
+            "2 - Copy commit\n" +
+            "3 - Copy debug info\n" +
+            "4 - Report bug"
+          );
+
+          if (action === "1") reload();
+          if (action === "2") await copy(commit);
+          if (action === "3") await copy(JSON.stringify({
+            app: "GO IRL",
+            commit,
+            builtAt,
+            href: window.location.href,
+            userAgent: navigator.userAgent
+          }, null, 2));
+          if (action === "4") window.open("https://t.me/go_irl_support", "_blank", "noopener,noreferrer");
+        });
+      })();
+    </script>
   </body>
 </html>
