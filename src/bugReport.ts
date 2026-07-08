@@ -1,35 +1,24 @@
 import { getTelegramWebApp } from "./telegram";
-import type { Activity, Language } from "./types";
 
-const botUrl = "https://t.me/GOirl_bot";
 
-export const bugReportUrl = (activity: Activity, language: Language) => {
-  const text = [
-    "GO IRL BUG REPORT",
-    `activity: ${activity.id}`,
-    `language: ${language}`,
-    `title: ${activity.title?.[language] || activity.activity?.[language] || ""}`,
-  ].join("\n");
+const botUsername = "GOirl_bot";
+const webBugReportUrl = `https://t.me/${botUsername}?start=bug_report`;
+const telegramBugReportUrl = `tg://resolve?domain=${botUsername}&start=bug_report`;
 
-  const url = new URL("https://t.me/share/url");
-  url.searchParams.set("url", botUrl);
-  url.searchParams.set("text", text);
-  return url.toString();
-};
+export const bugReportUrl = () => webBugReportUrl;
 
-export const openBugReport = (activity: Activity, language: Language) => {
-  const url = bugReportUrl(activity, language);
+export const openBugReport = () => {
   const webApp = getTelegramWebApp();
 
   if (webApp?.openTelegramLink) {
-    webApp.openTelegramLink(url);
+    webApp.openTelegramLink(telegramBugReportUrl);
     return;
   }
 
   if (webApp?.openLink) {
-    webApp.openLink(url, { try_instant_view: false });
+    webApp.openLink(webBugReportUrl, { try_instant_view: false });
     return;
   }
 
-  window.open(url, "_blank", "noopener,noreferrer");
+  window.open(webBugReportUrl, "_blank", "noopener,noreferrer");
 };
