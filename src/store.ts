@@ -562,11 +562,11 @@ export const useAppStore = create<AppState>((set, get) => {
 
       const status: DbMember["status"] = activity.visibility === "invite" ? "pending" : "joined";
       const displayName = getCurrentDisplayName(getTranslation(get().language).guestName);
-      const { error } = supabase.from("activity_members").insert({
+      const { error } = await supabase.from("activity_members").insert({
         activity_id: id,
         user_key: userKey,
         display_name: displayName,
-        status }) as never;
+        status });
       if (error) throw error;
       await reload();
       return status;
