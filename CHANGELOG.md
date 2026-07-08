@@ -6,11 +6,16 @@ All notable confirmed changes to GO IRL are tracked here.
 
 ### Added
 
+- Added `docs/MARKET_POSITIONING.md` as the market positioning source of truth for GO IRL beta.
+- Added `docs/COMPETITOR_WATCH.md` to track competitor signals and product mechanics worth borrowing.
 - Documented Sport Coach MVP 1.1 as the next narrow beta focus.
 - Added `docs/SPORT_COACH_MVP.md` with scope, UX guardrails, beta metrics, roadmap, and Event Roles boundaries.
 
 ### Changed
 
+- Aligned `README.md`, `DOCS_INDEX.md`, `ROADMAP.md`, and `BACKLOG.md` with the Telegram-first local meetup positioning.
+- Added beta guardrails that block ticketing, payments, club CRM, AI recommendations, dating, broad social feed, complex profiles, and multi-city expansion before the Olomouc loop is stable.
+- Clarified the canonical beta categories: Volleyball, Running, Walking, Coffee meetup, Board games, and Language exchange.
 - Clarified that Coach means sport-only in MVP 1.1.
 - Clarified that guides, tutors, language buddies, game masters, hosts, referees, and paid role marketplace work belong to future Event Roles phases.
 - Updated roadmap priority to validate Sport Coach through show-up rate and beginner comfort before universal role expansion.
