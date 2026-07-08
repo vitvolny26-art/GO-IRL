@@ -37,6 +37,7 @@ GO IRL Documentation
 │       ├── GO_IRL_PROJECT_AUDIT.json
 │       ├── GO_IRL_HEALTH_AUDIT.md
 │       ├── TASK1_COACH_CHAT_WEATHER_AUDIT.md
+│       ├── BETA_READINESS_AUDIT.md
 │       └── STABILIZATION_BOOTSTRAP_REPORT.md
 │
 ├── Architecture / Product / Platform
@@ -139,6 +140,9 @@ Generated health audit. Must be regenerated when lint/build/test status changes.
 
 ### `project-audit/TASK1_COACH_CHAT_WEATHER_AUDIT.md`
 Task-specific audit for Coach, Activity Chat, and Weather. Keep as implementation context.
+
+### `project-audit/BETA_READINESS_AUDIT.md`
+Beta readiness audit. Keep as release-gate evidence and synchronize with `BETA_CHECKLIST.md`, `BETA_TESTING.md`, and `RELEASE_NOTES.md`.
 
 ### `project-audit/STABILIZATION_BOOTSTRAP_REPORT.md`
 Historical stabilization bootstrap report. Candidate for archival after core findings are merged into `GO_IRL_PROJECT_AUDIT.md`.
