@@ -1,3 +1,9 @@
+> ⚠️ **HISTORICAL SNAPSHOT / DEPRECATED**
+>
+> Этот документ является историческим артефактом Sprint 0 / локальной разработки.
+>
+> Актуальные инструкции см. в `README.md` и `DOCS_INDEX.md`. Не использовать для генерации кода!
+
 # DEPRECATED — Legacy local Windows setup
 
 Status: **deprecated / historical**.
@@ -78,91 +84,3 @@ pnpm run dev
 - ✅ **Prettier** — code formatting
 - ✅ **ESLint** — error checking
 - ✅ **Tailwind CSS** — style hints
-- ✅ **Docker** — container management
-
-### Node Packages
-- ✅ All dependencies from `package.json`
-
-### Startup Scripts
-- ✅ `start-dev.bat` — quick dev server launch
-- ✅ `.env.local` — environment config
-
----
-
-## How It Works
-
-```
-1. You open VS Code
-   ↓
-2. Edit code (e.g., add new component)
-   ↓
-3. Press Ctrl+S (save)
-   ↓
-4. Vite automatically rebuilds
-   ↓
-5. Browser auto-refreshes (hot reload)
-   ↓
-6. Shotdiff shows all visual changes
-   ↓
-7. React DevTools shows component changes
-```
-
----
-
-## Commands
-
-### Start dev server
-```bash
-pnpm run dev
-```
-
-### Run tests
-```bash
-pnpm run test
-```
-
-### Check linting
-```bash
-pnpm run lint
-```
-
-### Build for production
-```bash
-pnpm run build
-```
-
----
-
-## Troubleshooting
-
-### VS Code not installed
-```powershell
-winget install Microsoft.VisualStudioCode
-```
-
-### pnpm not installed
-```powershell
-npm install -g pnpm
-```
-
-### Need administrator rights
-1. Open PowerShell
-2. Right-click → "Run as administrator"
-3. Run the script again
-
-### Port 5178 already in use
-```powershell
-# Find process on that port
-netstat -ano | findstr :5178
-
-# Or use a different port
-pnpm run dev -- --port 5179
-```
-
----
-
-## Help
-
-If anything doesn't work — let me know!
-
-🚀 **Ready to develop!**
