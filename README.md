@@ -6,6 +6,7 @@ Before contributing or implementing new features, read:
 
 1. [docs/PRODUCT_PHILOSOPHY.md](docs/PRODUCT_PHILOSOPHY.md)
 2. [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md)
+3. [docs/SPORT_COACH_MVP.md](docs/SPORT_COACH_MVP.md)
 
 Every major product or architecture decision must support the mission:
 
@@ -16,6 +17,14 @@ If a feature increases screen time but does not increase real-life meetings, it 
 GO IRL (Go In Real Life) is a Telegram Mini App for creating and joining offline activities, starting with Olomouc.
 
 All major product and architecture decisions must follow the [GO IRL Constitution](docs/GO_IRL_CONSTITUTION.md).
+
+## Current Product Focus
+
+Closed beta focuses on Olomouc and the real-life event loop:
+
+create event -> share -> participants join -> event chat -> people show up in real life.
+
+For version 1.1, **Coach means Sport Coach only**. Coach is not a universal helper for all events. Guides, language buddies, game masters, hosts, referees, and paid role marketplaces are future Event Roles work after the Sport Coach MVP proves value.
 
 ## Current Stack
 
@@ -78,6 +87,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Safe-area aware fixed header for Telegram Mini App
 - Explicit "Done" / "Back to Telegram" UX; the Mini App closes only after a user action
 - Sport Vertical MVP with sport-specific card, details, create fields, and matching engine
+- Sport Coach MVP 1.1 product scope: Coach is sport-only; future roles move to Event Roles
 - ActivityRendererRegistry with Sport and Generic registrations for future vertical expansion
 - GO IRL brand logo, favicon, app icon, and Open Graph preview
 - Supabase schema and RLS policies in `supabase/schema.sql`
@@ -91,6 +101,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 
 - `docs/PRODUCT_PHILOSOPHY.md` - product manifesto and mission
 - `docs/GO_IRL_CONSTITUTION.md` - product and architecture source of truth
+- `docs/SPORT_COACH_MVP.md` - Sport Coach MVP 1.1 scope, beta metrics, roadmap, and Event Roles guardrails
 - `CHANGELOG.md` - shipped changes
 - `ROADMAP.md` - product and engineering direction
 - `SPRINTS.md` - sprint-by-sprint delivery plan
