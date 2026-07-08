@@ -1,3 +1,38 @@
+# DEPRECATED — Старый локальный Windows setup
+
+Статус: **deprecated / historical**.
+
+Файл сохранён только как история проекта. Не использовать как актуальную инструкцию запуска.
+
+Причины:
+
+- Внутри указан старый локальный Windows-путь: `C:\Users\lenovo\Documents\Codex\2026-05-28\new-chat`.
+- Инструкция завязана на `.bat` / `.ps1` desktop helper scripts.
+- Текущий workflow GO IRL: Codespaces + pnpm.
+
+Актуальный безопасный запуск:
+
+```bash
+pnpm install
+pnpm run dev
+```
+
+Перед commit:
+
+```bash
+pnpm run lint
+pnpm run build
+pnpm run test
+```
+
+Смотри также:
+
+- `README.md`
+- `DOCS_INDEX.md`
+- `docs/DEVELOPMENT_PROTOCOL.md`
+
+---
+
 # 🚀 GO IRL Development Setup - Автоматическая Установка
 
 ## Быстрый старт (3 шага)
