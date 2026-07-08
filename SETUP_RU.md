@@ -1,3 +1,9 @@
+> ⚠️ **HISTORICAL SNAPSHOT / DEPRECATED**
+>
+> Этот документ является историческим артефактом Sprint 0 / локальной разработки.
+>
+> Актуальные инструкции см. в `README.md` и `DOCS_INDEX.md`. Не использовать для генерации кода!
+
 # DEPRECATED — Старый локальный Windows setup
 
 Статус: **deprecated / historical**.
