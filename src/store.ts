@@ -10,6 +10,7 @@ import {
 import { getCurrentUserRole, isCurrentUserAdmin } from "./config/admin";
 import { cities, defaultCityId } from "./config/cities";
 import { getTranslation } from "./i18n";
+import { getTelegramInitData } from "./telegram";
 import type { Activity, ActivityMetadata, ActivityType, AppView, Language, NewActivity, UserRole } from "./types";
 
 type JoinResult = "joined" | "pending" | "left" | "full" | "private";
@@ -78,11 +79,12 @@ let realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
 const visualDemoStorageKey = "go-irl-visual-demo-activities-v1";
 const visualDemoUserKey = "telegram:999999";
 const visualDemoUserName = "Vit_Test";
-const visualDemoNotice = "\u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b (\u0414\u0435\u043c\u043e-\u0440\u0435\u0436\u0438\u043c)";
+const visualDemoNotice = "Изменения сохранены (Демо-режим)";
+const hasTelegramInitData = () => Boolean(getTelegramInitData());
 const isVisualDemoMode = () =>
   typeof window !== "undefined" &&
-  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
-  !isTrustedAuthReady();
+  !isTrustedAuthReady() &&
+  !hasTelegramInitData();
 
 const demoLocalized = (value: string) => ({ ru: value, uk: value, cs: value, en: value });
 
@@ -482,7 +484,7 @@ export const useAppStore = create<AppState>((set, get) => {
       try {
         set({ userRole: getTrustedUserRole() === "user" ? getCurrentUserRole(getUserKey()) : getTrustedUserRole() });
         await reload();
-        if (!realtimeChannel && !(typeof document !== "undefined" && document.hidden)) {
+        if (!isVisualDemoMode() && !realtimeChannel && !(typeof document !== "undefined" && document.hidden)) {
           realtimeChannel = supabase
             .channel("go-irl-live")
             .on("postgres_changes", { event: "*", schema: "public", table: "activities" }, () => {
@@ -560,11 +562,11 @@ export const useAppStore = create<AppState>((set, get) => {
 
       const status: DbMember["status"] = activity.visibility === "invite" ? "pending" : "joined";
       const displayName = getCurrentDisplayName(getTranslation(get().language).guestName);
-      const { error } = await supabase.from("activity_members").insert({
+      const { error } = supabase.from("activity_members").insert({
         activity_id: id,
         user_key: userKey,
         display_name: displayName,
-        status });
+        status }) as never;
       if (error) throw error;
       await reload();
       return status;
