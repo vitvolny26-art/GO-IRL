@@ -4,6 +4,7 @@
 
 Before contributing or implementing new features, read:
 
+0. [DOCS_INDEX.md](DOCS_INDEX.md)
 1. [docs/PRODUCT_PHILOSOPHY.md](docs/PRODUCT_PHILOSOPHY.md)
 2. [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md)
 3. [docs/SPORT_COACH_MVP.md](docs/SPORT_COACH_MVP.md)
@@ -99,6 +100,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 
 ## Project Documents
 
+- `DOCS_INDEX.md` - single documentation entry point and archive policy
 - `docs/PRODUCT_PHILOSOPHY.md` - product manifesto and mission
 - `docs/GO_IRL_CONSTITUTION.md` - product and architecture source of truth
 - `docs/SPORT_COACH_MVP.md` - Sport Coach MVP 1.1 scope, beta metrics, roadmap, and Event Roles guardrails
