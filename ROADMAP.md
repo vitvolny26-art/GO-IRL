@@ -4,59 +4,120 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md).
 
+Market positioning and MVP feature filters must follow [docs/MARKET_POSITIONING.md](docs/MARKET_POSITIONING.md).
+
+Competitor-driven product signals are tracked in [docs/COMPETITOR_WATCH.md](docs/COMPETITOR_WATCH.md).
+
 For the Sport Coach MVP 1.1 scope, see [docs/SPORT_COACH_MVP.md](docs/SPORT_COACH_MVP.md).
+
+## Market guardrail for beta
+
+Closed beta is not a generic event calendar, ticketing platform, sport-only app, dating product, or social feed.
+
+Closed beta validates one focused market thesis:
+
+> GO IRL is a Telegram-first local meetup layer for small real-life activities in Olomouc.
+
+Beta product scope must stay centered on:
+
+- create event in 30-60 seconds;
+- share through Telegram;
+- one-tap Join;
+- participant count and capacity;
+- event chat;
+- organizer/host trust;
+- people showing up in real life.
+
+Canonical beta categories:
+
+1. Volleyball
+2. Running
+3. Walking
+4. Coffee meetup
+5. Board games
+6. Language exchange
+
+Before adding any feature, apply this test:
+
+> Does this make it easier for people to leave the chat and meet in real life?
+
+If not, it is future scope.
+
+## Explicit beta non-goals
+
+Do not build before beta:
+
+- ticketing or payments;
+- club CRM;
+- subscriptions or premium plans;
+- AI recommendations;
+- photo albums or post-event social feed;
+- public ratings/reviews;
+- direct messages;
+- full recurring engine;
+- big multi-city catalog;
+- complex profiles;
+- dating, friends, travel, or lifestyle verticals.
+
+These may be revisited after Olomouc proves event creation, join rate, chat activation, and real attendance.
 
 ## Strategic Development Order
 
-The current product priority is foundation and infrastructure. Friends, Travel, and Dating are intentionally deferred until the platform layer is stable.
+The current product priority is foundation and infrastructure. Friends, Travel, Dating, ticketing, and broad social features are intentionally deferred until the Olomouc beta loop is stable.
 
 Before new vertical expansion, Closed Beta must validate the Sport Coach hypothesis in Olomouc:
 
 > Sport events with a confirmed coach should have a higher show-up rate and higher beginner comfort than sport events without a coach.
 
-1. Infrastructure Hardening
+1. Closed Beta Loop Stability
+   - Browser demo/mock mode works without Telegram.
+   - Event cards are stable and readable.
+   - Join state, participant count, event chat, and share flow work reliably.
+   - Profile basics create enough trust to join an event.
+   - The six beta categories stay focused and visible.
+2. Infrastructure Hardening
    - Supabase production readiness.
    - Safe, repeatable migrations.
    - RLS hardening for all user and event data.
    - Roles and permission enforcement.
    - Database verification SQL and release checklist.
    - Remove dependency on local fallback where possible after production migration is applied.
-2. Sport Coach MVP 1.1
+3. Sport Coach MVP 1.1
    - Keep Coach sport-only.
    - Stabilize coach request flow for sport events.
    - Add demo confirmed coach for browser mock mode.
    - Add coach detail block and sport card badge.
    - Measure show-up rate and beginner comfort.
-3. Performance
+4. Performance
    - Lazy loading.
    - Code splitting.
    - Bundle optimization.
    - Telegram Mini App startup performance.
-4. n8n Notifications
+5. n8n Notifications
    - Server-side notification workflow.
    - Evening digest.
    - Working hours.
    - Quiet hours.
    - No Mini App background work.
-5. AI Event Discovery
+6. AI Event Discovery
    - External sources.
    - Event collection.
    - AI normalization.
    - Duplicate detection.
    - Confidence scoring.
    - Save discovered events to the database.
-6. Event Roles Foundation
+7. Event Roles Foundation
    - Start only after Sport Coach improves show-up rate or beginner comfort.
    - Future roles are not called Coach.
    - Board games can use Game Master.
    - Language events can use Language Buddy or Conversation Mentor.
    - City walks can use Guide.
    - Social meetups can use Host or Icebreaker.
-7. Friends Vertical
+8. Friends Vertical
    - Start only after database and notification foundation is stable.
-8. Travel Vertical
+9. Travel Vertical
    - Start only after Friends and source discovery architecture are stable.
-9. Dating Vertical
+10. Dating Vertical
    - Last, because it requires privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection.
 
 ## Sport Coach MVP 1.1
@@ -276,7 +337,7 @@ Do not build these before Sport Coach proves value.
 - Sport Coach is the next narrow beta validation layer for Sport only.
 - Generic Activity/Event remains as fallback until a vertical-specific experience is implemented.
 - Future Event Roles must use native role names per vertical instead of calling every helper a coach.
-- Friends, Travel, and Dating are deferred by strategy and must not be implemented before the infrastructure, performance, n8n, and AI discovery layers are stable.
+- Friends, Travel, Dating, ticketing, CRM, and broad social feed features are deferred by strategy and must not be implemented before the Olomouc beta loop is stable.
 - Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.
 
 <!-- GO_IRL_MVP_STABILIZATION_PHASE -->
@@ -291,13 +352,15 @@ Priority before Closed Beta:
 5. Replace bug-report clipboard/alert flow.
 6. Add safe Open-Meteo weather widget.
 7. Fix Telegram share links and prepare /join/:id OG previews.
+8. Keep beta scope aligned with `docs/MARKET_POSITIONING.md` and `docs/COMPETITOR_WATCH.md`.
 
 Definition of done:
 - lint/build/test pass;
 - no broken Telegram auth;
 - demo mode works in browser;
 - no technical labels leak into UI;
-- README and roadmap updated after each milestone.
+- README and roadmap updated after each milestone;
+- new feature requests pass the market guardrail test: they must help users meet in real life.
 
 <!-- GO_IRL_STABILIZATION_TASKS_5_8 -->
 ## Stabilization update: Tasks 5-8
