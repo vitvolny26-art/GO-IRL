@@ -1,5 +1,6 @@
 import { initializeTrustedAuth, getCurrentAuthSession, isTrustedAuthReady } from "./authSession";
 import { supabase } from "./supabase";
+import { getTelegramInitData } from "./telegram";
 import type { Activity, CoachRequest, CoachRequestType } from "./types";
 
 type AuthLike = {
@@ -17,10 +18,11 @@ const readAuthUserKey = (identity: unknown) => {
 const demoUserKey = "telegram:999999";
 const demoCoachStorageKey = "go-irl-demo-coach-requests-v1";
 
+const hasTelegramInitData = () => Boolean(getTelegramInitData());
 const isBrowserDemoMode = () =>
   typeof window !== "undefined" &&
-  /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname) &&
-  !isTrustedAuthReady();
+  !isTrustedAuthReady() &&
+  !hasTelegramInitData();
 
 const readDemoCoachRequests = () => {
   try {
