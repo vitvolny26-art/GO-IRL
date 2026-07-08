@@ -41,7 +41,7 @@ node beta-test.cjs
 - [ ] Tap share button (Share2 icon)
 - [ ] Select "Copy link"
 - [ ] Paste link in Notes app
-- [ ] Verify link format: `https://t.me/[BOT_NAME]?startapp=[ACTIVITY_ID]`
+- [ ] Verify link format: `https://t.me/[BOT_NAME]/[APP_NAME]?startapp=[ACTIVITY_ID]`
 - [ ] Tap link → should open mini app with activity loaded
 - [ ] Check if you can join/request
 
@@ -65,23 +65,67 @@ node beta-test.cjs
 pnpm run dev
 ```
 
-- [ ] Open: `http://localhost:5178?demo=true`
-- [ ] Check that demo user is loaded (should see demo activities)
-- [ ] Try to join an activity (POST)
-- [ ] Check browser console for `ensureTrustedAuthForWrite()` guard
-- [ ] Verify write operations show error (demo mode blocks writes)
+- [ ] Open local app in a normal browser, not inside Telegram
+- [ ] Open Vercel app in a normal browser, not inside Telegram
+- [ ] Confirm demo user is active: `Vit_Test` / `telegram:999999`
+- [ ] Confirm Olomouc demo events are visible:
+  - [ ] Volleyball
+  - [ ] Board games
+  - [ ] Running
+  - [ ] Walking
+  - [ ] Coffee meetup
+  - [ ] Language exchange
+- [ ] Create a demo activity
+- [ ] Confirm message appears: `Изменения сохранены (Демо-режим)`
+- [ ] Refresh the page
+- [ ] Confirm the demo activity persists from local browser state
+- [ ] Join/leave a demo activity
+- [ ] Open sport event details
+- [ ] Check Coach request flow
+- [ ] Check Event Chat message flow
+- [ ] Confirm browser demo writes do not appear in production Supabase tables
 
-**Demo write tests:**
-- [ ] Try to create activity → should fail
-- [ ] Try to join activity → should fail
-- [ ] Try to delete activity → should fail
-- [ ] Chat/coach features → should fail
-
-**Expected:** All writes blocked with appropriate error messages
+**Expected:** Browser without Telegram uses local demo state. Demo writes are allowed locally and must not touch production Supabase.
 
 ---
 
-## 6. Supabase: Table Integrity
+## 6. Event Cards: Time Rendering
+- [ ] Open Home
+- [ ] Compare generic cards and sport cards
+- [ ] Confirm sport cards show event start time, not duration
+- [ ] Confirm cards with invalid/empty time do not show an empty time badge
+- [ ] Open sport event detail and confirm duration remains visible in details metadata
+
+**Expected:** Card time rendering is consistent and no empty time badge appears.
+
+---
+
+## 7. Weather Widget
+- [ ] Open a sport event within 7 days
+- [ ] Confirm weather text appears after loading
+- [ ] Expand weather details
+- [ ] Confirm temperature bars are visible
+- [ ] Confirm rain and wind values are visible
+- [ ] Open/create sport event more than 7 days ahead
+- [ ] Confirm forecast-available-later message appears
+
+**Expected:** Weather works without API keys and does not break sport details.
+
+---
+
+## 8. Bug Report
+- [ ] Open event details
+- [ ] Open more menu
+- [ ] Tap `Сообщить о баге`
+- [ ] Confirm Telegram support link opens
+- [ ] Confirm share text is not copied
+- [ ] Confirm no alert popup appears
+
+**Expected:** Bug report opens support link only.
+
+---
+
+## 9. Supabase: Table Integrity
 - [ ] Open Supabase dashboard
 - [ ] Check tables exist (no manual changes):
   - [ ] `activities`
