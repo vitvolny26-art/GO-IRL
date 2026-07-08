@@ -1,3 +1,17 @@
+> ⚠️ **HISTORICAL BIBLE DRAFT / NOT CURRENT MVP SCOPE**
+>
+> This PRD is preserved as product Bible material, but it is **not** the current beta implementation plan.
+>
+> Current product scope is controlled by:
+> - `docs/MARKET_POSITIONING.md`
+> - `docs/COMPETITOR_WATCH.md`
+> - `ROADMAP.md`
+> - `BACKLOG.md`
+>
+> Anything below that mentions reminders, RLI, reviews, achievements, broad modules, natural-language search, complex notifications, attendance verification, Trust Score, or full multi-vertical platform behavior must be treated as **future / not current MVP** unless explicitly re-approved.
+>
+> Current beta focus: Olomouc, Telegram-first local micro-meetups, six categories, create -> share -> join -> chat -> real attendance.
+
 Отлично. Теперь начинается документ, который станет **основой всей разработки**.
 
 После него Codex уже сможет реализовывать MVP практически без уточнений.
