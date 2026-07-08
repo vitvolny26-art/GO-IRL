@@ -72,6 +72,7 @@ GO IRL Documentation
 │
 ├── History / Bible / Product Philosophy Archive
 │   └── docs/bible/
+│       ├── 00-completion-audit.md
 │       ├── 01-foundation/
 │       │   ├── 01-why-we-exist.md
 │       │   └── 02-core-principles.md
@@ -243,31 +244,32 @@ The old root-level Bible filenames were intentionally renamed and moved into `do
 
 ### Current Bible structure
 
-| Order | File | Source status |
+| Order | File | Status |
 |---|---|---|
-| 01.01 | `docs/bible/01-foundation/01-why-we-exist.md` | Complete chapter: Why We Exist. |
-| 01.02 | `docs/bible/01-foundation/02-core-principles.md` | Complete chapter: 22 principles plus Engineering Oath. |
-| 02 | `docs/bible/02-platform-architecture.md` | Complete book-level architecture document. |
-| 03 | `docs/bible/03-database-design.md` | Complete database design document, but contains a leftover Russian sentence at the end. |
-| 04 | `docs/bible/04-modules-architecture.md` | Complete modules architecture document. |
-| 05 | `docs/bible/05-product-requirements.md` | Complete PRD document. Original heading did not include chapter number 06. |
-| 06 | `docs/bible/06-ux-interaction-guidelines.md` | Complete UX guidelines document. Original heading used `07`, so numbering was inconsistent. |
+| 00 | `docs/bible/00-completion-audit.md` | Completion audit. Source of truth for what is missing. |
+| 01.01 | `docs/bible/01-foundation/01-why-we-exist.md` | Preserved draft / usable, not final. |
+| 01.02 | `docs/bible/01-foundation/02-core-principles.md` | Preserved draft / usable, not final. |
+| 02 | `docs/bible/02-platform-architecture.md` | Preserved draft / needs MVP reconciliation. |
+| 03 | `docs/bible/03-database-design.md` | Needs Supabase/schema audit. Contains a leftover Russian sentence at the end. |
+| 04 | `docs/bible/04-modules-architecture.md` | Needs audit against current Sport-first focus. |
+| 05 | `docs/bible/05-product-requirements.md` | Draft / not final. Needs split into MVP 1.0 and GO IRL 1.1 requirements. |
+| 06 | `docs/bible/06-ux-interaction-guidelines.md` | Draft / not final. Original heading used `07`, so numbering was inconsistent. |
 
 ### Bible completeness audit
 
-Current Bible archive is usable and preserved, but not perfectly complete as a numbered book series.
+Current Bible archive is preserved and structured, but **not complete** as a final book set.
 
 Known gaps and inconsistencies:
 
 - Book I has Chapter 1 and Chapter 2.
 - Book II is a book-level document and does not explicitly say Chapter 3.
-- Book III starts as `04 — Database Design`.
-- Book IV starts as `05 — Modules Architecture`.
+- Book III originally starts as `04 — Database Design`.
+- Book IV originally starts as `05 — Modules Architecture`.
 - Book V has PRD content but no explicit `06` in the original heading.
-- Book VI starts as `07 — UX & Interaction Guidelines`.
-- This suggests the historical material contains chapters 1, 2, 4, 5, 7, with `3` implicit in Book II and `6` implicit/missing in Book V.
+- Book VI originally starts as `07 — UX & Interaction Guidelines`.
+- This suggests the historical material contains chapters 1, 2, 4, 5, 7, with `3` implicit in Book II and `6` implicit or missing around PRD.
 
-Do not invent missing Bible chapters without a product decision. If needed, create a separate future file such as `docs/bible/00-bible-roadmap.md` to define missing chapter titles before writing them.
+Next step before writing: find all old Bible / PRD / Architecture fragments, compare them with current code and Supabase, then create a final Bible plan. Do not invent missing Bible chapters without product decision.
 
 ### Old root filenames replaced
 
