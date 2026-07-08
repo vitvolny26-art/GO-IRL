@@ -1,3 +1,17 @@
+> ⚠️ **HISTORICAL BIBLE DRAFT / FUTURE PLATFORM VISION**
+>
+> This architecture chapter is preserved as long-term product thinking, but it is **not** an instruction to build a large backend platform before beta.
+>
+> Current beta scope is controlled by:
+> - `docs/MARKET_POSITIONING.md`
+> - `docs/COMPETITOR_WATCH.md`
+> - `ROADMAP.md`
+> - `BACKLOG.md`
+>
+> Anything below that implies REST API first, WebSocket infrastructure, background workers, event bus, multi-client platform, achievements, RLI, Trust Score, referral, media, AI, or broad module infrastructure must be treated as **future / not current MVP** unless explicitly re-approved.
+>
+> Current engineering priority: stabilize the Telegram Mini App MVP for Olomouc without rewriting the architecture.
+
 GO IRL Bible
 Book II
 Platform Architecture
@@ -70,7 +84,6 @@ Architecture Overview
                 │
 
        Event Bus / Queue
-
         ┌────────┴────────┐
 
         │                 │
