@@ -1,24 +1,19 @@
 import { getTelegramWebApp } from "./telegram";
 
-
-const botUsername = "GOirl_bot";
-const webBugReportUrl = `https://t.me/${botUsername}?start=bug_report`;
-const telegramBugReportUrl = `tg://resolve?domain=${botUsername}&start=bug_report`;
-
-export const bugReportUrl = () => webBugReportUrl;
+const bugReportUrl = "https://t.me/GOirl_bot";
 
 export const openBugReport = () => {
   const webApp = getTelegramWebApp();
 
   if (webApp?.openTelegramLink) {
-    webApp.openTelegramLink(telegramBugReportUrl);
+    webApp.openTelegramLink(bugReportUrl);
     return;
   }
 
   if (webApp?.openLink) {
-    webApp.openLink(webBugReportUrl, { try_instant_view: false });
+    webApp.openLink(bugReportUrl, { try_instant_view: false });
     return;
   }
 
-  window.open(webBugReportUrl, "_blank", "noopener,noreferrer");
+  window.open(bugReportUrl, "_blank", "noopener,noreferrer");
 };
