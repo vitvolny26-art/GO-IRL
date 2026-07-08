@@ -139,6 +139,11 @@ The constraints are created as `NOT VALID`, which means legacy/demo rows do not 
 
 `supabase/migration_v4_trusted_telegram_auth.sql` prepares the database for verified Telegram sessions.
 
+Current status split:
+
+- Implemented in repository: `verifyTelegramInitData` Edge Function, trusted JWT flow, frontend `accessToken` flow, and migration v4 SQL.
+- Still required before public release: deploy/configure Edge Function secrets, apply and verify migration v4, and run trusted-auth smoke tests in real Telegram clients.
+
 It adds:
 
 - `public.app_users`
@@ -183,7 +188,7 @@ Legacy demo mode can send these headers from `src/supabase.ts` only when explici
 
 Production policies must use verified JWT claims from `verifyTelegramInitData`.
 
-Critical warning: this header-based identity model is unsafe for public release because the frontend controls `x-go-irl-user-key`. A user can forge it with DevTools or direct REST calls. It is allowed only for private demo/testing until trusted Telegram `initData` verification is implemented.
+Critical warning: this header-based identity model is unsafe for public release because the frontend controls `x-go-irl-user-key`. A user can forge it with DevTools or direct REST calls. It is allowed only for private demo/testing until trusted Telegram `initData` verification is deployed, migration v4 is applied, and smoke tests pass.
 
 Admin delete permissions are checked by `public.admin_users` through `go_irl_request_is_admin()`. Add only trusted owner keys:
 
