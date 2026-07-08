@@ -1,3 +1,16 @@
+> ⚠️ **HISTORICAL BIBLE DRAFT / UX PRINCIPLES, NOT FULL CURRENT MVP SCOPE**
+>
+> This UX guide is preserved because its core philosophy is strong: GO IRL should reduce friction and get people into real life.
+>
+> Current beta UX scope is controlled by:
+> - `docs/MARKET_POSITIONING.md`
+> - `docs/COMPETITOR_WATCH.md`
+> - `ROADMAP.md`
+> - `BACKLOG.md`
+>
+> Sections below that mention achievements, AI assistance, verification, broad notifications, or future reward mechanics are **future / not current MVP** unless explicitly re-approved.
+>
+> Current beta UX priority: understand event cards quickly, create in 30-60 seconds, join in one tap, use event chat, share in Telegram, and meet in real life.
 
 
 # GO IRL Bible
@@ -558,4 +571,3 @@ The interface is only the bridge.
 > The best interaction with GO IRL is the one that ends with people meeting in person.
 
 ---
-
