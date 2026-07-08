@@ -4,38 +4,81 @@ Confirmed work is ordered by priority.
 
 All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md).
 
+Market positioning and MVP feature filters must follow [docs/MARKET_POSITIONING.md](docs/MARKET_POSITIONING.md).
+
+Competitor-driven product signals are tracked in [docs/COMPETITOR_WATCH.md](docs/COMPETITOR_WATCH.md).
+
+## Backlog filter for Olomouc beta
+
+Before adding any backlog item to current beta scope, apply this test:
+
+> Does this help users create, join, coordinate, and attend a real-life meetup faster than a normal Telegram chat?
+
+If no, the item must stay future scope.
+
+Current beta must stay focused on:
+
+- six beta categories: Volleyball, Running, Walking, Coffee meetup, Board games, Language exchange;
+- event card clarity;
+- event creation in 30-60 seconds;
+- Telegram share;
+- one-tap Join;
+- participant count and capacity;
+- event chat;
+- organizer/host trust;
+- browser demo/mock mode.
+
+Do not move these into beta implementation:
+
+- ticketing/payments;
+- club CRM;
+- subscriptions/premium;
+- AI recommendations;
+- post-event albums/feed;
+- public ratings/reviews;
+- direct messages;
+- complex profiles;
+- big multi-city catalog;
+- dating, friends, travel, or broad lifestyle verticals.
+
 ## Strategic Priority Order
 
-1. Infrastructure Hardening
+1. Closed Beta Loop Stability
+   - Browser demo/mock mode without Telegram.
+   - Stable event cards and time rendering.
+   - Join state, participant count, capacity, event chat, and Telegram share.
+   - Profile basics and organizer/host trust.
+   - Six canonical beta categories only.
+2. Infrastructure Hardening
    - Supabase production readiness.
    - Migrations.
    - RLS.
    - Roles.
    - Database verification.
    - Remove dependency on local fallback where possible after production migration is verified.
-2. Performance
+3. Performance
    - Lazy loading.
    - Code splitting.
    - Bundle optimization.
    - Telegram Mini App startup performance.
-3. n8n Notifications
+4. n8n Notifications
    - Server-side notification workflow.
    - Evening digest.
    - Working hours.
    - Quiet hours.
    - No Mini App background work.
-4. AI Event Discovery
+5. AI Event Discovery
    - External sources.
    - Event collection.
    - AI normalization.
    - Duplicate detection.
    - Confidence scoring.
    - Save discovered events to the database.
-5. Friends Vertical
+6. Friends Vertical
    - Deferred until database and notification foundation is stable.
-6. Travel Vertical
+7. Travel Vertical
    - Deferred until Friends and source discovery architecture are stable.
-7. Dating Vertical
+8. Dating Vertical
    - Deferred until privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection are ready.
 
 ## Build Blocker
