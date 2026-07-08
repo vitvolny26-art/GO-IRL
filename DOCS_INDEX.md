@@ -73,6 +73,7 @@ GO IRL Documentation
 ├── History / Bible / Product Philosophy Archive
 │   └── docs/bible/
 │       ├── 00-completion-audit.md
+│       ├── 00-bible-roadmap.md
 │       ├── 01-foundation/
 │       │   ├── 01-why-we-exist.md
 │       │   └── 02-core-principles.md
@@ -247,6 +248,7 @@ The old root-level Bible filenames were intentionally renamed and moved into `do
 | Order | File | Status |
 |---|---|---|
 | 00 | `docs/bible/00-completion-audit.md` | Completion audit. Source of truth for what is missing. |
+| 00 | `docs/bible/00-bible-roadmap.md` | Completion roadmap. Defines how to finish without rewriting from scratch. |
 | 01.01 | `docs/bible/01-foundation/01-why-we-exist.md` | Preserved draft / usable, not final. |
 | 01.02 | `docs/bible/01-foundation/02-core-principles.md` | Preserved draft / usable, not final. |
 | 02 | `docs/bible/02-platform-architecture.md` | Preserved draft / needs MVP reconciliation. |
