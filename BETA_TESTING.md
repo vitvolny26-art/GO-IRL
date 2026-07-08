@@ -76,22 +76,53 @@ Manual checks:
 ### 4. Test on Mobile (iOS/Android)
 
 #### Share Link Test
-1. Find sport activity in Telegram mini app
-2. Tap share button
-3. Copy link
-4. Open link → should load activity in mini app
-5. Try to join
+1. Find sport activity in Telegram Mini App.
+2. Tap share button.
+3. Copy/share the generated link.
+4. Open link from another Telegram account.
+5. Confirm it opens the same target activity in the Mini App.
+6. Try to join.
 
-#### Expected Link Format
+#### Expected Telegram Mini App Link Format
+
+```text
+https://t.me/[BOT_USERNAME]/[APP_NAME]?startapp=[ACTIVITY_ID]
 ```
-https://t.me/[BOT_NAME]?startapp=[ACTIVITY_ID]
+
+Expected behavior:
+
+- Link opens the GO IRL Telegram Mini App.
+- Target activity opens directly when possible.
+- iOS must not redirect to the App Store instead of opening Telegram/Mini App.
+- Public event joins directly if capacity is available.
+- Private/invite event follows request/approval rules.
+- Full event follows waiting-state behavior where supported.
+
+#### Browser Join Fallback Test
+
+1. Open local or deployed web app route:
+
+```text
+/join/[ACTIVITY_ID]
 ```
+
+2. Confirm the browser route opens the target activity.
+3. Confirm it does not behave like a ticketing page, event website, or external landing page.
+4. Confirm Open Graph preview uses GO IRL metadata and an absolute image URL.
+
+#### Share Guardrails
+
+- [ ] Share flow must not be reused for bug report.
+- [ ] Bug report must open support/feedback flow, not copy share text.
+- [ ] Share text should focus on joining the event, not downloading an app store package.
 
 ### 5. Check Vercel Deployment
 1. Go to the current Vercel project for GO IRL
 2. Check latest deployment status (should be green)
 3. Open preview URL
 4. Verify same functionality as localhost
+
+If Vercel shows `upgradeToPro=build-rate-limit`, treat it as an operational quota issue, not an app regression.
 
 ### 6. Supabase Verification
 1. Open Supabase dashboard
