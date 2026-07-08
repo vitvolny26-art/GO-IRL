@@ -1,3 +1,25 @@
+# HISTORICAL SNAPSHOT — Trusted Auth Guard Patches
+
+Status: **historical / snapshot**.
+
+This report is preserved as implementation history for the trusted-auth guard patch set. Do not use it as the current release or setup source of truth.
+
+Current source-of-truth documents:
+
+- `README.md`
+- `RELEASE_NOTES.md`
+- `docs/Security.md`
+- `supabase/README.md`
+- `DOCS_INDEX.md`
+
+Rules:
+
+- Do not edit `.env`, secrets, Supabase RLS, auth, or SQL from this historical report.
+- Verify current code and deployment state before treating any status below as current.
+- Keep this file until useful content is merged into current docs or audit history.
+
+---
+
 # Trusted Auth Guard Patches — Application Report
 
 ## Completed
