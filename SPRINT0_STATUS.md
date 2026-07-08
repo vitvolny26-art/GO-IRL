@@ -1,3 +1,9 @@
+> ⚠️ **HISTORICAL SNAPSHOT / DEPRECATED**
+>
+> Этот документ является историческим артефактом Sprint 0 / локальной разработки.
+>
+> Актуальные инструкции см. в `README.md` и `DOCS_INDEX.md`. Не использовать для генерации кода!
+
 # Sprint 0 Status
 
 Status: **historical snapshot**.
@@ -12,7 +18,7 @@ Current release/deployment source of truth:
 - `DEPLOYMENT.md`
 - `RELEASE_NOTES.md`
 - `BETA_CHECKLIST.md`
-- `project-audit/GO_IRL_DOCUMENTATION_CLEANUP_AUDIT.md`
+- `DOCS_INDEX.md`
 
 ---
 
