@@ -63,6 +63,20 @@ Trusted auth note: production auth uses `Telegram.WebApp.initData` -> `verifyTel
 
 After starting Vite, open the local URL shown in the terminal. For Telegram testing, the deployed Mini App URL is configured in BotFather.
 
+## Telegram Mini App constraints
+
+Current runtime target is Telegram Mini App first, browser demo second.
+
+Boundaries for MVP 1.1:
+
+- Production identity comes from Telegram `WebApp.initData`, verified through the Supabase Edge Function `verifyTelegramInitData`.
+- `initDataUnsafe` and browser fallback identity are not trusted production auth.
+- The Mini App may call Telegram lifecycle helpers such as `ready`, `expand`, Back Button handling, and explicit close.
+- The app must not close unexpectedly. Closing the Mini App must be user-triggered through explicit Done / Back to Telegram actions.
+- The Mini App must not rely on background polling or hidden background work.
+- Browser mode is for local/demo testing and must not be treated as verified Telegram identity.
+- Any feature that needs production writes must pass trusted auth or stay in demo/local-only behavior.
+
 ## Verification
 
 ```powershell
@@ -97,12 +111,14 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Supabase Edge Function `verifyTelegramInitData` for Telegram HMAC verification and trusted session issuing
 - Supabase setup guide in `supabase/README.md`
 - ESLint and Vitest quality gates
-- Netlify build configuration in `netlify.toml`
+- Netlify build configuration in `netlify.toml` is historical/secondary; Vercel is the current beta deployment target.
 - Vercel fallback deployment configuration in `vercel.json`
 
 ## Project Documents
 
-- `DOCS_INDEX.md` - single documentation entry point and archive policy
+- `DOCS_INDEX.md` - documentation status registry and source-of-truth map
+- `docs/MVP_DOC_AUDIT.md` - MVP documentation conflict registry
+- `docs/MISSING_SECTIONS.md` - missing documentation boundary registry
 - `docs/PRODUCT_PHILOSOPHY.md` - product manifesto and mission
 - `docs/GO_IRL_CONSTITUTION.md` - product and architecture source of truth
 - `docs/MARKET_POSITIONING.md` - market positioning source of truth and MVP feature filter
@@ -111,7 +127,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `CHANGELOG.md` - shipped changes
 - `ROADMAP.md` - product and engineering direction
 - `SPRINTS.md` - sprint-by-sprint delivery plan
-- `SPRINT0_STATUS.md` - current Sprint 0 production verification status
+- `SPRINT0_STATUS.md` - historical Sprint 0 snapshot, not current deployment source of truth
 - `BACKLOG.md` - confirmed work queue
 - `RELEASE_NOTES.md` - release-ready notes for deployment
 - `DEPLOYMENT.md` - production deployment and smoke-test checklist
