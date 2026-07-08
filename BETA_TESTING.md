@@ -35,16 +35,43 @@ http://localhost:5178
 - [ ] Check members panel
 - [ ] Verify no console errors
 
-### 3. Test Demo Mode
+### 3. Test Browser Demo Mode
 ```bash
 # In browser, go to:
 http://localhost:5178?demo=true
 ```
 
+Browser Demo Mode is a beta safety surface for testing outside Telegram.
+
+Expected demo boundaries:
+
+- Browser without Telegram should open the app and not show a black screen.
+- Demo identity must be treated as fake/local, not trusted Telegram auth.
+- Expected fake user:
+  - id: `999999`
+  - name: `Vit_Test`
+- Expected Olomouc demo event set:
+  - Volleyball
+  - Board games
+  - Running
+  - Walking
+  - Coffee meetup
+  - Language exchange
+- Demo writes must not touch production Supabase.
+- Demo-only writes should show a clear success message such as:
+
+```text
+Изменения сохранены (Демо-режим)
+```
+
+Manual checks:
+
 - [ ] View demo activities
-- [ ] Try to join → should fail with error message
-- [ ] Open console (F12) → check `ensureTrustedAuthForWrite()` guard
-- [ ] Verify error is helpful (not black screen)
+- [ ] Open sport activity card
+- [ ] Try to join or save in demo mode
+- [ ] Verify no production Supabase write is required
+- [ ] Verify message is helpful and not a black screen
+- [ ] Open console (F12) and check there are no uncaught auth errors
 
 ### 4. Test on Mobile (iOS/Android)
 
@@ -61,7 +88,7 @@ https://t.me/[BOT_NAME]?startapp=[ACTIVITY_ID]
 ```
 
 ### 5. Check Vercel Deployment
-1. Go to https://vercel.com/vitvolny26-art/go-irl
+1. Go to the current Vercel project for GO IRL
 2. Check latest deployment status (should be green)
 3. Open preview URL
 4. Verify same functionality as localhost
