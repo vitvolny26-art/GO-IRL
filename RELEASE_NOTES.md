@@ -2,24 +2,31 @@
 
 ## 0.1.0 - Internal Telegram Mini App MVP
 
-### Public Release Blocker
+### Production Auth Status
 
-GO IRL has trusted Telegram auth implemented in code, but public release is still blocked until that path is deployed, configured, migrated, and verified in production.
+Trusted Telegram auth is **[SHIPPED/PRODUCTION PATH]** in the repository and is the documented production model.
 
-Current status split:
+Current production path:
 
-- Implemented in repository: `verifyTelegramInitData` Edge Function, trusted JWT flow, frontend `accessToken` flow, and migration v4 for verified-claim RLS.
-- Still required before public release: deploy/configure Edge Function secrets, apply and verify migration v4, confirm trusted-auth smoke tests with real Telegram accounts, and remove reliance on legacy frontend-controlled identity.
+- `verifyTelegramInitData` Supabase Edge Function validates Telegram `initData`.
+- Frontend uses the verified `accessToken` flow.
+- Write operations are guarded until trusted auth is ready.
+- Legacy `x-go-irl-user-key` behavior is treated as legacy demo/local compatibility and must not be presented as the public production auth model.
 
-The legacy Supabase RLS model reads `x-go-irl-user-key` from frontend-controlled request headers derived from Telegram `initDataUnsafe` or guest storage. This can be forged and is not safe for public release.
+Release verification still requires real-environment smoke checks, but Trusted Auth is no longer listed as a public blocker in these notes.
 
-Public release requires:
+### Public Release Blockers
 
-- deployed `verifyTelegramInitData` Supabase Edge Function;
-- configured Edge Function secrets, including `GO_IRL_JWT_SECRET`;
-- RLS based on verified JWT claims;
-- removal of `VITE_GO_IRL_ADMIN_KEYS` from the production security model;
-- production verification of security hardening and trusted-auth migrations.
+Public/beta release still requires operational verification:
+
+- Configure production environment variables on Vercel.
+- Confirm Supabase Edge Function secrets are present in production.
+- Re-check private activity visibility with an unrelated account before public launch.
+- Confirm RLS behavior with at least two Telegram accounts.
+- Validate Telegram share links through `@GOirl_bot`.
+- Validate explicit Mini App close behavior on real Telegram clients.
+- Replace temporary admin allowlist with server-side role enforcement before public moderation tools launch.
+- Apply and verify backend/security migrations only through the approved Supabase release process.
 
 GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 
@@ -63,12 +70,11 @@ GO IRL now has a working Telegram Mini App foundation for Olomouc activities.
 - Confirm RLS behavior with at least two Telegram accounts.
 - Validate Telegram share links through `@GOirl_bot`.
 - Validate explicit Mini App close behavior on real Telegram clients.
-- Deploy `verifyTelegramInitData` and configure required Supabase Edge Function secrets.
-- Apply and verify `supabase/migration_v4_trusted_telegram_auth.sql`.
+- Confirm `verifyTelegramInitData` can issue trusted tokens in production.
+- Confirm `supabase/migration_v4_trusted_telegram_auth.sql` is applied and verified in the target Supabase project before broader rollout.
 - Replace temporary admin allowlist with server-side role enforcement before public moderation tools launch.
 - Apply and verify `supabase/migration_v2_backend_foundation.sql` before enabling public moderation/admin tools.
 - Apply and verify `supabase/migration_v3_security_hardening.sql`.
-- Do not launch publicly until trusted Telegram auth is deployed, v4 migration is applied, and smoke tests pass.
 
 <!-- GO_IRL_STABILIZATION_TASKS_5_8 -->
 ## Stabilization update: Tasks 5-8
