@@ -8,6 +8,7 @@ export type SportEnvironment = "indoor" | "outdoor";
 export type CoachRequestType = "organizer_request" | "participant_interest";
 export type CoachRequestStatus = "pending" | "matched" | "confirmed" | "cancelled" | "completed" | "rejected";
 export type CoachPaymentMode = "organizer" | "split" | "free" | "unknown";
+export type SportCoachRole = "sport_coach" | "beginner_helper" | "team_captain";
 
 export type SportMetadata = {
   sportType?: string;
@@ -78,6 +79,7 @@ export type CoachProfile = {
   id: string;
   userKey: string;
   displayName: string;
+  avatarUrl?: string;
   city?: string;
   bio?: string;
   sports: string[];
@@ -100,7 +102,9 @@ export type CoachRequest = {
   coachProfileId?: string;
   requestType: CoachRequestType;
   sportType?: string;
+  coachRole?: SportCoachRole;
   goal?: string;
+  message?: string;
   level?: string;
   budgetMin?: number;
   budgetMax?: number;
