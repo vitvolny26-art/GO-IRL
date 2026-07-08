@@ -21,7 +21,6 @@ const marker = `
         <button data-dev-action="reload" style="width:100%;margin:6px 0;padding:13px;border:0;border-radius:14px;background:#2563eb;color:#fff;font-weight:700">Reload latest build</button>
         <button data-dev-action="commit" style="width:100%;margin:6px 0;padding:13px;border:0;border-radius:14px;background:#20242a;color:#fff">Copy commit</button>
         <button data-dev-action="debug" style="width:100%;margin:6px 0;padding:13px;border:0;border-radius:14px;background:#20242a;color:#fff">Copy debug info</button>
-        <button data-dev-action="bug" style="width:100%;margin:6px 0;padding:13px;border:0;border-radius:14px;background:#20242a;color:#fff">Report bug</button>
         <button data-dev-action="close" style="width:100%;margin:10px 0 0;padding:13px;border:0;border-radius:14px;background:#30343b;color:#fff">Close</button>
       </div>
     </div>
@@ -48,7 +47,6 @@ const marker = `
           if (action === "reload") reload();
           if (action === "commit") await copy(commit);
           if (action === "debug") await copy(JSON.stringify({ app: "GO IRL", commit, builtAt, href: window.location.href, userAgent: navigator.userAgent }, null, 2));
-          if (action === "bug") window.open("tg://resolve?domain=GOirl_bot&start=bug_report_report", "_blank", "noopener,noreferrer");
         });
       })();
     </script>`;
