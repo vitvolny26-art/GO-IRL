@@ -1,3 +1,11 @@
+> ℹ️ **BIBLE PRINCIPLES / CURRENT PHILOSOPHY WITH FUTURE ARCHITECTURE LANGUAGE**
+>
+> These principles are preserved as strategic guidance, but they must not be used to justify a large refactor before beta.
+>
+> Current beta implementation still follows the stabilization rules: one task at a time, no architecture rewrite, no unsafe Supabase/auth/RLS changes without explicit approval.
+>
+> Principles below that mention API first, backend first, shared core, RLI, Trust Score, Community Score, achievements, multi-client reuse, n8n, or AI are **future architecture direction**, not current MVP requirement unless explicitly approved.
+
 # GO IRL Bible
 
 # Book I — Foundation
