@@ -2,7 +2,7 @@ export const formatEventTime = (value?: string | null) => {
   const raw = String(value || "").trim();
   if (!raw) return "";
 
-  const match = raw.match(/(\d{1,2}):(\d{2})/);
+  const match = raw.match(/(?:T|^|\s)(\d{1,2}):(\d{2})(?::\d{2})?/);
   if (!match) return "";
 
   const hours = Number(match[1]);
