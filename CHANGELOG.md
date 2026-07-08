@@ -2,6 +2,19 @@
 
 All notable confirmed changes to GO IRL are tracked here.
 
+## Unreleased
+
+### Added
+
+- Documented Sport Coach MVP 1.1 as the next narrow beta focus.
+- Added `docs/SPORT_COACH_MVP.md` with scope, UX guardrails, beta metrics, roadmap, and Event Roles boundaries.
+
+### Changed
+
+- Clarified that Coach means sport-only in MVP 1.1.
+- Clarified that guides, tutors, language buddies, game masters, hosts, referees, and paid role marketplace work belong to future Event Roles phases.
+- Updated roadmap priority to validate Sport Coach through show-up rate and beginner comfort before universal role expansion.
+
 ## 0.1.0 - 2026-07-03
 
 ### Added
