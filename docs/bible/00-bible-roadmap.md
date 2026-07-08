@@ -7,7 +7,14 @@ Updated: 2026-07-08
 
 This file defines how to finish the GO IRL Bible without rewriting it from scratch.
 
-Current rule: preserve existing material, classify it, compare it with the actual MVP, then complete only the missing parts.
+Current rule: preserve existing material, classify it, compare it with the actual MVP and market positioning, then complete only the missing parts.
+
+Market scope is controlled by:
+
+- `docs/MARKET_POSITIONING.md`
+- `docs/COMPETITOR_WATCH.md`
+
+These files must prevent competitor-inspired or future-platform ideas from entering MVP scope without passing the beta guardrail.
 
 ## Search result
 
@@ -61,18 +68,19 @@ Outdated
 Future vision
 Needs rewrite
 Needs code/schema audit
+Needs market-scope audit
 ```
 
 Current classification:
 
 | Book | File | Classification |
 |---|---|---|
-| Foundation | `01-foundation/01-why-we-exist.md` | partly current |
-| Core principles | `01-foundation/02-core-principles.md` | partly current |
+| Foundation | `01-foundation/01-why-we-exist.md` | partly current / needs market-scope audit |
+| Core principles | `01-foundation/02-core-principles.md` | partly current / needs beta guardrail alignment |
 | Platform architecture | `02-platform-architecture.md` | partly current / future vision |
 | Database design | `03-database-design.md` | needs schema audit |
 | Modules architecture | `04-modules-architecture.md` | needs MVP audit / future vision |
-| Product requirements | `05-product-requirements.md` | draft / needs 1.0 vs 1.1 split |
+| Product requirements | `05-product-requirements.md` | draft / needs 1.0 vs 1.1 split / needs market-scope audit |
 | UX guidelines | `06-ux-interaction-guidelines.md` | draft / needs Telegram Mini App audit |
 
 ### Step 3 — Compare with current MVP
@@ -85,6 +93,8 @@ DOCS_INDEX.md
 ROADMAP.md
 BACKLOG.md
 docs/DOCUMENTATION_AUDIT.md
+docs/MARKET_POSITIONING.md
+docs/COMPETITOR_WATCH.md
 docs/GO_IRL_1_1_STABILIZATION.md
 docs/MVP_STABILIZATION_PLAN.md
 docs/SPORT_COACH_MVP.md
@@ -105,17 +115,20 @@ Required Bible 1.0 sections:
 
 ```text
 Book I — Foundation
-Book II — MVP 1.0 Product Scope
+Book II — Market Positioning and MVP 1.0 Product Scope
 Book III — Platform Architecture for current MVP
 Book IV — Current Data Model and Supabase boundaries
-Book V — Current Modules and Sport-first vertical logic
+Book V — Current Modules and Sport-first / six-category beta logic
 Book VI — Telegram Mini App UX and Interaction
 Book VII — Beta Readiness and Operations
 ```
 
 Bible 1.0 must explicitly cover:
 
+- GO IRL as Telegram-first local meetup layer.
+- Not an event calendar, ticketing platform, sport-only app, dating app, or social feed.
 - Olomouc closed beta.
+- Six beta categories: Volleyball, Running, Walking, Coffee meetup, Board games, Language exchange.
 - Event creation, share, join, event chat, real-life attendance loop.
 - Browser Demo Mode.
 - Telegram Mini App constraints.
@@ -133,6 +146,7 @@ Future / 1.1+ sections:
 Sport Coach MVP
 Coach request lifecycle
 Coach reviews and trust model
+Event Roles after Sport Coach validation
 Expanded moderation
 Notifications
 Recommendation engine
@@ -154,16 +168,20 @@ Do not rewrite the existing chapters unless they contradict the current project.
 Missing or weak areas for 1.0:
 
 ```text
+Market positioning
+Competitor boundaries
 MVP 1.0 scope
 Telegram Mini App constraints
 Browser Demo Mode
 Olomouc beta scope
+Six beta categories
 Supabase trusted auth reality
 Activity Chat boundaries
 Weather Widget boundaries
 Profile boundaries
 Share/join flow
 QA and release gates
+Explicit non-goals before beta
 ```
 
 Missing or weak areas for 1.1+:
@@ -172,6 +190,7 @@ Missing or weak areas for 1.1+:
 Sport Coach MVP boundaries
 Coach request lifecycle
 Coach reviews
+Event Roles after Sport Coach validation
 Moderation
 Notifications
 Recommendation engine
@@ -188,12 +207,13 @@ Only after audit and product review:
 - fix numbering;
 - remove leftover mixed-language fragments;
 - add explicit status blocks to future material;
+- ensure `MARKET_POSITIONING.md` and `COMPETITOR_WATCH.md` are reflected;
 - mark the set as `GO IRL Bible 1.0`.
 
 ## Immediate next audit tasks
 
 1. Audit `03-database-design.md` against Supabase schema and migrations.
-2. Audit `05-product-requirements.md` against current MVP and roadmap.
+2. Audit `05-product-requirements.md` against current MVP, market positioning, roadmap, and backlog.
 3. Audit `06-ux-interaction-guidelines.md` against Telegram Mini App UX.
 4. Extract useful current content from `GO_IRL_DOCUMENTATION.md` into current docs if needed.
 5. Sync `README.md`, `RELEASE_NOTES.md`, `docs/Security.md`, and `supabase/README.md` around trusted auth status.
@@ -204,4 +224,5 @@ Only after audit and product review:
 - Do not make Bible the source of truth over current code without audit.
 - Do not delete preserved drafts.
 - Do not merge future vision into MVP scope without labeling it.
+- Do not import competitor features into MVP without passing `MARKET_POSITIONING.md`.
 - Do not change Supabase SQL, RLS, auth, or secrets from Bible cleanup.
