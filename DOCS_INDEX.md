@@ -71,13 +71,15 @@ GO IRL Documentation
 │       └── migration_*.sql
 │
 ├── History / Bible / Product Philosophy Archive
-│   ├── Chapter 1 Why We Exist
-│   ├── GO IRL Bible Book I — Foundation Chapter 2 Core Principles
-│   ├── GO IRL Bible Book II Platform Architecture
-│   ├── Book III  ## 04 — Database Design
-│   ├── Book IV — Modules  ### 05 — Modules Architecture
-│   ├── Book V  ## Product Requirements Document (PRD)
-│   └── Book VI  ## 07 — UX & Interaction Guidelines
+│   └── docs/bible/
+│       ├── 01-foundation/
+│       │   ├── 01-why-we-exist.md
+│       │   └── 02-core-principles.md
+│       ├── 02-platform-architecture.md
+│       ├── 03-database-design.md
+│       ├── 04-modules-architecture.md
+│       ├── 05-product-requirements.md
+│       └── 06-ux-interaction-guidelines.md
 │
 └── Deprecated / Snapshot Candidates
     ├── [DEPRECATED] SETUP.md
@@ -229,23 +231,53 @@ Database migrations. Apply only through an approved, reviewed process. No destru
 
 ## History / Bible / Product Philosophy Archive
 
-These files are product-philosophy and long-form architecture sources. They may overlap with newer `docs/` files, but they should not be deleted or overwritten by routine refactors.
+Bible documents are product-philosophy and long-form architecture sources. They may overlap with newer `docs/` files, but they should not be deleted or overwritten by routine refactors.
+
+The old root-level Bible filenames were intentionally renamed and moved into `docs/bible/` to remove naming noise and make the archive safe to navigate.
 
 ### Preservation rule
 
-- Do not rename, delete, or rewrite Bible files during code cleanup.
+- Do not delete or rewrite Bible files during code cleanup.
 - If a Bible file conflicts with current implementation, update current operational docs first and note the conflict.
 - If consolidation is needed, copy the stable principle into `docs/PRODUCT_PHILOSOPHY.md` or `docs/GO_IRL_CONSTITUTION.md`, then keep the original as historical source.
 
-### Files
+### Current Bible structure
 
-- `Chapter 1 Why We Exist`
-- `GO IRL Bible Book I — Foundation Chapter 2 Core Principles`
-- `GO IRL Bible Book II Platform Architecture`
-- `Book III  ## 04 — Database Design`
-- `Book IV — Modules  ### 05 — Modules Architecture`
-- `Book V  ## Product Requirements Document (PRD)`
-- `Book VI  ## 07 — UX & Interaction Guidelines`
+| Order | File | Source status |
+|---|---|---|
+| 01.01 | `docs/bible/01-foundation/01-why-we-exist.md` | Complete chapter: Why We Exist. |
+| 01.02 | `docs/bible/01-foundation/02-core-principles.md` | Complete chapter: 22 principles plus Engineering Oath. |
+| 02 | `docs/bible/02-platform-architecture.md` | Complete book-level architecture document. |
+| 03 | `docs/bible/03-database-design.md` | Complete database design document, but contains a leftover Russian sentence at the end. |
+| 04 | `docs/bible/04-modules-architecture.md` | Complete modules architecture document. |
+| 05 | `docs/bible/05-product-requirements.md` | Complete PRD document. Original heading did not include chapter number 06. |
+| 06 | `docs/bible/06-ux-interaction-guidelines.md` | Complete UX guidelines document. Original heading used `07`, so numbering was inconsistent. |
+
+### Bible completeness audit
+
+Current Bible archive is usable and preserved, but not perfectly complete as a numbered book series.
+
+Known gaps and inconsistencies:
+
+- Book I has Chapter 1 and Chapter 2.
+- Book II is a book-level document and does not explicitly say Chapter 3.
+- Book III starts as `04 — Database Design`.
+- Book IV starts as `05 — Modules Architecture`.
+- Book V has PRD content but no explicit `06` in the original heading.
+- Book VI starts as `07 — UX & Interaction Guidelines`.
+- This suggests the historical material contains chapters 1, 2, 4, 5, 7, with `3` implicit in Book II and `6` implicit/missing in Book V.
+
+Do not invent missing Bible chapters without a product decision. If needed, create a separate future file such as `docs/bible/00-bible-roadmap.md` to define missing chapter titles before writing them.
+
+### Old root filenames replaced
+
+- `Chapter 1 Why We Exist` -> `docs/bible/01-foundation/01-why-we-exist.md`
+- `GO IRL Bible Book I — Foundation Chapter 2 Core Principles` -> `docs/bible/01-foundation/02-core-principles.md`
+- `GO IRL Bible Book II Platform Architecture` -> `docs/bible/02-platform-architecture.md`
+- `Book III  ## 04 — Database Design` -> `docs/bible/03-database-design.md`
+- `Book IV — Modules  ### 05 — Modules Architecture` -> `docs/bible/04-modules-architecture.md`
+- `Book V  ## Product Requirements Document (PRD)` -> `docs/bible/05-product-requirements.md`
+- `Book VI  ## 07 — UX & Interaction Guidelines` -> `docs/bible/06-ux-interaction-guidelines.md`
 
 ## Deprecated / Snapshot Candidates
 
