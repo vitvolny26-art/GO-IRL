@@ -23,7 +23,7 @@ This is not a feature wishlist. It is a boundary file for AI developers so they 
 | Sport Coach actual UI | Fixed / keep maintained | `CoachRequestPanel.tsx` as current v1.1 basis; Role Choice and Review Flow as future. | `docs/SPORT_COACH_MVP.md` |
 | Weather Widget boundary | Fixed / keep maintained | Open-Meteo no-key API, forecast available only inside API range, event >7 days message, hourly summary for <=7 days. | `docs/MVP_STABILIZATION_PLAN.md` |
 | Share / Join flow | Fixed / keep maintained | Telegram Mini App `startapp`, `/join/:id`, no App Store redirect on iOS, Open Graph behavior. | `README.md`, `BETA_TESTING.md` |
-| Release source of truth | Partly fixed | Vercel-first beta/deploy flow, historical Netlify snapshots not current truth. | `DEPLOYMENT.md`, `BETA_CHECKLIST.md`, `DOCS_INDEX.md` |
+| Release source of truth | Fixed / keep maintained | Vercel-first beta/deploy flow, historical Netlify snapshots not current truth, Vercel build-rate-limit interpretation. | `DEPLOYMENT.md`, `DOCS_INDEX.md`, `docs/MVP_DOC_AUDIT.md` |
 | Bible completion | Incomplete | Existing archive is not final; define missing chapters and MVP 1.0/1.1 final Bible plan after product review. | `docs/bible/00-completion-audit.md`, `docs/bible/00-bible-roadmap.md` |
 | Supabase schema vs docs | Needs audit | Compare `docs/Database.md`, Bible database chapter, `supabase/schema.sql`, migrations, current code types. | `docs/Database.md`, `docs/MVP_DOC_AUDIT.md` |
 
@@ -92,6 +92,6 @@ Language exchange
 
 ## Next documentation patches
 
-1. Audit `DEPLOYMENT.md` for Vercel-first release flow.
-2. Audit Supabase schema docs against `supabase/schema.sql` and migrations.
-3. Refresh project audit after documentation cleanup.
+1. Audit Supabase schema docs against `supabase/schema.sql` and migrations.
+2. Refresh project audit after documentation cleanup.
+3. Run local quality gates when Codespaces is available.
