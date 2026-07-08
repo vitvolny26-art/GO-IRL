@@ -882,7 +882,7 @@ function ProfileView({ language, onOpen, onJoin, onCloseMiniApp }: { language: L
           <p>{profile.bio || t.profileBioFallback}</p>
           <small>{t.registeredAt}: {registeredLabel}</small>
         </div>
-        <button className="profile-edit-button" onClick={() => { if (!editing) setEditing(true); }} type={editing ? "submit" : "button"} form={editing ? "profile-edit-form" : undefined}><Pencil size={18} />{editing ? t.save : t.editProfile}</button>
+        <button className="profile-edit-button" onClick={() => setEditing(true)} type="button"><Pencil size={18} />{t.editProfile}</button>
       </div>
 
       {editing && (
