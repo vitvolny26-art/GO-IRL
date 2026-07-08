@@ -1,5 +1,13 @@
 # Database Architecture
 
+> ⚠️ **FUTURE DATABASE ARCHITECTURE / NOT CURRENT MVP SCHEMA**
+>
+> This document describes target database architecture. It is not the current Supabase production schema and must not be used as a direct migration plan.
+>
+> Current schema decisions must use `supabase/schema.sql`, `supabase/migration_v*.sql`, `supabase/README.md`, and `docs/DATABASE_SCHEMA_AUDIT.md`.
+>
+> Do not replace `activities` with `events`, introduce future `users`/`user_profiles`, or change RLS/auth from this document without a separate approved Supabase task.
+
 This document describes the target database model for GO IRL after Sprint 1. It is an architecture plan, not a mandatory migration for the current MVP tables.
 
 ## Principles
