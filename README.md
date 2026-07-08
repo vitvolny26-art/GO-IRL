@@ -78,6 +78,34 @@ Boundaries for MVP 1.1:
 - Browser demo writes are allowed locally, but must not touch production Supabase.
 - Any feature that needs production writes must pass trusted auth or stay in demo/local-only behavior.
 
+## Share / Join flow boundary
+
+Sharing is part of the main MVP loop: create event -> share -> join -> chat -> real attendance.
+
+Current MVP boundary:
+
+- Primary share target is Telegram.
+- Event share links should use Telegram Mini App `startapp` deep links:
+
+```text
+https://t.me/[BOT_USERNAME]/[APP_NAME]?startapp=[ACTIVITY_ID]
+```
+
+- Browser fallback uses `/join/:id` to open the target activity in the web app.
+- `/join/:id` is a landing/opening route, not a separate event website or ticketing page.
+- iOS must not redirect users to the App Store as a substitute for opening the Telegram Mini App.
+- Open Graph metadata should describe the shared event and use an absolute image URL.
+- Share text must not be reused for unrelated flows such as bug reporting.
+- Joining still follows normal visibility and capacity rules:
+  - public event: direct join when capacity is available;
+  - invite/private event: request or organizer approval where required;
+  - full event: waiting state where supported.
+
+Implementation-sensitive notes:
+
+- Verify share behavior against the current share helper and route handling before changing copy or URL shape.
+- Do not introduce App Store redirects, paid ticketing, tracking pixels, or external landing infrastructure during MVP stabilization.
+
 ## Verification
 
 ```powershell
@@ -99,6 +127,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Browser demo mode with Olomouc demo events and local-only writes outside Telegram
 - Save Activity to Google Calendar through a template link without Google OAuth
 - Share link that opens the Telegram Mini App with `startapp`
+- Browser `/join/:id` fallback opens the target activity
 - City selection architecture with Olomouc as the first city
 - City expansion with Praha/Prague available through configuration
 - Russian, Ukrainian, Czech, and English localization architecture
