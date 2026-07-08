@@ -1,30 +1,27 @@
 import { getTelegramWebApp } from "./telegram";
 import type { Activity, Language } from "./types";
 
-const defaultSupportUrl = "https://t.me/GOirl_bot?start=bug_report";
-
-const safeSupportUrl = () => {
-  const raw = String(import.meta.env.VITE_GO_IRL_SUPPORT_URL || defaultSupportUrl).trim();
-  return raw.startsWith("https://t.me/") ? raw : defaultSupportUrl;
-};
+const botUrl = "https://t.me/GOirl_bot";
 
 export const bugReportUrl = (activity: Activity, language: Language) => {
-  const baseUrl = safeSupportUrl();
+  const text = [
+    "GO IRL BUG REPORT",
+    `activity: ${activity.id}`,
+    `language: ${language}`,
+    `title: ${activity.title?.[language] || activity.activity?.[language] || ""}`,
+  ].join("\n");
 
-  try {
-    const url = new URL(baseUrl);
-    url.searchParams.set("start", `bug_${activity.id}_${language}`);
-    return url.toString();
-  } catch {
-    return defaultSupportUrl;
-  }
+  const url = new URL("https://t.me/share/url");
+  url.searchParams.set("url", botUrl);
+  url.searchParams.set("text", text);
+  return url.toString();
 };
 
 export const openBugReport = (activity: Activity, language: Language) => {
   const url = bugReportUrl(activity, language);
   const webApp = getTelegramWebApp();
 
-  if (url.startsWith("https://t.me/") && webApp?.openTelegramLink) {
+  if (webApp?.openTelegramLink) {
     webApp.openTelegramLink(url);
     return;
   }
