@@ -1,3 +1,11 @@
+> ℹ️ **BIBLE FOUNDATION / CURRENT PHILOSOPHY WITH FUTURE VISION LANGUAGE**
+>
+> This chapter is preserved as core product philosophy. The mission is current: less scrolling, more real-life meetings.
+>
+> Broad phrases such as "world's leading platform" or "operating system for real-life activities" describe long-term vision, not current beta scope.
+>
+> Current beta scope is Olomouc-first, Telegram-first, and focused on small local meetups across six categories.
+
 # GO IRL Bible
 
 # Book I — Foundation
