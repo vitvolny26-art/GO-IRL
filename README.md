@@ -74,7 +74,8 @@ Boundaries for MVP 1.1:
 - The Mini App may call Telegram lifecycle helpers such as `ready`, `expand`, Back Button handling, and explicit close.
 - The app must not close unexpectedly. Closing the Mini App must be user-triggered through explicit Done / Back to Telegram actions.
 - The Mini App must not rely on background polling or hidden background work.
-- Browser mode is for local/demo testing and must not be treated as verified Telegram identity.
+- Browser mode without Telegram `initData` uses local demo state and must not be treated as verified Telegram identity.
+- Browser demo writes are allowed locally, but must not touch production Supabase.
 - Any feature that needs production writes must pass trusted auth or stay in demo/local-only behavior.
 
 ## Verification
@@ -95,6 +96,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Private join requests with approve/reject actions
 - Participants list with joined, waiting, and pending states
 - Activity creation with category, activity type, address, and optional location URL
+- Browser demo mode with Olomouc demo events and local-only writes outside Telegram
 - Save Activity to Google Calendar through a template link without Google OAuth
 - Share link that opens the Telegram Mini App with `startapp`
 - City selection architecture with Olomouc as the first city
@@ -161,36 +163,40 @@ Run a local health audit:
 node scripts/go-irl-health-audit.cjs
 ```
 
-<!-- GO_IRL_STABILIZATION_TASKS_5_8 -->
-## Stabilization update: Tasks 5-8
+## Current stabilization status
 
-Date: 2026-07-07
+Date: 2026-07-08
 
-Closed stabilization scope:
-- Task 5 Profile Fix
-  - Profile edit action now saves user changes instead of acting like a close button.
-  - Local avatar upload is supported.
-- Task 6 Bug Report Fix
-  - Bug report action opens support link.
-  - Removed alert/copy-share behavior from bug reporting.
-- Task 7 Weather Widget
-  - Sport event details show Open-Meteo based weather summary and details.
-  - Future events outside forecast range show a safe availability message.
-- Task 8 Share Fix
-  - Share links use Telegram Mini App startapp deep links.
-  - Browser /join/:id opens the target activity.
-  - Vercel SPA rewrite and Open Graph metadata are present.
+Current closed/patched areas:
 
-Verification:
-- pnpm run lint: PASS
-- pnpm run build: PASS
-- pnpm run test: PASS, 10 files / 51 tests
+- Browser Mock Mode
+  - Browser without Telegram `initData` uses local demo state.
+  - Demo writes are local-only and must not touch production Supabase.
+- Restore Coach + Chat
+  - Coach and Event Chat panels are mounted in sport event details.
+- Event Card Time Fix
+  - Sport cards show event start time consistently.
+  - Empty time badge is not rendered.
+- Profile Fix
+  - Profile edit uses Save and local persistence.
+  - Demo avatar upload stores a local data URL.
+  - Production Supabase Storage avatar upload is still pending a separate Storage/RLS-safe task.
+- Bug Report Fix
+  - Bug report opens Telegram support link and does not copy share text.
+- Weather Widget
+  - Sport event details use Open-Meteo weather without API keys.
+- Share Fix
+  - Share links use Telegram Mini App `startapp` deep links.
+  - Browser `/join/:id` opens the target activity.
+  - Open Graph metadata is present with an absolute image URL.
+- Beta UI Cleanup
+  - Static `BETA` dev marker and debug panel were removed from `index.html`.
 
-Related commits:
-- cc67706 fix: save profile from edit button
-- a021e10 fix: support local profile avatar upload
-- dee51af fix: open bug report support link
-- a61947d fix: show weather summary in sport sheet
-- 7087b86 fix: show weather details in sport sheet
-- e44152d fix: use telegram mini app share link
-- ea63432 fix: open join route activity
+Verification status:
+
+- Vercel: latest checked commits are deploying/building through Vercel status checks.
+- Local `pnpm run lint`: pending after latest commits.
+- Local `pnpm run build`: pending after latest commits.
+- Local `pnpm run test`: pending after latest commits.
+
+Do not claim beta-ready until local quality gates pass on the latest `main`.
