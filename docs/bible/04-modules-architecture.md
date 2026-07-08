@@ -1,3 +1,16 @@
+> ⚠️ **HISTORICAL BIBLE DRAFT / FUTURE MODULE VISION**
+>
+> This module architecture chapter is preserved as long-term platform thinking, but it is **not** the current beta implementation plan.
+>
+> Current beta scope is controlled by:
+> - `docs/MARKET_POSITIONING.md`
+> - `docs/COMPETITOR_WATCH.md`
+> - `ROADMAP.md`
+> - `BACKLOG.md`
+>
+> Anything below that implies full module registry, Parties, Nature, Learning, Creative, AI module layer, cross-module intelligence, personalized navigation, or broad platform modules must be treated as **future / not current MVP** unless explicitly re-approved.
+>
+> Current beta focus: Olomouc, Telegram-first local micro-meetups, six categories, create -> share -> join -> chat -> real attendance.
 
 
 # GO IRL Bible
