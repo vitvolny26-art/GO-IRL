@@ -1,3 +1,17 @@
+> ⚠️ **HISTORICAL BIBLE DRAFT / FUTURE DATABASE VISION**
+>
+> This database chapter is preserved as long-term domain thinking, but it is **not** the current Supabase schema or an approved migration plan.
+>
+> Current database truth is controlled by:
+> - `supabase/schema.sql`
+> - `supabase/migrations/*`
+> - `supabase/README.md`
+> - `docs/Database.md`
+> - `docs/RLS.md`
+>
+> Do not apply tables, RLS policies, auth changes, soft-delete rules, RLI, Trust Score, Community Score, referrals, verification, media, or module registry ideas from this file without a separate approved Supabase task.
+>
+> Current beta priority: keep the existing Supabase model stable for Olomouc micro-meetups, participants, chat, profile basics, weather, and share/join flow.
 
 
 # GO IRL Bible
@@ -726,5 +740,3 @@ Spend ten times more time designing it than coding it.
 Every hour spent improving the data model saves dozens of hours of future development.
 
 ---
-
- позволит сделать так, чтобы GO IRL не выглядел как одно приложение с шестью вкладками, а как **единая платформа с шестью специализированными продуктами**, использующими общее ядро. На мой взгляд, это одна из самых сильных идей, к которой мы пришли сегодня.
