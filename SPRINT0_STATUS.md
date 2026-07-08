@@ -1,8 +1,20 @@
 # Sprint 0 Status
 
-Status: **Complete**
+Status: **historical snapshot**.
 
 Date: 2026-07-03
+
+This file records the Sprint 0 state at the time it was written. It is preserved for history and should not be used as the current production deployment status.
+
+Current release/deployment source of truth:
+
+- `README.md`
+- `DEPLOYMENT.md`
+- `RELEASE_NOTES.md`
+- `BETA_CHECKLIST.md`
+- `project-audit/GO_IRL_DOCUMENTATION_CLEANUP_AUDIT.md`
+
+---
 
 ## Passed
 
