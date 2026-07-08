@@ -43,11 +43,6 @@ The coach does not replace the organizer. The organizer creates the event. The c
 
 - Sport events only.
 - Button: **Need a coach** / **Нужен тренер**.
-- Bottom sheet: **Who is needed?** / **Кто нужен?**.
-- Minimal role choice:
-  - Sport Coach;
-  - Beginner Helper;
-  - Team Captain.
 - Organizer note/message.
 - Request status:
   - pending/requested;
@@ -60,7 +55,6 @@ The coach does not replace the organizer. The organizer creates the event. The c
   - Olomouc;
   - request is immediately confirmed;
   - no production Supabase writes.
-- Minimal review after the event.
 - Beta feedback question:
   - “Did the coach help you feel comfortable if you came alone?”
 
@@ -78,6 +72,8 @@ The coach does not replace the organizer. The organizer creates the event. The c
 - Availability calendars.
 - Complex matching.
 - Verified coach badge.
+- Role Choice bottom sheet.
+- Review Flow.
 
 Do not label coaches as verified unless there is a real verification workflow.
 
@@ -100,6 +96,32 @@ The current model uses:
 Do not replace it with `user_id`, `event_id`, or `coach_id` during MVP 1.1.
 
 MVP 1.1 should extend the existing model safely and keep compatibility with current migrations and RLS.
+
+## Фактическая реализация UI (v1.1)
+
+Current shipped UI baseline is `src/components/CoachRequestPanel.tsx` rendered from the Sport activity details flow.
+
+Current UI behavior:
+
+- Shows whether a coach is needed for a sport event.
+- Lets the organizer/requesting user create a coach request for the activity.
+- Displays request status through the existing coach request status model.
+- Uses the existing `coachFeature.ts` integration and current `coach_requests` table.
+
+Not shipped in the current v1.1 UI baseline:
+
+- Role Choice bottom sheet with Sport Coach / Beginner Helper / Team Captain.
+- Full Review Flow after the event.
+- Verified coach badge.
+- Universal Event Roles.
+- Payments or coach marketplace.
+
+Status decision:
+
+- `CoachRequestPanel.tsx` is the current implementation basis for MVP 1.1.
+- Role Choice is moved to backlog as **[FUTURE VISION 1.2+]**.
+- Review Flow is moved to backlog as **[FUTURE VISION 1.2+]**.
+- Broader Event Roles remain **[FUTURE VISION 1.3+]**.
 
 ## UX rules
 
@@ -146,7 +168,9 @@ Avoid renaming database statuses in MVP 1.1 unless a separate migration is expli
 
 ## Reviews and ratings
 
-MVP review should stay simple:
+MVP review should stay simple, but the current v1.1 UI baseline does not ship the full review flow.
+
+Future review fields:
 
 - 1-5 rating;
 - short comment;
@@ -186,20 +210,20 @@ The winning signal:
 ### Phase 1 - Sport Coach MVP 1.1
 
 - Keep Coach sport-only.
-- Add demo confirmed coach.
-- Add coach request bottom sheet.
-- Add confirmed coach event block.
-- Add sport card badge.
-- Add minimal review.
+- Stabilize `CoachRequestPanel.tsx`.
+- Keep request statuses compatible with current database model.
+- Keep patches small and avoid auth/RLS rewrites.
 
 ### Phase 2 - Sport Roles 1.2
 
 Expand sport roles after Coach MVP works:
 
+- Beginner Helper;
+- Team Captain;
 - Referee;
-- Captain;
 - Safety Lead;
-- Equipment Helper.
+- Equipment Helper;
+- minimal coach review flow.
 
 Referee is a sport role, but it is not part of Coach MVP 1.1.
 
