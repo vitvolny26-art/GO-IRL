@@ -4,9 +4,15 @@ GO IRL is being built as a platform, not a one-off Telegram Mini App. New work s
 
 All major product and architecture decisions must follow [docs/GO_IRL_CONSTITUTION.md](docs/GO_IRL_CONSTITUTION.md).
 
+For the Sport Coach MVP 1.1 scope, see [docs/SPORT_COACH_MVP.md](docs/SPORT_COACH_MVP.md).
+
 ## Strategic Development Order
 
 The current product priority is foundation and infrastructure. Friends, Travel, and Dating are intentionally deferred until the platform layer is stable.
+
+Before new vertical expansion, Closed Beta must validate the Sport Coach hypothesis in Olomouc:
+
+> Sport events with a confirmed coach should have a higher show-up rate and higher beginner comfort than sport events without a coach.
 
 1. Infrastructure Hardening
    - Supabase production readiness.
@@ -15,30 +21,145 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
    - Roles and permission enforcement.
    - Database verification SQL and release checklist.
    - Remove dependency on local fallback where possible after production migration is applied.
-2. Performance
+2. Sport Coach MVP 1.1
+   - Keep Coach sport-only.
+   - Stabilize coach request flow for sport events.
+   - Add demo confirmed coach for browser mock mode.
+   - Add coach detail block and sport card badge.
+   - Measure show-up rate and beginner comfort.
+3. Performance
    - Lazy loading.
    - Code splitting.
    - Bundle optimization.
    - Telegram Mini App startup performance.
-3. n8n Notifications
+4. n8n Notifications
    - Server-side notification workflow.
    - Evening digest.
    - Working hours.
    - Quiet hours.
    - No Mini App background work.
-4. AI Event Discovery
+5. AI Event Discovery
    - External sources.
    - Event collection.
    - AI normalization.
    - Duplicate detection.
    - Confidence scoring.
    - Save discovered events to the database.
-5. Friends Vertical
+6. Event Roles Foundation
+   - Start only after Sport Coach improves show-up rate or beginner comfort.
+   - Future roles are not called Coach.
+   - Board games can use Game Master.
+   - Language events can use Language Buddy or Conversation Mentor.
+   - City walks can use Guide.
+   - Social meetups can use Host or Icebreaker.
+7. Friends Vertical
    - Start only after database and notification foundation is stable.
-6. Travel Vertical
+8. Travel Vertical
    - Start only after Friends and source discovery architecture are stable.
-7. Dating Vertical
+9. Dating Vertical
    - Last, because it requires privacy, safety, anonymous chat, mutual reveal, reporting, moderation, and abuse protection.
+
+## Sport Coach MVP 1.1
+
+Coach is a sport-only role in MVP 1.1.
+
+Coach is not a generic event helper. Guides, tutors, social hosts, game masters, referees, and moderators are future Event Roles work and must not be mixed into the Coach MVP.
+
+### Product goal
+
+Reduce the fear of joining sport events and improve real-life attendance.
+
+The coach helps with:
+
+- warm-up;
+- rules;
+- beginner support;
+- team flow;
+- safety;
+- helping users feel comfortable when arriving alone.
+
+### MVP patches
+
+1. Coach model compatibility
+   - Keep the existing `coach_profiles`, `coach_requests`, and `coach_reviews` model.
+   - Keep `user_key`, `activity_id`, and `coach_profile_id`.
+   - Do not replace with `user_id`, `event_id`, or `coach_id` in MVP 1.1.
+2. Demo Sport Coach
+   - Browser/no Telegram demo uses Alex, Sport Coach, Olomouc.
+   - Demo request becomes confirmed immediately.
+   - Demo writes never touch production Supabase.
+3. Sport Coach Bottom Sheet
+   - Button: "Need a coach" / "Нужен тренер".
+   - Choice: Sport Coach, Beginner Helper, Team Captain.
+   - Organizer note.
+   - Status: requested or confirmed.
+4. Sport Coach Event Block
+   - Event detail shows confirmed coach.
+   - Chat link stays close to coach block.
+   - Copy explains that coach helps beginners and event flow.
+5. Sport Coach Badge
+   - Sport cards show "✨ Есть тренер" only for confirmed coach.
+   - Pending requests must not show the confirmed badge.
+6. Minimal Review
+   - 1-5 rating.
+   - Short comment.
+   - Beginner comfort marker: "Did the coach help you feel comfortable if you came alone?"
+
+### Beta metrics
+
+Primary:
+
+- Show-up Rate: joined users who actually came.
+
+Supporting:
+
+- coach badge open/click rate;
+- join -> chat message rate;
+- join -> attendance confirmation rate;
+- beginner comfort yes/no;
+- repeat sport attendance;
+- organizer coach-request conversion.
+
+### Not now
+
+- Payments.
+- Marketplace.
+- Universal event roles.
+- Referee.
+- City guide.
+- Language buddy.
+- Tutor.
+- Social host.
+- Game master.
+- Verified coach badge.
+- Availability calendar.
+
+## Event Roles Vision
+
+Future Event Roles are the scalable pattern after Sport Coach is validated.
+
+The product rule:
+
+> For every event type, use the role name that is clear in one second.
+
+Examples:
+
+| Vertical | Future role |
+|---|---|
+| Sport | Coach, Referee, Captain, Safety Lead |
+| Board games | Game Master |
+| Language | Language Buddy, Conversation Mentor |
+| City walks | Guide, Route Leader |
+| Social meetups | Host, Icebreaker |
+
+Future normalized tables may include:
+
+- `event_role_profiles`
+- `event_role_requests`
+- `event_role_assignments`
+- `event_role_reviews`
+
+Do not build these before Sport Coach proves value.
 
 ## Phase 1 - Production Foundation
 
@@ -152,7 +273,9 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 - GO IRL is composed of vertical experience modules, not one universal event flow.
 - Sport remains the current reference vertical.
+- Sport Coach is the next narrow beta validation layer for Sport only.
 - Generic Activity/Event remains as fallback until a vertical-specific experience is implemented.
+- Future Event Roles must use native role names per vertical instead of calling every helper a coach.
 - Friends, Travel, and Dating are deferred by strategy and must not be implemented before the infrastructure, performance, n8n, and AI discovery layers are stable.
 - Dating is a separate product vertical with `discover -> like/pass -> match -> anonymous chat -> mutual reveal`; it must not use the generic event join flow.
 
@@ -161,7 +284,7 @@ The current product priority is foundation and infrastructure. Friends, Travel, 
 
 Priority before Closed Beta:
 
-1. Restore Coach + Activity Chat with Weather enabled.
+1. Stabilize Sport Coach + Activity Chat with Weather enabled.
 2. Add Browser Demo / MockAuth mode.
 3. Fix event card time rendering.
 4. Fix profile save and avatar upload.
