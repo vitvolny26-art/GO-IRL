@@ -48,7 +48,7 @@ const marker = `
           if (action === "reload") reload();
           if (action === "commit") await copy(commit);
           if (action === "debug") await copy(JSON.stringify({ app: "GO IRL", commit, builtAt, href: window.location.href, userAgent: navigator.userAgent }, null, 2));
-          if (action === "bug") window.open("https://t.me/GOirl_bot?start=bug", "_blank", "noopener,noreferrer");
+          if (action === "bug") window.open("https://t.me/GOirl_bot?start=bug_report", "_blank", "noopener,noreferrer");
         });
       })();
     </script>`;

@@ -1,7 +1,7 @@
 import { getTelegramWebApp } from "./telegram";
 import type { Activity, Language } from "./types";
 
-const defaultSupportUrl = "https://t.me/GOirl_bot?start=bug";
+const defaultSupportUrl = "https://t.me/GOirl_bot?start=bug_report";
 
 const safeSupportUrl = () => {
   const raw = String(import.meta.env.VITE_GO_IRL_SUPPORT_URL || defaultSupportUrl).trim();
