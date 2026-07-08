@@ -10,6 +10,8 @@ All notable confirmed changes to GO IRL are tracked here.
 - Added `docs/COMPETITOR_WATCH.md` to track competitor signals and product mechanics worth borrowing.
 - Documented Sport Coach MVP 1.1 as the next narrow beta focus.
 - Added `docs/SPORT_COACH_MVP.md` with scope, UX guardrails, beta metrics, roadmap, and Event Roles boundaries.
+- Added Browser Mock Mode reports and beta checklist coverage for non-Telegram browser testing.
+- Added per-task audit reports for Browser Mock Mode, Event Card Time Fix, Profile Fix, Bug Report Fix, Weather Widget, Share Fix, Documentation Update, and Beta UI Cleanup.
 
 ### Changed
 
@@ -19,6 +21,20 @@ All notable confirmed changes to GO IRL are tracked here.
 - Clarified that Coach means sport-only in MVP 1.1.
 - Clarified that guides, tutors, language buddies, game masters, hosts, referees, and paid role marketplace work belong to future Event Roles phases.
 - Updated roadmap priority to validate Sport Coach through show-up rate and beginner comfort before universal role expansion.
+- Browser without Telegram `initData` now uses local demo state instead of production Supabase write paths.
+- Sport cards now show event start time consistently instead of sport duration.
+- Static beta/dev marker and debug panel were removed from `index.html`.
+- `BETA_CHECKLIST.md` now matches the current local demo-write behavior.
+
+### Verification
+
+Latest local quality gates are **pending after the newest commits**:
+
+- `pnpm run lint`: pending
+- `pnpm run build`: pending
+- `pnpm run test`: pending
+
+Do not claim beta-ready until these pass on the latest `main`.
 
 ## 0.1.0 - 2026-07-03
 
@@ -49,7 +65,7 @@ All notable confirmed changes to GO IRL are tracked here.
 - Sprint 1 home screen now works as an action dashboard with city context, metrics, quick actions, and category counts.
 - Ukrainian and English localization options.
 - Praha/Prague city configuration.
-- Inline skating ("Ролики") is available as a first-class activity category.
+- Inline skating (`Ролики`) is available as a first-class activity category.
 - Organizer/admin event delete flow with confirmation and Supabase RLS planning.
 - GO IRL brand logo assets, favicon, and Open Graph preview.
 - Create Event validation for required text, length limits, capacity, and price.
@@ -79,38 +95,4 @@ All notable confirmed changes to GO IRL are tracked here.
 
 ### Known Gaps
 
-- Telegram `initData` validation still needs a production backend or secure edge function.
-
-<!-- GO_IRL_STABILIZATION_TASKS_5_8 -->
-## Stabilization update: Tasks 5-8
-
-Date: 2026-07-07
-
-Closed stabilization scope:
-- Task 5 Profile Fix
-  - Profile edit action now saves user changes instead of acting like a close button.
-  - Local avatar upload is supported.
-- Task 6 Bug Report Fix
-  - Bug report action opens support link.
-  - Removed alert/copy-share behavior from bug reporting.
-- Task 7 Weather Widget
-  - Sport event details show Open-Meteo based weather summary and details.
-  - Future events outside forecast range show a safe availability message.
-- Task 8 Share Fix
-  - Share links use Telegram Mini App startapp deep links.
-  - Browser /join/:id opens the target activity.
-  - Vercel SPA rewrite and Open Graph metadata are present.
-
-Verification:
-- pnpm run lint: PASS
-- pnpm run build: PASS
-- pnpm run test: PASS, 10 files / 51 tests
-
-Related commits:
-- cc67706 fix: save profile from edit button
-- a021e10 fix: support local profile avatar upload
-- dee51af fix: open bug report support link
-- a61947d fix: show weather summary in sport sheet
-- 7087b86 fix: show weather details in sport sheet
-- e44152d fix: use telegram mini app share link
-- ea63432 fix: open join route activity
+- Public beta still requires latest local quality gates and real Telegram/Supabase smoke verification.
