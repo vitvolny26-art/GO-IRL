@@ -5,13 +5,15 @@ const htmlPath = "index.html";
 const commit = process.env.VERCEL_GIT_COMMIT_SHA || cp.execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
 const shortCommit = commit.slice(0, 7);
 const builtAt = new Date().toISOString();
+const shouldInjectMarker = process.env.GO_IRL_BUILD_MARKER === "1";
 
 let html = fs.readFileSync(htmlPath, "utf8");
 
 html = html.replace(/\s*<button id="beta-build-marker"[\s\S]*?<\/script>/g, "");
 html = html.replace(/\s*<div id="beta-dev-panel"[\s\S]*?<\/script>/g, "");
 
-const marker = `
+if (shouldInjectMarker) {
+  const marker = `
     <button id="beta-build-marker" type="button" style="position:fixed;left:60px;top:24px;z-index:99999;font-size:12px;font-weight:700;line-height:1;background:#2563eb;color:#fff;padding:5px 10px;border:0;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.28);cursor:pointer;user-select:none">BETA ${shortCommit}</button>
     <div id="beta-dev-panel" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55)">
       <div style="position:absolute;left:0;right:0;bottom:0;background:#101214;color:#fff;border-radius:22px 22px 0 0;padding:18px;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;box-shadow:0 -8px 28px rgba(0,0,0,.35)">
@@ -51,8 +53,10 @@ const marker = `
       })();
     </script>`;
 
-html = html.replace("</body>", marker + "\n  </body>");
+  html = html.replace("</body>", marker + "\n  </body>");
+}
+
 html = html.trimEnd() + "\n";
 
 fs.writeFileSync(htmlPath, html);
-console.log("developer panel:", shortCommit);
+console.log(shouldInjectMarker ? `developer panel: ${shortCommit}` : "developer panel: disabled");
