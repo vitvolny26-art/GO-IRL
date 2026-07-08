@@ -1,12 +1,12 @@
 # Deployment
 
-Status: **current deployment checklist / needs live verification before public release**.
+Status: **current Vercel-first deployment checklist / needs live verification before public release**.
 
 This checklist is for releasing the GO IRL Telegram Mini App to production.
 
-Current hosting target: **Vercel**.
+Current primary hosting target: **Vercel**.
 
-Netlify references are preserved only as historical/secondary hosting notes.
+Netlify references are historical/secondary only. Do not configure BotFather or release notes from Netlify-era snapshots unless Vercel is explicitly replaced by a new product decision.
 
 ## 1. Build Locally
 
@@ -18,6 +18,8 @@ pnpm run build
 ```
 
 Do not deploy if any command fails.
+
+Local gates are required even when Vercel is temporarily blocked by quota or build-rate limits.
 
 ## 2. Supabase
 
@@ -39,7 +41,7 @@ VITE_GO_IRL_LEGACY_DEMO_AUTH=false
 
 Use only the publishable/anon key in frontend hosting. Never put a service role key in Vercel, Netlify, or client code.
 
-## 3. Vercel
+## 3. Vercel production deployment
 
 1. Import the GitHub repository `vitvolny26-art/GO-IRL`.
 2. Framework preset: `Vite`.
@@ -59,6 +61,17 @@ The repository includes `vercel.json`, so Vercel should pick up the SPA fallback
 
 After the GitHub connection is active, every push to `main` should trigger a production deploy automatically.
 
+### Vercel status interpretation
+
+| Vercel status | Meaning | Action |
+|---|---|---|
+| `success` | Deployment/build passed. | Continue release smoke tests. |
+| `pending` | Deployment/build is still running. | Wait and re-check. |
+| `failure` with app/build logs | Possible app/build regression. | Inspect first red build error before changing code. |
+| `failure` with `upgradeToPro=build-rate-limit` | Vercel quota/build-rate limit. | Treat as operational quota issue, not app regression. Do not change code for this. |
+
+If Vercel is blocked by build-rate limit, keep local `pnpm run lint`, `pnpm run build`, and `pnpm run test` as the temporary quality gate until Vercel builds are available again.
+
 ## 3a. Historical / Secondary Netlify Notes
 
 Netlify was used earlier in the project and can remain as a fallback only if explicitly selected again.
@@ -73,6 +86,8 @@ pnpm: 11.7.0
 ```
 
 Do not configure BotFather to a stale Netlify URL if the current production Mini App runs on Vercel.
+
+Do not use `SPRINT0_STATUS.md` as deployment truth. It contains historical Netlify-era verification.
 
 ## 4. Telegram BotFather
 
@@ -99,8 +114,13 @@ Use at least two Telegram accounts.
 10. Confirm `/join/:id` opens the target activity in browser fallback.
 11. Confirm Telegram Mini App `startapp` opens the target activity.
 12. Confirm explicit Done / Back to Telegram behavior on real Telegram clients.
+13. Confirm Browser Demo Mode does not write to production Supabase.
+14. Confirm Weather Widget failure does not block event details.
+15. Confirm Bug Report opens support/feedback flow and does not copy share text.
 
 ## 6. Trusted Auth Release Gate
+
+Trusted Telegram auth is the shipped production path, but public release still requires live verification.
 
 Do not launch publicly until all are true:
 
@@ -114,3 +134,9 @@ Do not launch publicly until all are true:
 ## 7. Release Notes
 
 Update `RELEASE_NOTES.md` before announcing the release.
+
+Release notes must match:
+
+- `README.md` for current code scope;
+- `DOCS_INDEX.md` for source-of-truth status;
+- this file for deployment target and release gate wording.
