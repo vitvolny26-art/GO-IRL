@@ -37,10 +37,11 @@ Rules:
 | DOC-SETUP-001 | Legacy setup docs contain local Windows paths and desktop helper assumptions. | `SETUP.md`, `SETUP_RU.md`, `CHECKLIST.md` | Contained. | Added historical/deprecated status banners. Current setup is `README.md` + `DOCS_INDEX.md`. |
 | DOC-MARKET-001 | Broad roadmap/backlog/future docs could make GO IRL look like event calendar, ticketing platform, sport-only app, dating app, or social feed. | `docs/MARKET_POSITIONING.md`, `docs/COMPETITOR_WATCH.md`, `ROADMAP.md`, `BACKLOG.md`, `RELEASE_NOTES.md` | Fixed in docs. | Added market source-of-truth docs and beta guardrails: Olomouc, Telegram-first micro-meetups, six categories, create -> share -> join -> chat -> real attendance. |
 | DOC-BIBLE-001 | Bible archive is structured but not complete; numbering, MVP scope, database design, platform architecture, and future features looked like current implementation truth. | `docs/bible/*`, `DOCS_INDEX.md`, `docs/DOCUMENTATION_AUDIT.md` | Contained. | Added guardrail banners to Bible foundation, principles, platform architecture, database design, modules architecture, PRD, and UX guide; synced Bible audit/roadmap and registry. |
-| DOC-CHAT-001 | Activity Chat has current temporary implementation, while future docs imply broader retention/moderation/notification behavior. | `src/components/ActivityChatPanel.tsx`, `src/activityChatFeature.ts`, `docs/MISSING_SECTIONS.md` | Open. | Chat limits must be documented as MVP boundary; advanced lifecycle remains future. |
-| DOC-DEMO-001 | Browser Demo Mode is critical for beta, but boundaries are not centralized. | `README.md`, `BETA_TESTING.md`, `docs/MISSING_SECTIONS.md` | Open. | Missing section created for Demo Mode rules: fake user, demo events, no production writes. |
-| DOC-TMA-001 | Telegram Mini App constraints are spread across docs and code. | `README.md`, `docs/MISSING_SECTIONS.md` | Open. | Missing section created for Mini App constraints: initData, explicit close, no background polling. |
-| DOC-WEATHER-001 | Weather widget behavior exists but boundaries are not centralized. | `src/weather.ts`, `src/verticals/SportVertical.tsx`, `docs/MISSING_SECTIONS.md` | Open. | Missing section created for forecast availability and Open-Meteo limits. |
+| DOC-CHAT-001 | Activity Chat has current temporary implementation, while future docs imply broader retention/moderation/notification behavior. | `src/components/ActivityChatPanel.tsx`, `src/activityChatFeature.ts`, `docs/EventLifecycle.md` | Contained / needs code audit. | Added Activity Chat MVP boundary and safe wording for the unresolved 24-hour expiry rule. |
+| DOC-DEMO-001 | Browser Demo Mode is critical for beta, but boundaries are not centralized. | `README.md`, `BETA_TESTING.md`, `docs/MISSING_SECTIONS.md` | Fixed in docs. | Demo Mode boundaries documented: fake user, demo events, no production writes, demo save message. |
+| DOC-TMA-001 | Telegram Mini App constraints are spread across docs and code. | `README.md`, `docs/MISSING_SECTIONS.md` | Fixed in docs. | Mini App constraints documented: initData, trusted auth path, explicit close, no background polling. |
+| DOC-WEATHER-001 | Weather widget behavior exists but boundaries are not centralized. | `src/weather.ts`, `src/verticals/SportVertical.tsx`, `docs/MVP_STABILIZATION_PLAN.md` | Fixed in docs. | Weather boundary documented: Open-Meteo without keys, forecast range limits, summary/details scope. |
+| DOC-VERCEL-001 | Latest Vercel status can show FAILURE because of build-rate-limit rather than app/docs regression. | GitHub commit status, Vercel target URL | Operational / not code regression. | Status target includes `upgradeToPro=build-rate-limit`; treat as deployment quota issue until a new Vercel build can run. Do not change app code for this. |
 
 ## Current implementation boundaries
 
@@ -96,28 +97,57 @@ Payments / marketplace
 Current MVP boundary:
 
 - Temporary activity coordination chat.
-- Advanced chat lifecycle, retention policy, moderation tools, and notifications are not final MVP truth until audited.
+- Not a general messenger.
+- Not a feed, channel, or engagement loop.
+- Exact close/archive timing needs code and migration audit before public release wording.
 
 ### Browser Demo Mode
 
-Current missing documentation boundary:
+Current boundary:
 
 - Browser without Telegram should open the app.
+- Fake user: `999999` / `Vit_Test`.
 - Demo writes must not touch production Supabase.
-- Fake user and demo events need central documentation.
+- Canonical demo events: Volleyball, Board games, Running, Walking, Coffee meetup, Language exchange.
 
 ### Telegram Mini App
 
-Current missing documentation boundary:
+Current boundary:
 
-- Telegram `initData` and trusted auth reality.
+- Telegram `initData` is verified through `verifyTelegramInitData` before production writes.
 - Explicit user-triggered close only.
 - No surprise close.
 - No background polling.
 
+### Weather Widget
+
+Current boundary:
+
+- Open-Meteo without API keys.
+- No fake weather outside forecast range.
+- Event beyond forecast range: `Прогноз будет за 7 дней`.
+- Compact summary: icon, temperature, condition.
+- Details can include temperature graph, wind, rain probability.
+
+### Vercel build-rate-limit
+
+Current latest observed status:
+
+```text
+Vercel: FAILURE
+Reason URL marker: upgradeToPro=build-rate-limit
+```
+
+Decision:
+
+- This is an operational quota/deployment limit.
+- Do not treat it as a code or documentation regression.
+- Do not change app code to fix it.
+- Resume Vercel verification when build quota is available again.
+
 ## Next actions
 
-1. Fill `docs/MISSING_SECTIONS.md` into current docs one section at a time.
-2. Audit `docs/Database.md` against Supabase schema and migrations.
-3. Audit `DEPLOYMENT.md` for Vercel-first wording.
+1. Clarify Share / Join flow in `README.md` and `BETA_TESTING.md`.
+2. Audit `DEPLOYMENT.md` for Vercel-first wording.
+3. Audit `docs/Database.md` against Supabase schema and migrations.
 4. Refresh `project-audit/GO_IRL_PROJECT_AUDIT.md` after documentation cleanup.
