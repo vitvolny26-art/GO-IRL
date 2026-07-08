@@ -1,5 +1,37 @@
 # Release Notes
 
+## Unreleased - Market Positioning Update
+
+### Product Scope Guardrails
+
+GO IRL now has a documented market positioning source of truth for the Olomouc beta:
+
+- `docs/MARKET_POSITIONING.md` defines GO IRL as a Telegram-first local meetup layer, not an event calendar, ticketing platform, sport-only app, dating app, or social feed.
+- `docs/COMPETITOR_WATCH.md` tracks competitor signals from sports apps, messenger organizers, community platforms, invite tools, ticketing platforms, and local calendars.
+- `ROADMAP.md` and `BACKLOG.md` now enforce the beta guardrail: new scope must help users create, join, coordinate, and attend real-life meetups faster than a normal Telegram chat.
+
+Canonical beta categories stay limited to:
+
+1. Volleyball
+2. Running
+3. Walking
+4. Coffee meetup
+5. Board games
+6. Language exchange
+
+Explicit non-goals before beta:
+
+- ticketing/payments;
+- club CRM;
+- subscriptions/premium;
+- AI recommendations;
+- post-event albums/feed;
+- public ratings/reviews;
+- direct messages;
+- complex profiles;
+- big multi-city catalog;
+- dating, friends, travel, or broad lifestyle verticals.
+
 ## 0.1.0 - Internal Telegram Mini App MVP
 
 ### Production Auth Status
