@@ -112,6 +112,7 @@ export function SportActivityCard({ activity, language, onOpen, onJoin }: SportC
   const isOrganizer = activity.organizerKey === getUserKey();
   const full = activity.participants >= activity.capacity;
   const action = isOrganizer ? t.open : pending ? t.requested : joined ? t.joined : full ? t.eventFull : activity.visibility === "invite" ? t.request : t.join;
+  const eventTime = formatEventTime(activity.time);
   const [membersPreviewOpen, setMembersPreviewOpen] = useState(false);
 
   const joinedMembers = activity.members.filter(m => m.status === "joined");
@@ -143,7 +144,7 @@ export function SportActivityCard({ activity, language, onOpen, onJoin }: SportC
           <UsersRound size={16} aria-hidden="true" />
           <span>{activity.participants} / {activity.capacity}</span>
         </button>
-        <span className="sport-card-chip"><Clock3 size={16} aria-hidden="true" /><span>{meta.durationMinutes || 90} {t.minutesShort}</span></span>
+        {eventTime ? <span className="sport-card-chip"><Clock3 size={16} aria-hidden="true" /><span>{eventTime}</span></span> : null}
       </div>
       {membersPreviewOpen && (
         <div className="sport-card-members-preview">
