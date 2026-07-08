@@ -238,7 +238,7 @@ button, input, textarea, select { letter-spacing: 0; }
 
 .profile-page { display: grid; gap: 14px; }
 .profile-hero { position: relative; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 13px; padding: 15px; border: 1px solid var(--line); border-radius: 8px; background: linear-gradient(180deg, #171a20 0%, #111319 100%); box-shadow: 0 16px 40px rgba(0,0,0,.22); animation: card-in 180ms ease-out; }
-.profile-avatar { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 8px; background: linear-gradient(135deg, var(--lime), var(--cyan)); color: var(--lime-text); font-size: 20px; font-weight: 950; }
+.profile-avatar { display: grid; place-items: center; width: 72px; height: 72px; overflow: hidden; border-radius: 8px; background: linear-gradient(135deg, var(--lime), var(--cyan)); color: var(--lime-text); font-size: 20px; font-weight: 950; }
 .profile-main { min-width: 0; padding-right: 8px; }
 .profile-kicker { display: flex; align-items: center; gap: 5px; color: var(--lime); font-size: 11px; font-weight: 850; text-transform: uppercase; }
 .profile-kicker svg { width: 14px; height: 14px; }
@@ -1201,4 +1201,11 @@ button, input, textarea, select { letter-spacing: 0; }
   margin-top: 12px !important;
   color: var(--muted) !important;
   font-size: 12px !important;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
