@@ -7,13 +7,15 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 ## Absolute source-of-truth rules
 
 - `docs/GO_IRL_CONSTITUTION.md` is the **absolute source of truth** for GO IRL philosophy and architecture principles.
+- `docs/MARKET_POSITIONING.md` is the **source of truth for market positioning and MVP feature filtering**.
+- `docs/COMPETITOR_WATCH.md` is the **source of truth for competitor signals**, but competitor signals must not automatically become MVP scope.
 - `README.md` is the **source of truth for the current code scope**: implemented features, stack, setup, and current runtime model.
 - `RELEASE_NOTES.md` is the source of truth for release state and must not contradict `README.md`.
 - `docs/SPORT_COACH_MVP.md` is the source of truth for Sport Coach MVP 1.1 boundaries after this cleanup.
 - `docs/MVP_DOC_AUDIT.md` is the source of truth for known documentation conflicts.
 - `docs/MISSING_SECTIONS.md` is the source of truth for missing documentation boundaries.
 - Historical snapshot files must not be used for code generation.
-- Bible files are preserved historical/product sources. Do not rewrite them during technical cleanup.
+- Bible files are preserved historical/product sources. They must not override current beta scope, market positioning, code, Supabase schema, auth, or RLS.
 - Do not change `.env`, secrets, Supabase RLS, auth, or destructive SQL without explicit approval.
 
 ## Статусный реестр документации
@@ -22,9 +24,9 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 |---|---|---|---|---|
 | `README.md` | Core / Code Scope | Current | Да | Must stay aligned with `RELEASE_NOTES.md` on Trusted Auth and release blockers. |
 | `DOCS_INDEX.md` | Registry | Current | Да | Must be updated after every doc move/status change. |
-| `ROADMAP.md` | Product Planning | Current | Да | Needs strict MVP vs future vision separation. |
-| `BACKLOG.md` | Product Planning | Draft | Нет | Some future items may look like current MVP unless tagged. |
-| `CHANGELOG.md` | Release History | Draft | Нет | Needs verification before public release. |
+| `ROADMAP.md` | Product Planning | Current | Да | Synced with market guardrails; broad platform work remains future. |
+| `BACKLOG.md` | Product Planning | Draft | Нет | Synced with beta filter; future items must remain tagged. |
+| `CHANGELOG.md` | Release History | Draft | Нет | Tracks docs-only guardrail updates; latest quality gates still pending. |
 | `RELEASE_NOTES.md` | Release Status | Current | Да | Trusted Auth was synced as `[SHIPPED/PRODUCTION PATH]`; operational smoke checks remain. |
 | `BETA_CHECKLIST.md` | QA / Beta | Current | Да | Needs sync after release/deployment wording changes. |
 | `BETA_TESTING.md` | QA / Beta | Current | Да | Browser Demo Mode needs fuller boundaries. |
@@ -36,17 +38,17 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `SETUP_RU.md` | Legacy Setup | Deprecated | Нет | Old Windows paths and `.bat` / `.ps1` workflow. |
 | `PATCH_REPORT.md` | Historical Patch Report | Deprecated | Нет | Trusted Auth implementation history, not current release truth. |
 | `GO_IRL_DOCUMENTATION.md` | Generated Snapshot | Deprecated | Нет | Old generated snapshot; may contain outdated README/Roadmap excerpts. |
-| `docs/PRODUCT_PHILOSOPHY.md` | Product Philosophy | Current | Нет | Protected from rewrite; Constitution is higher source of truth. |
+| `docs/PRODUCT_PHILOSOPHY.md` | Product Philosophy | Current | Нет | Protected from rewrite; Constitution and Market Positioning are higher operational filters. |
 | `docs/GO_IRL_CONSTITUTION.md` | Product / Architecture Constitution | Current | Да | Absolute philosophy and architecture source of truth. |
 | `docs/MARKET_POSITIONING.md` | Market / Feature Filter | Current | Да | Must gate new feature categories before MVP expansion. |
-| `docs/COMPETITOR_WATCH.md` | Market Watch | Draft | Нет | Competitor signals must not auto-create MVP scope. |
+| `docs/COMPETITOR_WATCH.md` | Market Watch | Current | Да | Competitor signals must not auto-create MVP scope. |
 | `docs/GO_IRL_1_1_STABILIZATION.md` | Stabilization Ledger | Draft | Нет | Task statuses may become historical. |
 | `docs/MVP_STABILIZATION_PLAN.md` | MVP Plan | Current | Да | Needs missing sections for demo/chat/weather boundaries. |
 | `docs/DEVELOPMENT_PROTOCOL.md` | Engineering Protocol | Current | Да | Must remain aligned with project rules: pnpm, small patches, no unsafe changes. |
 | `docs/SPORT_COACH_MVP.md` | Product Scope / Coach | Current | Да | Synced: `CoachRequestPanel.tsx` is current UI basis; Role Choice and Review Flow are future. |
 | `docs/MVP_DOC_AUDIT.md` | Audit / Conflict Registry | Current | Да | New registry for doc conflicts and resolutions. |
 | `docs/MISSING_SECTIONS.md` | Audit / Missing Boundaries | Current | Да | New registry for undocumented MVP boundaries. |
-| `docs/DOCUMENTATION_AUDIT.md` | Audit | Current | Нет | Must be refreshed after sanitation pass if used. |
+| `docs/DOCUMENTATION_AUDIT.md` | Audit | Current | Нет | Refreshed with market layer and Bible guardrail tasks. |
 | `docs/Database.md` | Architecture | Draft | Нет | Needs audit against `supabase/schema.sql` and migrations. |
 | `docs/RLS.md` | Supabase / RLS | Draft | Нет | Do not edit policies without explicit approval. |
 | `docs/Security.md` | Security | Draft | Нет | Must stay aligned with Trusted Auth production path. |
@@ -61,17 +63,17 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `docs/ai-event-discovery.md` | AI / Future | Draft | Нет | Future pipeline only. |
 | `docs/RecommendationEngine.md` | Architecture / Future | Draft | Нет | v2 recommendation concepts, not current MVP proof. |
 | `docs/reputation.md` | Reputation / Future | Draft | Нет | RLI/Trust future model, not current complete runtime. |
-| `docs/vertical-experiences.md` | Product / Future Architecture | Draft | Нет | Current MVP is Sport-first; broad verticals are future-compatible architecture. |
+| `docs/vertical-experiences.md` | Product / Future Architecture | Draft | Нет | Current MVP is Olomouc-first with six beta categories; broad verticals are future-compatible architecture. |
 | `docs/performance.md` | Architecture | Current | Нет | Keep aligned with bundle and vertical loading strategy. |
-| `docs/bible/00-completion-audit.md` | Bible Audit | Current | Да | Bible is preserved and structured, not complete. |
-| `docs/bible/00-bible-roadmap.md` | Bible Roadmap | Current | Да | Defines how to finish Bible without rewriting from scratch. |
-| `docs/bible/01-foundation/01-why-we-exist.md` | Bible | Draft | Нет | Preserved draft, not final Bible 1.0. |
-| `docs/bible/01-foundation/02-core-principles.md` | Bible | Draft | Нет | Needs MVP reconciliation. |
-| `docs/bible/02-platform-architecture.md` | Bible | Draft | Нет | Broad platform vision; not current MVP-only truth. |
-| `docs/bible/03-database-design.md` | Bible | Draft | Нет | Needs Supabase/schema audit; known leftover Russian sentence. |
-| `docs/bible/04-modules-architecture.md` | Bible | Draft | Нет | Needs Sport-first reconciliation. |
-| `docs/bible/05-product-requirements.md` | Bible / PRD | Draft | Нет | Needs split into MVP 1.0 and GO IRL 1.1 requirements. |
-| `docs/bible/06-ux-interaction-guidelines.md` | Bible / UX | Draft | Нет | Needs Telegram Mini App UX reconciliation. |
+| `docs/bible/00-completion-audit.md` | Bible Audit | Current | Да | Bible is preserved and structured, not complete; now includes market-scope reconciliation. |
+| `docs/bible/00-bible-roadmap.md` | Bible Roadmap | Current | Да | Defines how to finish Bible without rewriting from scratch; now includes market-scope guardrails. |
+| `docs/bible/01-foundation/01-why-we-exist.md` | Bible | Draft | Нет | Preserved philosophy; broad platform language is future vision, not beta scope. |
+| `docs/bible/01-foundation/02-core-principles.md` | Bible | Draft | Нет | Preserved principles; API/backend/RLI/AI language is future direction, not beta refactor mandate. |
+| `docs/bible/02-platform-architecture.md` | Bible | Draft | Нет | Marked as future platform vision; not an instruction to build large backend/API/workers before beta. |
+| `docs/bible/03-database-design.md` | Bible | Draft | Нет | Marked as future database vision; not current Supabase schema or migration plan. |
+| `docs/bible/04-modules-architecture.md` | Bible | Draft | Нет | Marked as future module vision; broad modules and AI are not current MVP. |
+| `docs/bible/05-product-requirements.md` | Bible / PRD | Draft | Нет | Marked as historical PRD draft; RLI/reminders/reviews/achievements are future unless re-approved. |
+| `docs/bible/06-ux-interaction-guidelines.md` | Bible / UX | Draft | Нет | Marked as UX principles draft; achievements/AI/verification are future unless re-approved. |
 | `project-audit/GO_IRL_DOCUMENTATION_CLEANUP_AUDIT.md` | Audit | Current | Нет | Historical audit context; not code source of truth. |
 | `project-audit/GO_IRL_PROJECT_AUDIT.md` | Audit | Draft | Нет | Needs refresh after docs sanitation. |
 | `project-audit/GO_IRL_PROJECT_AUDIT.json` | Snapshot | Deprecated | Нет | Keep only if scripts consume it. |
@@ -94,6 +96,7 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | Legacy setup docs could mislead AI/code generation. | `SETUP.md`, `SETUP_RU.md`, `CHECKLIST.md` | Added historical/deprecated warning banners. |
 | Generated snapshots could be mistaken for current docs. | `GO_IRL_DOCUMENTATION.md`, `PATCH_REPORT.md` | Added warning banners and status registry entries. |
 | Activity Chat, Browser Demo Mode, Weather, Telegram Mini App limits are not fully centralized. | `docs/MISSING_SECTIONS.md` | Missing-section registry created. |
+| Bible files could be mistaken for current MVP, Supabase schema, or implementation plan. | `docs/bible/*`, `ROADMAP.md`, `BACKLOG.md`, `docs/MARKET_POSITIONING.md` | Added guardrail banners and synced Bible audit/roadmap with market scope. |
 
 ## Current tree
 
@@ -107,7 +110,7 @@ GO IRL Documentation
 │   ├── CHANGELOG.md
 │   └── RELEASE_NOTES.md
 │
-├── Product
+├── Product / Market
 │   └── docs/
 │       ├── PRODUCT_PHILOSOPHY.md
 │       ├── GO_IRL_CONSTITUTION.md
@@ -187,4 +190,5 @@ Update this registry when:
 - release blockers change;
 - future vision becomes MVP scope;
 - code implementation contradicts docs;
+- Bible files are audited or reclassified;
 - Supabase migration/auth/RLS docs are audited.
