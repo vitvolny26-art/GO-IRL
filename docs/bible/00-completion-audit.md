@@ -29,6 +29,7 @@ GO IRL Bible
 ├── docs/bible/02-platform-architecture.md
 ├── docs/bible/03-database-design.md
 ├── docs/bible/04-modules-architecture.md
+├── docs/bible/04-modules-mvp-audit.md
 ├── docs/bible/05-product-requirements.md
 ├── docs/bible/06-ux-interaction-guidelines.md
 ├── docs/bible/07-beta-readiness-and-operations.md
@@ -44,7 +45,8 @@ GO IRL Bible
 | Book I — Foundation / Chapter 3 | `01-foundation/03-mvp-scope-and-market-positioning.md` | Current MVP boundary | Added to define MVP 1.0 scope, market guardrails, Olomouc beta, six categories, and non-goals. |
 | Book II — Platform Architecture | `02-platform-architecture.md` | Partial / usable | Good architecture draft. Uses broad future platform vision. Needs reconciliation with current React/Supabase/Telegram Mini App MVP and Olomouc-first market scope. |
 | Book III — Database Design | `03-database-design.md` | Contained / future vision | Marked as historical/future DB vision. Current schema truth is `supabase/schema.sql`, migrations, `supabase/README.md`, and `docs/DATABASE_SCHEMA_AUDIT.md`. |
-| Book IV — Modules Architecture | `04-modules-architecture.md` | Needs audit | Broad module system. May be ahead of current MVP and partly outdated versus current Sport-first / six-category beta focus. |
+| Book IV — Modules Architecture | `04-modules-architecture.md` | Contained / future vision | Historical module vision preserved; MVP interpretation is defined in `04-modules-mvp-audit.md`. |
+| Book IV Audit — Modules MVP Audit | `04-modules-mvp-audit.md` | Current MVP boundary | Added to contain full module registry/AI/multi-module vision and map six beta categories to current MVP. |
 | Book V — Product Requirements Document | `05-product-requirements.md` | Draft / not final | PRD exists, but not proven final. Needs split into MVP 1.0, market beta scope, and 1.1 requirements. |
 | Book VI — UX & Interaction Guidelines | `06-ux-interaction-guidelines.md` | Draft / not final | UX guide exists, but original numbering suggests it was chapter 07. Needs final consistency pass and Telegram Mini App UX reconciliation. |
 | Book VII — Beta Readiness and Operations | `07-beta-readiness-and-operations.md` | Current MVP boundary | Added to define beta operations, QA gates, release gates, Browser Demo Mode, Telegram constraints, chat/share/weather/coach boundaries. |
@@ -61,6 +63,7 @@ Chapter 3 — MVP Scope and Market Positioning     added during Bible completion
 Book II — Platform Architecture
 Book III — 04 Database Design
 Book IV — 05 Modules Architecture
+Book IV Audit — Modules MVP Audit                added during Bible completion
 Book V — PRD                                     probably missing explicit Chapter 6
 Book VI — 07 UX & Interaction Guidelines
 Book VII — Beta Readiness and Operations          added during Bible completion
@@ -79,6 +82,7 @@ Bible 1.0 must describe the beta-ready MVP, not the entire future platform.
 | Market positioning | Added | Covered by `01-foundation/03-mvp-scope-and-market-positioning.md`, aligned with market guardrails. |
 | Competitor boundaries | Added | Covered as competitor feature filter in Chapter 3. |
 | Olomouc closed beta scope | Added | Covered in Chapter 3 and Book VII. |
+| Six-category beta module boundary | Added | Covered in `04-modules-mvp-audit.md`. |
 | Telegram Mini App constraints | Added / needs UX audit | Covered in Book VII and Book VIII; still needs reconciliation with UX guide. |
 | Browser Demo Mode | Added | Covered in Book VII and Book VIII. |
 | Event lifecycle | Partly covered | `docs/EventLifecycle.md` is updated; Bible still needs a dedicated final lifecycle chapter or PRD sync. |
@@ -88,7 +92,7 @@ Bible 1.0 must describe the beta-ready MVP, not the entire future platform.
 | Profile shipped behavior | Added / needs code audit | Profile/avatar runtime boundary covered in Book VIII. |
 | Supabase trusted auth reality | Added / needs smoke test | Covered in Book VIII and external auth docs. |
 | QA and release gates | Added | Covered in Book VII and Book VIII. |
-| Non-goals for 1.0 | Added | Covered in Chapter 3 and Book VII. |
+| Non-goals for 1.0 | Added | Covered in Chapter 3, Book VII, and Modules MVP Audit. |
 
 ## What is missing for Bible 1.1+
 
@@ -109,11 +113,10 @@ Future material must be clearly marked as `1.1+` or `future vision`.
 
 ## Required reconciliation before final Bible
 
-1. Audit `04-modules-architecture.md` against current MVP: six categories, Sport Coach first, universal roles later.
-2. Audit `05-product-requirements.md` against `docs/MARKET_POSITIONING.md`, `ROADMAP.md`, `BACKLOG.md`, and Book VII.
-3. Reconcile `06-ux-interaction-guidelines.md` with current mobile Telegram Mini App UX.
-4. Decide if missing chapters should be created or if current files should be renumbered permanently.
-5. Produce a final `GO IRL Bible 1.0` set only after product review and quality gates.
+1. Audit `05-product-requirements.md` against `docs/MARKET_POSITIONING.md`, `ROADMAP.md`, `BACKLOG.md`, and Book VII.
+2. Reconcile `06-ux-interaction-guidelines.md` with current mobile Telegram Mini App UX.
+3. Decide if missing chapters should be created or if current files should be renumbered permanently.
+4. Produce a final `GO IRL Bible 1.0` set only after product review and quality gates.
 
 ## Do not do yet
 
@@ -139,6 +142,7 @@ docs/bible/
 ├── 02-platform-architecture.md
 ├── 03-database-design.md
 ├── 04-modules-architecture.md
+├── 04-modules-mvp-audit.md
 ├── 05-product-requirements.md
 ├── 06-ux-interaction-guidelines.md
 ├── 07-beta-readiness-and-operations.md
