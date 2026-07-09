@@ -75,9 +75,12 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `docs/bible/02-platform-architecture.md` | Bible | Draft | Нет | Marked as future platform vision; not an instruction to build large backend/API/workers before beta. |
 | `docs/bible/03-database-design.md` | Bible | Draft | Нет | Marked as future database vision; not current Supabase schema or migration plan. |
 | `docs/bible/04-modules-architecture.md` | Bible | Draft | Нет | Marked as future module vision; broad modules and AI are not current MVP. |
-| `docs/bible/05-product-requirements.md` | Bible / PRD | Draft | Нет | Marked as historical PRD draft; RLI/reminders/reviews/achievements are future unless re-approved. |
+| `docs/bible/04-modules-mvp-audit.md` | Bible / MVP Boundary | Current | Да | Current Bible source for six-category beta module boundary and future module containment. |
+| `docs/bible/05-product-requirements.md` | Bible / PRD | Draft | Нет | Historical PRD draft; RLI/reminders/reviews/achievements are future unless re-approved. |
+| `docs/bible/05-product-requirements-mvp-split.md` | Bible / MVP Boundary | Current | Да | Current Bible source for PRD split: MVP 1.0, MVP 1.1 stabilization, future, and blocked-before-beta. |
 | `docs/bible/06-ux-interaction-guidelines.md` | Bible / UX | Draft | Нет | Marked as UX principles draft; achievements/AI/verification are future unless re-approved. |
 | `docs/bible/07-beta-readiness-and-operations.md` | Bible / Beta Ops | Current | Да | Current Bible source for beta operations, QA gates, release gates, Browser Demo Mode, and MVP non-goals. |
+| `docs/bible/08-runtime-boundaries.md` | Bible / Runtime Boundary | Current | Да | Current Bible source for runtime/auth/Supabase/demo/profile/chat/share/weather boundaries. |
 | `project-audit/GO_IRL_DOCUMENTATION_CLEANUP_AUDIT.md` | Audit | Current | Нет | Historical audit context; not code source of truth. |
 | `project-audit/GO_IRL_PROJECT_AUDIT.md` | Audit | Draft | Нет | Needs refresh after docs sanitation. |
 | `project-audit/GO_IRL_PROJECT_AUDIT.json` | Snapshot | Deprecated | Нет | Keep only if scripts consume it. |
@@ -100,7 +103,8 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | Legacy setup docs could mislead AI/code generation. | `SETUP.md`, `SETUP_RU.md`, `CHECKLIST.md` | Added historical/deprecated warning banners. |
 | Generated snapshots could be mistaken for current docs. | `GO_IRL_DOCUMENTATION.md`, `PATCH_REPORT.md` | Added warning banners and status registry entries. |
 | Activity Chat, Browser Demo Mode, Weather, Telegram Mini App limits were not fully centralized. | `docs/MISSING_SECTIONS.md`, `BETA_TESTING.md`, `docs/EventLifecycle.md`, `docs/MVP_STABILIZATION_PLAN.md` | Boundaries now documented; chat expiry still needs product/schema decision. |
-| Bible files could be mistaken for current MVP, Supabase schema, or implementation plan. | `docs/bible/*`, `ROADMAP.md`, `BACKLOG.md`, `docs/MARKET_POSITIONING.md` | Guardrails added; current MVP boundary chapters added; Bible remains not final. |
+| Bible files could be mistaken for current MVP, Supabase schema, or implementation plan. | `docs/bible/*`, `ROADMAP.md`, `BACKLOG.md`, `docs/MARKET_POSITIONING.md` | Guardrails added; current MVP boundary chapters/audits added; Bible remains not final. |
+| Historical PRD could be mistaken for current beta scope. | `docs/bible/05-product-requirements.md` | `docs/bible/05-product-requirements-mvp-split.md` classifies PRD items into MVP 1.0, MVP 1.1 stabilization, future, and blocked-before-beta. |
 | Future DB architecture conflicted with current Supabase migrations. | `docs/Database.md`, `docs/bible/03-database-design.md`, `supabase/migration_v8_activity_chat.sql` | `docs/DATABASE_SCHEMA_AUDIT.md` created; `docs/Database.md` marked future architecture. |
 
 ## Current tree
@@ -163,9 +167,12 @@ GO IRL Documentation
 │       ├── 02-platform-architecture.md
 │       ├── 03-database-design.md
 │       ├── 04-modules-architecture.md
+│       ├── 04-modules-mvp-audit.md
 │       ├── 05-product-requirements.md
+│       ├── 05-product-requirements-mvp-split.md
 │       ├── 06-ux-interaction-guidelines.md
-│       └── 07-beta-readiness-and-operations.md
+│       ├── 07-beta-readiness-and-operations.md
+│       └── 08-runtime-boundaries.md
 │
 ├── QA / Beta / Release
 │   ├── BETA_CHECKLIST.md
