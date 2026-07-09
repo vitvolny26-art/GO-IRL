@@ -31,7 +31,8 @@ GO IRL Bible
 ├── docs/bible/04-modules-architecture.md
 ├── docs/bible/05-product-requirements.md
 ├── docs/bible/06-ux-interaction-guidelines.md
-└── docs/bible/07-beta-readiness-and-operations.md
+├── docs/bible/07-beta-readiness-and-operations.md
+└── docs/bible/08-runtime-boundaries.md
 ```
 
 ## Completeness status
@@ -47,6 +48,7 @@ GO IRL Bible
 | Book V — Product Requirements Document | `05-product-requirements.md` | Draft / not final | PRD exists, but not proven final. Needs split into MVP 1.0, market beta scope, and 1.1 requirements. |
 | Book VI — UX & Interaction Guidelines | `06-ux-interaction-guidelines.md` | Draft / not final | UX guide exists, but original numbering suggests it was chapter 07. Needs final consistency pass and Telegram Mini App UX reconciliation. |
 | Book VII — Beta Readiness and Operations | `07-beta-readiness-and-operations.md` | Current MVP boundary | Added to define beta operations, QA gates, release gates, Browser Demo Mode, Telegram constraints, chat/share/weather/coach boundaries. |
+| Book VIII — Runtime Boundaries | `08-runtime-boundaries.md` | Current MVP boundary | Added to define Trusted Telegram Auth, Supabase, Browser Demo Mode, Profile/Avatar, Chat, Share/Join, Weather, Admin/Moderation runtime boundaries. |
 
 ## Numbering issue
 
@@ -62,6 +64,7 @@ Book IV — 05 Modules Architecture
 Book V — PRD                                     probably missing explicit Chapter 6
 Book VI — 07 UX & Interaction Guidelines
 Book VII — Beta Readiness and Operations          added during Bible completion
+Book VIII — Runtime Boundaries                    added during Bible completion
 ```
 
 Do not renumber old files yet. Renumbering is a later editorial task after product review.
@@ -76,15 +79,15 @@ Bible 1.0 must describe the beta-ready MVP, not the entire future platform.
 | Market positioning | Added | Covered by `01-foundation/03-mvp-scope-and-market-positioning.md`, aligned with market guardrails. |
 | Competitor boundaries | Added | Covered as competitor feature filter in Chapter 3. |
 | Olomouc closed beta scope | Added | Covered in Chapter 3 and Book VII. |
-| Telegram Mini App constraints | Added / needs UX audit | Covered in Book VII; still needs reconciliation with UX guide. |
-| Browser Demo Mode | Added | Covered in Book VII. |
+| Telegram Mini App constraints | Added / needs UX audit | Covered in Book VII and Book VIII; still needs reconciliation with UX guide. |
+| Browser Demo Mode | Added | Covered in Book VII and Book VIII. |
 | Event lifecycle | Partly covered | `docs/EventLifecycle.md` is updated; Bible still needs a dedicated final lifecycle chapter or PRD sync. |
-| Activity Chat shipped behavior | Added / needs code audit | Covered in Book VII and `docs/EventLifecycle.md`; schema audit found current migration uses chat creation + 24h. |
-| Share / Join flow | Added | Covered in Book VII. |
-| Weather Widget shipped behavior | Added | Covered in Book VII. |
-| Profile shipped behavior | Partly missing | Still needs profile/demo/avatar boundary in Bible or PRD. |
-| Supabase trusted auth reality | Partly covered | Covered by docs outside Bible; Bible still needs a concise implementation boundary. |
-| QA and release gates | Added | Covered in Book VII. |
+| Activity Chat shipped behavior | Added / needs code audit | Covered in Book VII, Book VIII, and `docs/EventLifecycle.md`; schema audit found current migration uses chat creation + 24h. |
+| Share / Join flow | Added | Covered in Book VII and Book VIII. |
+| Weather Widget shipped behavior | Added | Covered in Book VII and Book VIII. |
+| Profile shipped behavior | Added / needs code audit | Profile/avatar runtime boundary covered in Book VIII. |
+| Supabase trusted auth reality | Added / needs smoke test | Covered in Book VIII and external auth docs. |
+| QA and release gates | Added | Covered in Book VII and Book VIII. |
 | Non-goals for 1.0 | Added | Covered in Chapter 3 and Book VII. |
 
 ## What is missing for Bible 1.1+
@@ -109,10 +112,8 @@ Future material must be clearly marked as `1.1+` or `future vision`.
 1. Audit `04-modules-architecture.md` against current MVP: six categories, Sport Coach first, universal roles later.
 2. Audit `05-product-requirements.md` against `docs/MARKET_POSITIONING.md`, `ROADMAP.md`, `BACKLOG.md`, and Book VII.
 3. Reconcile `06-ux-interaction-guidelines.md` with current mobile Telegram Mini App UX.
-4. Add a concise Profile / Avatar / Demo Mode boundary to Bible or PRD.
-5. Add a concise Trusted Auth / Supabase boundary to Bible or PRD.
-6. Decide if missing chapters should be created or if current files should be renumbered permanently.
-7. Produce a final `GO IRL Bible 1.0` set only after product review and quality gates.
+4. Decide if missing chapters should be created or if current files should be renumbered permanently.
+5. Produce a final `GO IRL Bible 1.0` set only after product review and quality gates.
 
 ## Do not do yet
 
@@ -140,7 +141,8 @@ docs/bible/
 ├── 04-modules-architecture.md
 ├── 05-product-requirements.md
 ├── 06-ux-interaction-guidelines.md
-└── 07-beta-readiness-and-operations.md
+├── 07-beta-readiness-and-operations.md
+└── 08-runtime-boundaries.md
 ```
 
 ## Status
