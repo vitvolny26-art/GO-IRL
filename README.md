@@ -10,6 +10,7 @@ Before contributing or implementing new features, read:
 3. [docs/MARKET_POSITIONING.md](docs/MARKET_POSITIONING.md)
 4. [docs/COMPETITOR_WATCH.md](docs/COMPETITOR_WATCH.md)
 5. [docs/SPORT_COACH_MVP.md](docs/SPORT_COACH_MVP.md)
+6. [docs/COACH_CHAT_TRUST_LAYER.md](docs/COACH_CHAT_TRUST_LAYER.md)
 
 Every major product or architecture decision must support the mission:
 
@@ -28,6 +29,8 @@ Closed beta focuses on Olomouc and the real-life event loop:
 create event -> share -> participants join -> event chat -> people show up in real life.
 
 For version 1.1, **Coach means Sport Coach only**. Coach is not a universal helper for all events. Guides, language buddies, game masters, hosts, referees, and paid role marketplaces are future Event Roles work after the Sport Coach MVP proves value.
+
+The Coach/Role + Chat trust layer is documented separately. Its purpose is to place event support and temporary event chat close together so users trust the event enough to attend. Generic usage is a temporary bridge only; it must not redefine Coach as a universal role.
 
 ## Current Stack
 
@@ -136,6 +139,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - Explicit "Done" / "Back to Telegram" UX; the Mini App closes only after a user action
 - Sport Vertical MVP with sport-specific card, details, create fields, and matching engine
 - Sport Coach MVP 1.1 product scope: Coach is sport-only; future roles move to Event Roles
+- Coach/Role + Chat trust layer documented as the conversion pattern that keeps event support close to temporary event chat
 - ActivityRendererRegistry with Sport and Generic registrations for future vertical expansion
 - GO IRL brand logo, favicon, app icon, and Open Graph preview
 - Supabase schema and RLS policies in `supabase/schema.sql`
@@ -155,6 +159,7 @@ The build command runs `tsc -b` and then creates the production Vite bundle.
 - `docs/MARKET_POSITIONING.md` - market positioning source of truth and MVP feature filter
 - `docs/COMPETITOR_WATCH.md` - competitor watchlist and product monitoring rules
 - `docs/SPORT_COACH_MVP.md` - Sport Coach MVP 1.1 scope, beta metrics, roadmap, and Event Roles guardrails
+- `docs/COACH_CHAT_TRUST_LAYER.md` - trust layer concept for keeping role/helper support next to Activity Chat
 - `CHANGELOG.md` - shipped changes
 - `ROADMAP.md` - product and engineering direction
 - `SPRINTS.md` - sprint-by-sprint delivery plan
@@ -203,6 +208,7 @@ Current closed/patched areas:
   - Demo writes are local-only and must not touch production Supabase.
 - Restore Coach + Chat
   - Coach and Event Chat panels are mounted in sport event details.
+  - Coach/Role + Chat is now documented as a trust layer; any generic usage is a temporary bridge until Event Roles exist.
 - Event Card Time Fix
   - Sport cards show event start time consistently.
   - Empty time badge is not rendered.
