@@ -18,31 +18,36 @@ These files must prevent competitor-inspired or future-platform ideas from enter
 
 ## Search result
 
-Repository search found these confirmed Bible files:
+Repository contains these confirmed Bible files:
 
 ```text
 docs/bible/01-foundation/01-why-we-exist.md
 docs/bible/01-foundation/02-core-principles.md
+docs/bible/01-foundation/03-mvp-scope-and-market-positioning.md
 docs/bible/02-platform-architecture.md
 docs/bible/03-database-design.md
 docs/bible/04-modules-architecture.md
 docs/bible/05-product-requirements.md
 docs/bible/06-ux-interaction-guidelines.md
+docs/bible/07-beta-readiness-and-operations.md
 ```
 
-Additional related snapshot found:
+Additional related snapshot:
 
 ```text
 GO_IRL_DOCUMENTATION.md
 ```
 
-No separate final Book V, Book VI, PRD, or UX complete set was found outside the preserved Bible archive.
-
 ## Current verdict
 
-The Bible is structured, but not finished.
+The Bible is expanded and structured, but not final.
 
-Existing books are drafts with strong product value. They are not yet final GO IRL App 1.0 / 1.1 documentation.
+Two current MVP boundary chapters were added:
+
+- `01-foundation/03-mvp-scope-and-market-positioning.md`
+- `07-beta-readiness-and-operations.md`
+
+Existing historical books remain valuable drafts. They are not automatic implementation mandates.
 
 ## Completion plan
 
@@ -52,12 +57,11 @@ Status: done.
 
 - Old root filenames were moved into `docs/bible/`.
 - Original content was preserved.
-- `DOCS_INDEX.md` points to the structured archive.
 - Historical files must not be deleted during cleanup.
 
 ### Step 2 — Classify
 
-Status: started.
+Status: in progress.
 
 Each book must be marked as one of:
 
@@ -75,13 +79,15 @@ Current classification:
 
 | Book | File | Classification |
 |---|---|---|
-| Foundation | `01-foundation/01-why-we-exist.md` | partly current / needs market-scope audit |
+| Foundation | `01-foundation/01-why-we-exist.md` | partly current / philosophy source |
 | Core principles | `01-foundation/02-core-principles.md` | partly current / needs beta guardrail alignment |
+| MVP scope and market positioning | `01-foundation/03-mvp-scope-and-market-positioning.md` | current MVP boundary |
 | Platform architecture | `02-platform-architecture.md` | partly current / future vision |
-| Database design | `03-database-design.md` | needs schema audit |
+| Database design | `03-database-design.md` | contained future vision / schema-audited externally |
 | Modules architecture | `04-modules-architecture.md` | needs MVP audit / future vision |
 | Product requirements | `05-product-requirements.md` | draft / needs 1.0 vs 1.1 split / needs market-scope audit |
 | UX guidelines | `06-ux-interaction-guidelines.md` | draft / needs Telegram Mini App audit |
+| Beta readiness and operations | `07-beta-readiness-and-operations.md` | current MVP boundary |
 
 ### Step 3 — Compare with current MVP
 
@@ -98,8 +104,9 @@ docs/COMPETITOR_WATCH.md
 docs/GO_IRL_1_1_STABILIZATION.md
 docs/MVP_STABILIZATION_PLAN.md
 docs/SPORT_COACH_MVP.md
+docs/DATABASE_SCHEMA_AUDIT.md
 supabase/schema.sql
-supabase/migrations/*.sql
+supabase/migration_v*.sql
 src/types.ts
 src/store.ts
 src/verticals/SportVertical.tsx
@@ -109,16 +116,19 @@ Do not modify code, SQL, RLS, auth, or migrations during this comparison.
 
 ### Step 4 — Define Bible 1.0 scope
 
+Status: mostly covered by new MVP boundary chapters, but not final.
+
 Bible 1.0 should describe the beta-ready product, not the entire far-future platform.
 
 Required Bible 1.0 sections:
 
 ```text
 Book I — Foundation
-Book II — Market Positioning and MVP 1.0 Product Scope
-Book III — Platform Architecture for current MVP
-Book IV — Current Data Model and Supabase boundaries
-Book V — Current Modules and Sport-first / six-category beta logic
+Book I / Chapter 3 — MVP Scope and Market Positioning
+Book II — Platform Architecture for current MVP
+Book III — Current Data Model and Supabase boundaries
+Book IV — Current Modules and Sport-first / six-category beta logic
+Book V — Product Requirements for MVP 1.0 / 1.1
 Book VI — Telegram Mini App UX and Interaction
 Book VII — Beta Readiness and Operations
 ```
@@ -165,23 +175,31 @@ Status: Future / 1.1+ / Not current MVP
 
 Do not rewrite the existing chapters unless they contradict the current project.
 
-Missing or weak areas for 1.0:
+Covered or mostly covered for 1.0:
 
 ```text
 Market positioning
 Competitor boundaries
 MVP 1.0 scope
-Telegram Mini App constraints
 Browser Demo Mode
 Olomouc beta scope
 Six beta categories
-Supabase trusted auth reality
 Activity Chat boundaries
 Weather Widget boundaries
-Profile boundaries
 Share/join flow
 QA and release gates
 Explicit non-goals before beta
+```
+
+Still weak for 1.0:
+
+```text
+Telegram Mini App UX detail
+Supabase trusted auth reality inside Bible
+Profile/avatar/demo boundary
+Event lifecycle inside Bible
+Final PRD split for MVP 1.0 vs 1.1
+Modules architecture alignment with six categories
 ```
 
 Missing or weak areas for 1.1+:
@@ -212,15 +230,15 @@ Only after audit and product review:
 
 ## Immediate next audit tasks
 
-1. Audit `03-database-design.md` against Supabase schema and migrations.
+1. Audit `04-modules-architecture.md` against current MVP: six categories and Sport Coach first.
 2. Audit `05-product-requirements.md` against current MVP, market positioning, roadmap, and backlog.
 3. Audit `06-ux-interaction-guidelines.md` against Telegram Mini App UX.
-4. Extract useful current content from `GO_IRL_DOCUMENTATION.md` into current docs if needed.
-5. Sync `README.md`, `RELEASE_NOTES.md`, `docs/Security.md`, and `supabase/README.md` around trusted auth status.
+4. Add Bible boundary for Profile / Avatar / Demo Mode.
+5. Add Bible boundary for Trusted Auth / Supabase runtime reality.
+6. Extract useful current content from `GO_IRL_DOCUMENTATION.md` into current docs if needed.
 
 ## Do not do
 
-- Do not invent missing chapters blindly.
 - Do not make Bible the source of truth over current code without audit.
 - Do not delete preserved drafts.
 - Do not merge future vision into MVP scope without labeling it.
