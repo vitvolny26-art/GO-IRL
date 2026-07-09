@@ -29,6 +29,7 @@ docs/bible/03-database-design.md
 docs/bible/04-modules-architecture.md
 docs/bible/04-modules-mvp-audit.md
 docs/bible/05-product-requirements.md
+docs/bible/05-product-requirements-mvp-split.md
 docs/bible/06-ux-interaction-guidelines.md
 docs/bible/07-beta-readiness-and-operations.md
 docs/bible/08-runtime-boundaries.md
@@ -48,6 +49,7 @@ Current MVP boundary chapters/audits added:
 
 - `01-foundation/03-mvp-scope-and-market-positioning.md`
 - `04-modules-mvp-audit.md`
+- `05-product-requirements-mvp-split.md`
 - `07-beta-readiness-and-operations.md`
 - `08-runtime-boundaries.md`
 
@@ -90,7 +92,8 @@ Current classification:
 | Database design | `03-database-design.md` | contained future vision / schema-audited externally |
 | Modules architecture | `04-modules-architecture.md` | contained future vision / audited by `04-modules-mvp-audit.md` |
 | Modules MVP audit | `04-modules-mvp-audit.md` | current MVP boundary |
-| Product requirements | `05-product-requirements.md` | draft / needs 1.0 vs 1.1 split / needs market-scope audit |
+| Product requirements | `05-product-requirements.md` | historical PRD draft / audited by PRD split |
+| PRD MVP split | `05-product-requirements-mvp-split.md` | current MVP boundary |
 | UX guidelines | `06-ux-interaction-guidelines.md` | draft / needs Telegram Mini App audit |
 | Beta readiness and operations | `07-beta-readiness-and-operations.md` | current MVP boundary |
 | Runtime boundaries | `08-runtime-boundaries.md` | current MVP boundary |
@@ -192,6 +195,7 @@ Browser Demo Mode
 Olomouc beta scope
 Six beta categories
 Modules architecture alignment with six categories
+PRD split for MVP 1.0 vs 1.1
 Supabase trusted auth reality inside Bible
 Profile/avatar/demo boundary
 Activity Chat boundaries
@@ -206,7 +210,6 @@ Still weak for 1.0:
 ```text
 Telegram Mini App UX detail
 Event lifecycle inside Bible
-Final PRD split for MVP 1.0 vs 1.1
 ```
 
 Missing or weak areas for 1.1+:
@@ -218,11 +221,12 @@ Coach reviews
 Event Roles after Sport Coach validation
 Moderation
 Notifications
-Recommendation engine
 AI event discovery
 Multi-vertical platform
 Admin surface
 ```
+
+Recommendation engine is now explicitly classified as future in the PRD split.
 
 ### Step 7 — Finalize
 
@@ -237,8 +241,8 @@ Only after audit and product review:
 
 ## Immediate next audit tasks
 
-1. Audit `05-product-requirements.md` against current MVP, market positioning, roadmap, and backlog.
-2. Audit `06-ux-interaction-guidelines.md` against Telegram Mini App UX.
+1. Audit `06-ux-interaction-guidelines.md` against Telegram Mini App UX.
+2. Add or sync a final event lifecycle Bible chapter if needed.
 3. Extract useful current content from `GO_IRL_DOCUMENTATION.md` into current docs if needed.
 
 ## Do not do
