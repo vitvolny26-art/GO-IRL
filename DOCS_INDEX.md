@@ -14,8 +14,9 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 - `docs/SPORT_COACH_MVP.md` is the source of truth for Sport Coach MVP 1.1 boundaries after this cleanup.
 - `docs/MVP_DOC_AUDIT.md` is the source of truth for known documentation conflicts.
 - `docs/MISSING_SECTIONS.md` is the source of truth for missing documentation boundaries.
+- `docs/DATABASE_SCHEMA_AUDIT.md` is the source of truth for current schema-vs-future-schema documentation conflicts.
 - Historical snapshot files must not be used for code generation.
-- Bible files are preserved historical/product sources. They must not override current beta scope, market positioning, code, Supabase schema, auth, or RLS.
+- Bible files are preserved product sources. New Bible boundary chapters can describe MVP scope, but Bible files must not override current code, Supabase schema, auth, or RLS.
 - Do not change `.env`, secrets, Supabase RLS, auth, or destructive SQL without explicit approval.
 
 ## Статусный реестр документации
@@ -29,7 +30,7 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `CHANGELOG.md` | Release History | Draft | Нет | Tracks docs-only guardrail updates; latest quality gates still pending. |
 | `RELEASE_NOTES.md` | Release Status | Current | Да | Trusted Auth was synced as `[SHIPPED/PRODUCTION PATH]`; operational smoke checks remain. |
 | `BETA_CHECKLIST.md` | QA / Beta | Current | Да | Needs sync after release/deployment wording changes. |
-| `BETA_TESTING.md` | QA / Beta | Current | Да | Browser Demo Mode needs fuller boundaries. |
+| `BETA_TESTING.md` | QA / Beta | Current | Да | Browser Demo Mode documented. |
 | `DEPLOYMENT.md` | Release / Deploy | Current | Да | Must remain Vercel-first; old Netlify references are historical only. |
 | `SPRINTS.md` | Planning History | Draft | Нет | Sprint plan must follow current `ROADMAP.md`. |
 | `SPRINT0_STATUS.md` | Historical Snapshot | Deprecated | Нет | Contains Netlify-era proof; not current Vercel release truth. |
@@ -43,19 +44,20 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `docs/MARKET_POSITIONING.md` | Market / Feature Filter | Current | Да | Must gate new feature categories before MVP expansion. |
 | `docs/COMPETITOR_WATCH.md` | Market Watch | Current | Да | Competitor signals must not auto-create MVP scope. |
 | `docs/GO_IRL_1_1_STABILIZATION.md` | Stabilization Ledger | Draft | Нет | Task statuses may become historical. |
-| `docs/MVP_STABILIZATION_PLAN.md` | MVP Plan | Current | Да | Needs missing sections for demo/chat/weather boundaries. |
+| `docs/MVP_STABILIZATION_PLAN.md` | MVP Plan | Current | Да | Contains stabilization plan and Weather boundary. |
 | `docs/DEVELOPMENT_PROTOCOL.md` | Engineering Protocol | Current | Да | Must remain aligned with project rules: pnpm, small patches, no unsafe changes. |
 | `docs/SPORT_COACH_MVP.md` | Product Scope / Coach | Current | Да | Synced: `CoachRequestPanel.tsx` is current UI basis; Role Choice and Review Flow are future. |
-| `docs/MVP_DOC_AUDIT.md` | Audit / Conflict Registry | Current | Да | New registry for doc conflicts and resolutions. |
-| `docs/MISSING_SECTIONS.md` | Audit / Missing Boundaries | Current | Да | New registry for undocumented MVP boundaries. |
+| `docs/MVP_DOC_AUDIT.md` | Audit / Conflict Registry | Current | Да | Registry for doc conflicts and resolutions. |
+| `docs/MISSING_SECTIONS.md` | Audit / Missing Boundaries | Current | Да | Registry for undocumented MVP boundaries. |
+| `docs/DATABASE_SCHEMA_AUDIT.md` | Audit / Supabase Schema | Current | Да | Separates current Supabase schema/migrations from future database architecture. |
 | `docs/DOCUMENTATION_AUDIT.md` | Audit | Current | Нет | Refreshed with market layer and Bible guardrail tasks. |
-| `docs/Database.md` | Architecture | Draft | Нет | Needs audit against `supabase/schema.sql` and migrations. |
+| `docs/Database.md` | Architecture | Draft | Нет | Marked as future database architecture; not current schema. |
 | `docs/RLS.md` | Supabase / RLS | Draft | Нет | Do not edit policies without explicit approval. |
 | `docs/Security.md` | Security | Draft | Нет | Must stay aligned with Trusted Auth production path. |
 | `docs/Admin.md` | Architecture / Admin | Draft | Нет | Mostly future/admin tooling scope. |
 | `docs/Moderation.md` | Architecture / Moderation | Draft | Нет | Mostly future scope. |
 | `docs/privacy.md` | Product / Privacy | Draft | Нет | Needs sync with chat retention and auth reality. |
-| `docs/EventLifecycle.md` | Architecture | Draft | Нет | Needs Activity Chat and 24-hour boundary section. |
+| `docs/EventLifecycle.md` | Architecture | Draft | Нет | Activity Chat boundary added; final chat expiry still needs code/schema decision. |
 | `docs/UserLifecycle.md` | Architecture | Draft | Нет | Broader than current MVP. |
 | `docs/Notifications.md` | Architecture / Notifications | Draft | Нет | Advanced notification automation is future scope. |
 | `docs/n8n-workflows.md` | Automation / Future | Draft | Нет | Future automation only; not MVP core logic. |
@@ -65,15 +67,17 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `docs/reputation.md` | Reputation / Future | Draft | Нет | RLI/Trust future model, not current complete runtime. |
 | `docs/vertical-experiences.md` | Product / Future Architecture | Draft | Нет | Current MVP is Olomouc-first with six beta categories; broad verticals are future-compatible architecture. |
 | `docs/performance.md` | Architecture | Current | Нет | Keep aligned with bundle and vertical loading strategy. |
-| `docs/bible/00-completion-audit.md` | Bible Audit | Current | Да | Bible is preserved and structured, not complete; now includes market-scope reconciliation. |
-| `docs/bible/00-bible-roadmap.md` | Bible Roadmap | Current | Да | Defines how to finish Bible without rewriting from scratch; now includes market-scope guardrails. |
+| `docs/bible/00-completion-audit.md` | Bible Audit | Current | Да | Bible expanded and structured, not final; tracks MVP coverage and remaining gaps. |
+| `docs/bible/00-bible-roadmap.md` | Bible Roadmap | Current | Да | Defines how to finish Bible without rewriting from scratch; current completion state updated. |
 | `docs/bible/01-foundation/01-why-we-exist.md` | Bible | Draft | Нет | Preserved philosophy; broad platform language is future vision, not beta scope. |
 | `docs/bible/01-foundation/02-core-principles.md` | Bible | Draft | Нет | Preserved principles; API/backend/RLI/AI language is future direction, not beta refactor mandate. |
+| `docs/bible/01-foundation/03-mvp-scope-and-market-positioning.md` | Bible / MVP Boundary | Current | Да | Current Bible source for MVP 1.0 scope, market positioning, Olomouc beta, six categories, and non-goals. |
 | `docs/bible/02-platform-architecture.md` | Bible | Draft | Нет | Marked as future platform vision; not an instruction to build large backend/API/workers before beta. |
 | `docs/bible/03-database-design.md` | Bible | Draft | Нет | Marked as future database vision; not current Supabase schema or migration plan. |
 | `docs/bible/04-modules-architecture.md` | Bible | Draft | Нет | Marked as future module vision; broad modules and AI are not current MVP. |
 | `docs/bible/05-product-requirements.md` | Bible / PRD | Draft | Нет | Marked as historical PRD draft; RLI/reminders/reviews/achievements are future unless re-approved. |
 | `docs/bible/06-ux-interaction-guidelines.md` | Bible / UX | Draft | Нет | Marked as UX principles draft; achievements/AI/verification are future unless re-approved. |
+| `docs/bible/07-beta-readiness-and-operations.md` | Bible / Beta Ops | Current | Да | Current Bible source for beta operations, QA gates, release gates, Browser Demo Mode, and MVP non-goals. |
 | `project-audit/GO_IRL_DOCUMENTATION_CLEANUP_AUDIT.md` | Audit | Current | Нет | Historical audit context; not code source of truth. |
 | `project-audit/GO_IRL_PROJECT_AUDIT.md` | Audit | Draft | Нет | Needs refresh after docs sanitation. |
 | `project-audit/GO_IRL_PROJECT_AUDIT.json` | Snapshot | Deprecated | Нет | Keep only if scripts consume it. |
@@ -84,7 +88,7 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | `supabase/README.md` | Supabase Setup | Current | Да | Must reflect Trusted Auth and current migration reality. |
 | `supabase/schema.sql` | Supabase Schema | Current | Да | Production-sensitive. Read-only during documentation cleanup. |
 | `supabase/schema_next.sql` | Future Schema | Draft | Нет | Do not apply without review. |
-| `supabase/migrations/*` | Supabase Migration History | Current | Да | Read-only for this task. No destructive SQL. |
+| `supabase/migration_v*.sql` | Supabase Migration History | Current | Да | Read-only for this task. No destructive SQL. |
 
 ## Current documentation conflicts
 
@@ -95,8 +99,9 @@ Use this file before changing product logic, architecture, QA flow, beta scope, 
 | Sprint 0 Netlify proof conflicted with current Vercel beta flow. | `SPRINT0_STATUS.md`, `DEPLOYMENT.md`, `BETA_CHECKLIST.md` | `SPRINT0_STATUS.md` marked historical/deprecated. |
 | Legacy setup docs could mislead AI/code generation. | `SETUP.md`, `SETUP_RU.md`, `CHECKLIST.md` | Added historical/deprecated warning banners. |
 | Generated snapshots could be mistaken for current docs. | `GO_IRL_DOCUMENTATION.md`, `PATCH_REPORT.md` | Added warning banners and status registry entries. |
-| Activity Chat, Browser Demo Mode, Weather, Telegram Mini App limits are not fully centralized. | `docs/MISSING_SECTIONS.md` | Missing-section registry created. |
-| Bible files could be mistaken for current MVP, Supabase schema, or implementation plan. | `docs/bible/*`, `ROADMAP.md`, `BACKLOG.md`, `docs/MARKET_POSITIONING.md` | Added guardrail banners and synced Bible audit/roadmap with market scope. |
+| Activity Chat, Browser Demo Mode, Weather, Telegram Mini App limits were not fully centralized. | `docs/MISSING_SECTIONS.md`, `BETA_TESTING.md`, `docs/EventLifecycle.md`, `docs/MVP_STABILIZATION_PLAN.md` | Boundaries now documented; chat expiry still needs product/schema decision. |
+| Bible files could be mistaken for current MVP, Supabase schema, or implementation plan. | `docs/bible/*`, `ROADMAP.md`, `BACKLOG.md`, `docs/MARKET_POSITIONING.md` | Guardrails added; current MVP boundary chapters added; Bible remains not final. |
+| Future DB architecture conflicted with current Supabase migrations. | `docs/Database.md`, `docs/bible/03-database-design.md`, `supabase/migration_v8_activity_chat.sql` | `docs/DATABASE_SCHEMA_AUDIT.md` created; `docs/Database.md` marked future architecture. |
 
 ## Current tree
 
@@ -124,6 +129,7 @@ GO IRL Documentation
 ├── Architecture
 │   └── docs/
 │       ├── Database.md
+│       ├── DATABASE_SCHEMA_AUDIT.md
 │       ├── RLS.md
 │       ├── Security.md
 │       ├── Admin.md
@@ -152,12 +158,14 @@ GO IRL Documentation
 │       ├── 00-bible-roadmap.md
 │       ├── 01-foundation/
 │       │   ├── 01-why-we-exist.md
-│       │   └── 02-core-principles.md
+│       │   ├── 02-core-principles.md
+│       │   └── 03-mvp-scope-and-market-positioning.md
 │       ├── 02-platform-architecture.md
 │       ├── 03-database-design.md
 │       ├── 04-modules-architecture.md
 │       ├── 05-product-requirements.md
-│       └── 06-ux-interaction-guidelines.md
+│       ├── 06-ux-interaction-guidelines.md
+│       └── 07-beta-readiness-and-operations.md
 │
 ├── QA / Beta / Release
 │   ├── BETA_CHECKLIST.md
@@ -173,7 +181,7 @@ GO IRL Documentation
 │       ├── README.md
 │       ├── schema.sql
 │       ├── schema_next.sql
-│       └── migrations/
+│       └── migration_v*.sql
 │
 └── Deprecated / Snapshot Candidates
     ├── SETUP.md
