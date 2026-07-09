@@ -31,6 +31,7 @@ GO IRL Bible
 ├── docs/bible/04-modules-architecture.md
 ├── docs/bible/04-modules-mvp-audit.md
 ├── docs/bible/05-product-requirements.md
+├── docs/bible/05-product-requirements-mvp-split.md
 ├── docs/bible/06-ux-interaction-guidelines.md
 ├── docs/bible/07-beta-readiness-and-operations.md
 └── docs/bible/08-runtime-boundaries.md
@@ -47,7 +48,8 @@ GO IRL Bible
 | Book III — Database Design | `03-database-design.md` | Contained / future vision | Marked as historical/future DB vision. Current schema truth is `supabase/schema.sql`, migrations, `supabase/README.md`, and `docs/DATABASE_SCHEMA_AUDIT.md`. |
 | Book IV — Modules Architecture | `04-modules-architecture.md` | Contained / future vision | Historical module vision preserved; MVP interpretation is defined in `04-modules-mvp-audit.md`. |
 | Book IV Audit — Modules MVP Audit | `04-modules-mvp-audit.md` | Current MVP boundary | Added to contain full module registry/AI/multi-module vision and map six beta categories to current MVP. |
-| Book V — Product Requirements Document | `05-product-requirements.md` | Draft / not final | PRD exists, but not proven final. Needs split into MVP 1.0, market beta scope, and 1.1 requirements. |
+| Book V — Product Requirements Document | `05-product-requirements.md` | Historical PRD draft | Preserved as product vision. Current MVP interpretation is defined in `05-product-requirements-mvp-split.md`. |
+| Book V Audit — PRD MVP Split | `05-product-requirements-mvp-split.md` | Current MVP boundary | Added to classify PRD items into MVP 1.0, MVP 1.1 stabilization, future, and blocked-before-beta. |
 | Book VI — UX & Interaction Guidelines | `06-ux-interaction-guidelines.md` | Draft / not final | UX guide exists, but original numbering suggests it was chapter 07. Needs final consistency pass and Telegram Mini App UX reconciliation. |
 | Book VII — Beta Readiness and Operations | `07-beta-readiness-and-operations.md` | Current MVP boundary | Added to define beta operations, QA gates, release gates, Browser Demo Mode, Telegram constraints, chat/share/weather/coach boundaries. |
 | Book VIII — Runtime Boundaries | `08-runtime-boundaries.md` | Current MVP boundary | Added to define Trusted Telegram Auth, Supabase, Browser Demo Mode, Profile/Avatar, Chat, Share/Join, Weather, Admin/Moderation runtime boundaries. |
@@ -64,7 +66,8 @@ Book II — Platform Architecture
 Book III — 04 Database Design
 Book IV — 05 Modules Architecture
 Book IV Audit — Modules MVP Audit                added during Bible completion
-Book V — PRD                                     probably missing explicit Chapter 6
+Book V — PRD
+Book V Audit — PRD MVP Split                      added during Bible completion
 Book VI — 07 UX & Interaction Guidelines
 Book VII — Beta Readiness and Operations          added during Bible completion
 Book VIII — Runtime Boundaries                    added during Bible completion
@@ -83,16 +86,17 @@ Bible 1.0 must describe the beta-ready MVP, not the entire future platform.
 | Competitor boundaries | Added | Covered as competitor feature filter in Chapter 3. |
 | Olomouc closed beta scope | Added | Covered in Chapter 3 and Book VII. |
 | Six-category beta module boundary | Added | Covered in `04-modules-mvp-audit.md`. |
+| PRD 1.0 / 1.1 split | Added | Covered in `05-product-requirements-mvp-split.md`. |
 | Telegram Mini App constraints | Added / needs UX audit | Covered in Book VII and Book VIII; still needs reconciliation with UX guide. |
 | Browser Demo Mode | Added | Covered in Book VII and Book VIII. |
-| Event lifecycle | Partly covered | `docs/EventLifecycle.md` is updated; Bible still needs a dedicated final lifecycle chapter or PRD sync. |
-| Activity Chat shipped behavior | Added / needs code audit | Covered in Book VII, Book VIII, and `docs/EventLifecycle.md`; schema audit found current migration uses chat creation + 24h. |
-| Share / Join flow | Added | Covered in Book VII and Book VIII. |
-| Weather Widget shipped behavior | Added | Covered in Book VII and Book VIII. |
-| Profile shipped behavior | Added / needs code audit | Profile/avatar runtime boundary covered in Book VIII. |
+| Event lifecycle | Partly covered | `docs/EventLifecycle.md` is updated; Bible still needs a dedicated final lifecycle chapter or UX/PRD sync. |
+| Activity Chat shipped behavior | Added / needs code audit | Covered in Book VII, Book VIII, and PRD split; schema audit found current migration uses chat creation + 24h. |
+| Share / Join flow | Added | Covered in Book VII, Book VIII, and PRD split. |
+| Weather Widget shipped behavior | Added | Covered in Book VII, Book VIII, and PRD split. |
+| Profile shipped behavior | Added / needs code audit | Profile/avatar runtime boundary covered in Book VIII and PRD split. |
 | Supabase trusted auth reality | Added / needs smoke test | Covered in Book VIII and external auth docs. |
-| QA and release gates | Added | Covered in Book VII and Book VIII. |
-| Non-goals for 1.0 | Added | Covered in Chapter 3, Book VII, and Modules MVP Audit. |
+| QA and release gates | Added | Covered in Book VII, Book VIII, and PRD split. |
+| Non-goals for 1.0 | Added | Covered in Chapter 3, Book VII, Modules MVP Audit, and PRD split. |
 
 ## What is missing for Bible 1.1+
 
@@ -106,15 +110,15 @@ Future material must be clearly marked as `1.1+` or `future vision`.
 | Event Roles after Sport Coach | Future | Host/Game Master/Guide/Language Buddy belong after Sport Coach validates value. |
 | Moderation model | Future | Reporting/blocking/admin flows need implementation status. |
 | Notifications model | Future | Mini App background limits must be explicit. |
-| Recommendation engine | Future | Keep as architecture/backlog, not MVP. |
+| Recommendation engine | Future | PRD split marks this as future, not current MVP. |
 | AI event discovery | Future | Keep as architecture/backlog, not MVP. |
 | Multi-vertical platform | Future | Current beta is Olomouc-first and six-category focused. |
 | Admin surface | Future | Keep separate from current app. |
 
 ## Required reconciliation before final Bible
 
-1. Audit `05-product-requirements.md` against `docs/MARKET_POSITIONING.md`, `ROADMAP.md`, `BACKLOG.md`, and Book VII.
-2. Reconcile `06-ux-interaction-guidelines.md` with current mobile Telegram Mini App UX.
+1. Reconcile `06-ux-interaction-guidelines.md` with current mobile Telegram Mini App UX.
+2. Add or sync a final event lifecycle chapter if needed after code/schema audit.
 3. Decide if missing chapters should be created or if current files should be renumbered permanently.
 4. Produce a final `GO IRL Bible 1.0` set only after product review and quality gates.
 
@@ -144,6 +148,7 @@ docs/bible/
 ├── 04-modules-architecture.md
 ├── 04-modules-mvp-audit.md
 ├── 05-product-requirements.md
+├── 05-product-requirements-mvp-split.md
 ├── 06-ux-interaction-guidelines.md
 ├── 07-beta-readiness-and-operations.md
 └── 08-runtime-boundaries.md
