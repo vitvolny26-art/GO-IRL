@@ -27,9 +27,11 @@ docs/bible/01-foundation/03-mvp-scope-and-market-positioning.md
 docs/bible/02-platform-architecture.md
 docs/bible/03-database-design.md
 docs/bible/04-modules-architecture.md
+docs/bible/04-modules-mvp-audit.md
 docs/bible/05-product-requirements.md
 docs/bible/06-ux-interaction-guidelines.md
 docs/bible/07-beta-readiness-and-operations.md
+docs/bible/08-runtime-boundaries.md
 ```
 
 Additional related snapshot:
@@ -42,10 +44,12 @@ GO_IRL_DOCUMENTATION.md
 
 The Bible is expanded and structured, but not final.
 
-Two current MVP boundary chapters were added:
+Current MVP boundary chapters/audits added:
 
 - `01-foundation/03-mvp-scope-and-market-positioning.md`
+- `04-modules-mvp-audit.md`
 - `07-beta-readiness-and-operations.md`
+- `08-runtime-boundaries.md`
 
 Existing historical books remain valuable drafts. They are not automatic implementation mandates.
 
@@ -84,10 +88,12 @@ Current classification:
 | MVP scope and market positioning | `01-foundation/03-mvp-scope-and-market-positioning.md` | current MVP boundary |
 | Platform architecture | `02-platform-architecture.md` | partly current / future vision |
 | Database design | `03-database-design.md` | contained future vision / schema-audited externally |
-| Modules architecture | `04-modules-architecture.md` | needs MVP audit / future vision |
+| Modules architecture | `04-modules-architecture.md` | contained future vision / audited by `04-modules-mvp-audit.md` |
+| Modules MVP audit | `04-modules-mvp-audit.md` | current MVP boundary |
 | Product requirements | `05-product-requirements.md` | draft / needs 1.0 vs 1.1 split / needs market-scope audit |
 | UX guidelines | `06-ux-interaction-guidelines.md` | draft / needs Telegram Mini App audit |
 | Beta readiness and operations | `07-beta-readiness-and-operations.md` | current MVP boundary |
+| Runtime boundaries | `08-runtime-boundaries.md` | current MVP boundary |
 
 ### Step 3 — Compare with current MVP
 
@@ -131,6 +137,7 @@ Book IV — Current Modules and Sport-first / six-category beta logic
 Book V — Product Requirements for MVP 1.0 / 1.1
 Book VI — Telegram Mini App UX and Interaction
 Book VII — Beta Readiness and Operations
+Book VIII — Runtime Boundaries
 ```
 
 Bible 1.0 must explicitly cover:
@@ -184,6 +191,9 @@ MVP 1.0 scope
 Browser Demo Mode
 Olomouc beta scope
 Six beta categories
+Modules architecture alignment with six categories
+Supabase trusted auth reality inside Bible
+Profile/avatar/demo boundary
 Activity Chat boundaries
 Weather Widget boundaries
 Share/join flow
@@ -195,11 +205,8 @@ Still weak for 1.0:
 
 ```text
 Telegram Mini App UX detail
-Supabase trusted auth reality inside Bible
-Profile/avatar/demo boundary
 Event lifecycle inside Bible
 Final PRD split for MVP 1.0 vs 1.1
-Modules architecture alignment with six categories
 ```
 
 Missing or weak areas for 1.1+:
@@ -230,12 +237,9 @@ Only after audit and product review:
 
 ## Immediate next audit tasks
 
-1. Audit `04-modules-architecture.md` against current MVP: six categories and Sport Coach first.
-2. Audit `05-product-requirements.md` against current MVP, market positioning, roadmap, and backlog.
-3. Audit `06-ux-interaction-guidelines.md` against Telegram Mini App UX.
-4. Add Bible boundary for Profile / Avatar / Demo Mode.
-5. Add Bible boundary for Trusted Auth / Supabase runtime reality.
-6. Extract useful current content from `GO_IRL_DOCUMENTATION.md` into current docs if needed.
+1. Audit `05-product-requirements.md` against current MVP, market positioning, roadmap, and backlog.
+2. Audit `06-ux-interaction-guidelines.md` against Telegram Mini App UX.
+3. Extract useful current content from `GO_IRL_DOCUMENTATION.md` into current docs if needed.
 
 ## Do not do
 
